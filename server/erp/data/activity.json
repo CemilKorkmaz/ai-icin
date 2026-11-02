@@ -1,0 +1,58 @@
+[
+  {
+    "id": "AC-001",
+    "at": "2026-11-02T14:30:00+03:00",
+    "text": "DK-2026-0138 şarjına 800 kg hurda girildi",
+    "icon": "flame",
+    "user": "U06"
+  },
+  {
+    "id": "AC-002",
+    "at": "2026-11-02T11:15:00+03:00",
+    "text": "CR-001 kırıcı kaydı: 10,2 t → 9,5 t net",
+    "icon": "recycle",
+    "user": "U04"
+  },
+  {
+    "id": "AC-003",
+    "at": "2026-11-02T10:00:00+03:00",
+    "text": "MK-2026-0045 mal kabulü tamamlandı",
+    "icon": "clipboard",
+    "user": "U03"
+  },
+  {
+    "id": "AC-004",
+    "at": "2026-11-02T08:40:00+03:00",
+    "text": "DK-2026-0137 döküm sarf reçetesi uygulandı",
+    "icon": "layers",
+    "user": "U07"
+  },
+  {
+    "id": "AC-005",
+    "at": "2026-11-02T08:05:00+03:00",
+    "text": "DK-2026-0137 dökümü başlatıldı",
+    "icon": "play",
+    "user": "U07"
+  },
+  {
+    "id": "AC-006",
+    "at": "2026-11-02T03:00:00+03:00",
+    "text": "Günlük yedekleme harici diske yazıldı",
+    "icon": "database",
+    "user": "Sistem"
+  },
+  {
+    "id": "AC-007",
+    "at": "2026-11-01T16:20:00+03:00",
+    "text": "DK-2026-0136 testere kesimi tamamlandı",
+    "icon": "scissors",
+    "user": "U08"
+  },
+  {
+    "id": "AC-008",
+    "at": "2026-11-01T09:15:00+03:00",
+    "text": "DK-2026-0132 mamul stoka aktarıldı",
+    "icon": "package",
+    "user": "U09"
+  }
+]

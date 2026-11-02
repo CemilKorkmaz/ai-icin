@@ -1,0 +1,65 @@
+[
+  {
+    "id": "NT-001",
+    "at": "2026-11-02T14:35:00+03:00",
+    "type": "warning",
+    "title": "Kritik stok: Alüminyum Hurda",
+    "body": "Mevcut 3.200 kg, kritik alt sınır 5.000 kg. Acil sipariş önerilir.",
+    "read": false,
+    "source": "Stok"
+  },
+  {
+    "id": "NT-002",
+    "at": "2026-11-02T14:20:00+03:00",
+    "type": "danger",
+    "title": "Homojenizasyon süre aşımı",
+    "body": "DK-2026-0135 beklenen 420 dk süreyi aştı, operatör duraklatmadı.",
+    "read": false,
+    "source": "Üretim"
+  },
+  {
+    "id": "NT-003",
+    "at": "2026-11-02T13:05:00+03:00",
+    "type": "info",
+    "title": "Ergitme zamanı: Karıştırma",
+    "body": "DK-2026-0138 için 2. saat karıştırma uyarısı.",
+    "read": false,
+    "source": "Ergitme"
+  },
+  {
+    "id": "NT-004",
+    "at": "2026-11-02T11:16:00+03:00",
+    "type": "warning",
+    "title": "Fire oranı yükseldi",
+    "body": "CR-001 işleminde fire oranı %6,86. Eşik %10.",
+    "read": true,
+    "source": "Kırıcı"
+  },
+  {
+    "id": "NT-005",
+    "at": "2026-11-02T10:45:00+03:00",
+    "type": "info",
+    "title": "Onay bekleyen sevkiyat",
+    "body": "SV-2026-0090 muhasebe onayı bekliyor.",
+    "read": true,
+    "source": "Sevkiyat"
+  },
+  {
+    "id": "NT-006",
+    "at": "2026-11-02T09:00:00+03:00",
+    "type": "success",
+    "title": "Günlük yedekleme tamamlandı",
+    "body": "Harici disk kopyası ve sağlama toplamı doğrulandı.",
+    "read": true,
+    "source": "Sistem"
+  },
+  {
+    "id": "NT-007",
+    "at": "2026-11-02T08:00:00+03:00",
+    "type": "info",
+    "title": "PLC telemetrisi",
+    "body": "Ocak 1 sıcaklık sensörü 752 °C, eşik içinde.",
+    "read": true,
+    "source": "PLC"
+  }
+]

@@ -1,0 +1,277 @@
+[
+  {
+    "id": "RCP-01",
+    "type": "Ergitme",
+    "name": "6063 / 20 Ton Ocak",
+    "alloy": "6063",
+    "furnaceId": "F20",
+    "capacityTon": 20,
+    "tempC": 750,
+    "durationMin": 240,
+    "diameterMm": null,
+    "coolingMin": 0,
+    "items": [
+      {
+        "materialId": "H01",
+        "perTon": 820,
+        "unit": "kg",
+        "label": "Külçe"
+      },
+      {
+        "materialId": "H02",
+        "perTon": 160,
+        "unit": "kg",
+        "label": "Hurda"
+      },
+      {
+        "materialId": "H03",
+        "perTon": 4,
+        "unit": "kg",
+        "label": "Silisyum"
+      },
+      {
+        "materialId": "H04",
+        "perTon": 2.6,
+        "unit": "kg",
+        "label": "Magnezyum"
+      },
+      {
+        "materialId": "H05",
+        "perTon": 1.2,
+        "unit": "kg",
+        "label": "Altibor"
+      }
+    ],
+    "steps": [
+      {
+        "atMin": 120,
+        "label": "Karıştırma yapılacak",
+        "materialId": null,
+        "suggestedQty": 0
+      },
+      {
+        "atMin": 165,
+        "label": "Silisyum ekle (önerilen 80 kg)",
+        "materialId": "H03",
+        "suggestedQty": 80
+      },
+      {
+        "atMin": 180,
+        "label": "Magnezyum ekle (önerilen 52 kg)",
+        "materialId": "H04",
+        "suggestedQty": 52
+      }
+    ]
+  },
+  {
+    "id": "RCP-02",
+    "type": "Ergitme",
+    "name": "6063 / 35 Ton Ocak",
+    "alloy": "6063",
+    "furnaceId": "F35",
+    "capacityTon": 35,
+    "tempC": 755,
+    "durationMin": 300,
+    "diameterMm": null,
+    "coolingMin": 0,
+    "items": [
+      {
+        "materialId": "H01",
+        "perTon": 825,
+        "unit": "kg",
+        "label": "Külçe"
+      },
+      {
+        "materialId": "H02",
+        "perTon": 155,
+        "unit": "kg",
+        "label": "Hurda"
+      },
+      {
+        "materialId": "H03",
+        "perTon": 4.1,
+        "unit": "kg",
+        "label": "Silisyum"
+      },
+      {
+        "materialId": "H04",
+        "perTon": 2.5,
+        "unit": "kg",
+        "label": "Magnezyum"
+      }
+    ],
+    "steps": [
+      {
+        "atMin": 150,
+        "label": "Karıştırma yapılacak",
+        "materialId": null,
+        "suggestedQty": 0
+      },
+      {
+        "atMin": 210,
+        "label": "Alaşım elementleri ekle",
+        "materialId": "H03",
+        "suggestedQty": 140
+      }
+    ]
+  },
+  {
+    "id": "RCP-03",
+    "type": "Ergitme",
+    "name": "6061 / 20 Ton Ocak",
+    "alloy": "6061",
+    "furnaceId": "F20",
+    "capacityTon": 20,
+    "tempC": 760,
+    "durationMin": 260,
+    "diameterMm": null,
+    "coolingMin": 0,
+    "items": [
+      {
+        "materialId": "H01",
+        "perTon": 790,
+        "unit": "kg",
+        "label": "Külçe"
+      },
+      {
+        "materialId": "H02",
+        "perTon": 180,
+        "unit": "kg",
+        "label": "Hurda"
+      },
+      {
+        "materialId": "H03",
+        "perTon": 6,
+        "unit": "kg",
+        "label": "Silisyum"
+      },
+      {
+        "materialId": "H04",
+        "perTon": 8,
+        "unit": "kg",
+        "label": "Magnezyum"
+      },
+      {
+        "materialId": "H06",
+        "perTon": 3,
+        "unit": "kg",
+        "label": "Bakır"
+      }
+    ],
+    "steps": [
+      {
+        "atMin": 130,
+        "label": "Karıştırma ve numune",
+        "materialId": null,
+        "suggestedQty": 0
+      }
+    ]
+  },
+  {
+    "id": "RCP-04",
+    "type": "Döküm",
+    "name": "178 mm Biyet / Sarf Reçetesi",
+    "alloy": "6063",
+    "furnaceId": null,
+    "capacityTon": null,
+    "tempC": 720,
+    "durationMin": 0,
+    "diameterMm": 178,
+    "coolingMin": 0,
+    "items": [
+      {
+        "materialId": "S01",
+        "perTon": 0.7,
+        "unit": "adet",
+        "label": "Seramik filtre"
+      },
+      {
+        "materialId": "S02",
+        "perTon": 0.35,
+        "unit": "adet",
+        "label": "Tıkaç"
+      },
+      {
+        "materialId": "S03",
+        "perTon": 1.5,
+        "unit": "adet",
+        "label": "Besleyici"
+      },
+      {
+        "materialId": "H05",
+        "perTon": 0.4,
+        "unit": "kg",
+        "label": "Altibor"
+      },
+      {
+        "materialId": "B04",
+        "perTon": 7,
+        "unit": "kg",
+        "label": "Yolluk / filtre artığı (döngüsel)"
+      }
+    ],
+    "steps": []
+  },
+  {
+    "id": "RCP-05",
+    "type": "Homojenizasyon",
+    "name": "6063 / 178 mm",
+    "alloy": "6063",
+    "furnaceId": null,
+    "capacityTon": null,
+    "tempC": 580,
+    "durationMin": 360,
+    "diameterMm": 178,
+    "coolingMin": 120,
+    "items": [
+      {
+        "materialId": "Y05",
+        "perTon": 42,
+        "unit": "m³",
+        "label": "Doğalgaz (tahmini)"
+      }
+    ],
+    "steps": [
+      {
+        "atMin": 360,
+        "label": "Homojenizasyon süresi doldu, soğutmaya aktar",
+        "materialId": null,
+        "suggestedQty": 0
+      },
+      {
+        "atMin": 480,
+        "label": "Soğutma süresi doldu, paketlemeye aktar",
+        "materialId": null,
+        "suggestedQty": 0
+      }
+    ]
+  },
+  {
+    "id": "RCP-06",
+    "type": "Homojenizasyon",
+    "name": "6061 / 152 mm",
+    "alloy": "6061",
+    "furnaceId": null,
+    "capacityTon": null,
+    "tempC": 570,
+    "durationMin": 420,
+    "diameterMm": 152,
+    "coolingMin": 150,
+    "items": [
+      {
+        "materialId": "Y05",
+        "perTon": 46,
+        "unit": "m³",
+        "label": "Doğalgaz (tahmini)"
+      }
+    ],
+    "steps": [
+      {
+        "atMin": 420,
+        "label": "Soğutmaya aktar",
+        "materialId": null,
+        "suggestedQty": 0
+      }
+    ]
+  }
+]

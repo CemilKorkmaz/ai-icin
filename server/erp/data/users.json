@@ -1,0 +1,90 @@
+[
+  {
+    "id": "U01",
+    "name": "Cemil Korkmaz",
+    "username": "c.korkmaz",
+    "role": "Admin / Yönetici",
+    "department": "Yönetim",
+    "active": true
+  },
+  {
+    "id": "U02",
+    "name": "Ayşe Yılmaz",
+    "username": "a.yilmaz",
+    "role": "Satın Alma",
+    "department": "Satın Alma",
+    "active": true
+  },
+  {
+    "id": "U03",
+    "name": "Ahmet Yılmaz",
+    "username": "ahmet.y",
+    "role": "Stok Sorumlusu",
+    "department": "Hammadde",
+    "active": true
+  },
+  {
+    "id": "U04",
+    "name": "Mehmet Kaya",
+    "username": "m.kaya",
+    "role": "Kırıcı Operatörü",
+    "department": "Hammadde",
+    "active": true
+  },
+  {
+    "id": "U06",
+    "name": "Hasan Çelik",
+    "username": "h.celik",
+    "role": "Ocakçı / Ergitme",
+    "department": "Üretim",
+    "active": true
+  },
+  {
+    "id": "U07",
+    "name": "Emre Şahin",
+    "username": "e.sahin",
+    "role": "Döküm Operatörü",
+    "department": "Üretim",
+    "active": true
+  },
+  {
+    "id": "U08",
+    "name": "Fatih Aydın",
+    "username": "f.aydin",
+    "role": "Testere Operatörü",
+    "department": "Üretim",
+    "active": true
+  },
+  {
+    "id": "U09",
+    "name": "Serkan Koç",
+    "username": "s.koc",
+    "role": "Homojenizasyon",
+    "department": "Üretim",
+    "active": true
+  },
+  {
+    "id": "U10",
+    "name": "Burak Öz",
+    "username": "b.oz",
+    "role": "Sevkiyat Sorumlusu",
+    "department": "Sevkiyat",
+    "active": true
+  },
+  {
+    "id": "U11",
+    "name": "Elif Arslan",
+    "username": "e.arslan",
+    "role": "Muhasebe / Fatura",
+    "department": "Muhasebe",
+    "active": true
+  },
+  {
+    "id": "U12",
+    "name": "Geliştirici (VPN)",
+    "username": "dev.readonly",
+    "role": "Görüntüleyici",
+    "department": "Dış Erişim",
+    "active": true
+  }
+]

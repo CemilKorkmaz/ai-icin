@@ -1,0 +1,29 @@
+[
+  {
+    "id": "F20",
+    "code": "F20",
+    "name": "Ocak 1",
+    "capacityTon": 20,
+    "type": "Yatay ergitme",
+    "rotary": false,
+    "status": "Çalışıyor"
+  },
+  {
+    "id": "F35",
+    "code": "F35",
+    "name": "Ocak 2",
+    "capacityTon": 35,
+    "type": "Yatay ergitme",
+    "rotary": false,
+    "status": "Çalışıyor"
+  },
+  {
+    "id": "FD",
+    "code": "FD",
+    "name": "Döner Ocak",
+    "capacityTon": 8,
+    "type": "Cüruf geri kazanım",
+    "rotary": true,
+    "status": "Beklemede"
+  }
+]

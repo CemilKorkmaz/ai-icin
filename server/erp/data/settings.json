@@ -1,0 +1,19 @@
+{
+  "company": "Anadolu Alüminyum Dökümhane",
+  "serverUrl": "https://erp.firma.local",
+  "serverIp": "192.168.1.10",
+  "backupPath": "D:\\ERP_Yedek",
+  "currency": "₺",
+  "theme": "light",
+  "online": true,
+  "wasteThreshold": 10,
+  "density": 2700,
+  "bladeThicknessMm": 3,
+  "dailyReport": true,
+  "weeklyReport": true,
+  "monthlyReport": true,
+  "smsNumbers": "+9053x xxx xx 01, +9053x xxx xx 02",
+  "reportMail": "yonetim@anadolu-aluminyum.local",
+  "developerMail": "gelistirici@anadolu-aluminyum.local",
+  "lastBackup": "2026-11-02T03:00:00+03:00"
+}

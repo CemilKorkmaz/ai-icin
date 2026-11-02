@@ -1,0 +1,125 @@
+[
+  {
+    "id": "PO-001",
+    "no": "SA-2026-0041",
+    "date": "2026-10-28",
+    "supplierId": "T01",
+    "status": "Tamamlandı",
+    "paymentTerm": "30 gün",
+    "notes": "Ekim sonu külçe alımı",
+    "createdBy": "Satın Alma",
+    "items": [
+      {
+        "materialId": "H01",
+        "quantity": 10000,
+        "unit": "kg",
+        "unitPrice": 85.2,
+        "receivedQty": 10000
+      },
+      {
+        "materialId": "H07",
+        "quantity": 200,
+        "unit": "kg",
+        "unitPrice": 118,
+        "receivedQty": 200
+      }
+    ]
+  },
+  {
+    "id": "PO-002",
+    "no": "SA-2026-0042",
+    "date": "2026-10-25",
+    "supplierId": "T02",
+    "status": "Tamamlandı",
+    "paymentTerm": "45 gün",
+    "notes": "Sarf malzeme takviyesi",
+    "createdBy": "Satın Alma",
+    "items": [
+      {
+        "materialId": "S01",
+        "quantity": 200,
+        "unit": "adet",
+        "unitPrice": 12,
+        "receivedQty": 200
+      },
+      {
+        "materialId": "S03",
+        "quantity": 150,
+        "unit": "adet",
+        "unitPrice": 8.4,
+        "receivedQty": 150
+      },
+      {
+        "materialId": "Y01",
+        "quantity": 100,
+        "unit": "litre",
+        "unitPrice": 45,
+        "receivedQty": 100
+      }
+    ]
+  },
+  {
+    "id": "PO-003",
+    "no": "SA-2026-0043",
+    "date": "2026-11-01",
+    "supplierId": "T03",
+    "status": "Mal Kabulde",
+    "paymentTerm": "15 gün",
+    "notes": "Yağmurlu havada gelen hurda, nem oranı yüksek",
+    "createdBy": "Satın Alma",
+    "items": [
+      {
+        "materialId": "H02",
+        "quantity": 10000,
+        "unit": "kg",
+        "unitPrice": 62.5,
+        "receivedQty": 10200
+      }
+    ]
+  },
+  {
+    "id": "PO-004",
+    "no": "SA-2026-0044",
+    "date": "2026-10-30",
+    "supplierId": "T05",
+    "status": "Yolda",
+    "paymentTerm": "30 gün",
+    "notes": "Degassing gazı",
+    "createdBy": "Satın Alma",
+    "items": [
+      {
+        "materialId": "Y04",
+        "quantity": 12,
+        "unit": "tüp",
+        "unitPrice": 320,
+        "receivedQty": 0
+      }
+    ]
+  },
+  {
+    "id": "PO-005",
+    "no": "SA-2026-0045",
+    "date": "2026-11-02",
+    "supplierId": "T02",
+    "status": "Onay Bekliyor",
+    "paymentTerm": "30 gün",
+    "notes": "Kritik stok: tıkaç ve magnezyum",
+    "createdBy": "Satın Alma",
+    "items": [
+      {
+        "materialId": "S02",
+        "quantity": 150,
+        "unit": "adet",
+        "unitPrice": 5.5,
+        "receivedQty": 0
+      },
+      {
+        "materialId": "H04",
+        "quantity": 200,
+        "unit": "kg",
+        "unitPrice": 225,
+        "receivedQty": 0
+      }
+    ]
+  }
+]

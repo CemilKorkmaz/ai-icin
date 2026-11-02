@@ -1,0 +1,62 @@
+[
+  {
+    "id": "CR-001",
+    "date": "2026-11-02",
+    "materialId": "H02",
+    "unit": "Kırıcı",
+    "sourceReceiptId": "RC-003",
+    "gross": 10200,
+    "waste": 700,
+    "net": 9500,
+    "wasteRatio": 6.86,
+    "wasteReason": "Nemli malzeme",
+    "wasteDestination": "Hurda sahası",
+    "operator": "Mehmet Kaya",
+    "notes": "Yağmur sonrası teslimat"
+  },
+  {
+    "id": "CR-002",
+    "date": "2026-10-29",
+    "materialId": "H02",
+    "unit": "Kırıcı",
+    "sourceReceiptId": "RC-001",
+    "gross": 8000,
+    "waste": 400,
+    "net": 7600,
+    "wasteRatio": 5,
+    "wasteReason": "Yabancı madde",
+    "wasteDestination": "Geri dönüşüm",
+    "operator": "Mehmet Kaya",
+    "notes": ""
+  },
+  {
+    "id": "CR-003",
+    "date": "2026-10-20",
+    "materialId": "H02",
+    "unit": "Ayıklama",
+    "sourceReceiptId": "RC-001",
+    "gross": 12500,
+    "waste": 1700,
+    "net": 10800,
+    "wasteRatio": 13.6,
+    "wasteReason": "Plastik karışık",
+    "wasteDestination": "Hurda sahası",
+    "operator": "Mehmet Kaya",
+    "notes": "Eşik aşıldı, yöneticiye bildirildi"
+  },
+  {
+    "id": "CR-004",
+    "date": "2026-10-12",
+    "materialId": "H02",
+    "unit": "Manyetik Ayırıcı",
+    "sourceReceiptId": "RC-001",
+    "gross": 5000,
+    "waste": 100,
+    "net": 4900,
+    "wasteRatio": 2,
+    "wasteReason": "Paslı malzeme",
+    "wasteDestination": "Geri dönüşüm",
+    "operator": "Mehmet Kaya",
+    "notes": ""
+  }
+]

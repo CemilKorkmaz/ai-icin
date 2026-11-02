@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-02T19:37:52.583Z",
+  "source": "app/js/seed.js (node tools/export_seed.mjs)",
+  "note": "Koleksiyon dosyaları doğrudan kayıt dizisidir (settings.json tek nesnedir). Tam sistem snapshot'ı Ayarlar ekranından tek JSON olarak alınır.",
+  "stages": [
+    "Ergitme",
+    "Döküm",
+    "Testere",
+    "Homojenizasyon",
+    "Soğutma",
+    "Paketleme",
+    "Mamul Stok",
+    "Sevkiyat"
+  ],
+  "categories": [
+    "Hammadde",
+    "Sarf Malzeme",
+    "Yardımcı Malzeme",
+    "Yan Ürün",
+    "Mamul"
+  ],
+  "files": [
+    {
+      "file": "settings.json",
+      "collection": "settings",
+      "records": 1
+    },
+    {
+      "file": "units.json",
+      "collection": "units",
+      "records": 8
+    },
+    {
+      "file": "categories.json",
+      "collection": "categories",
+      "records": 5
+    },
+    {
+      "file": "materials.json",
+      "collection": "materials",
+      "records": 22
+    },
+    {
+      "file": "suppliers.json",
+      "collection": "suppliers",
+      "records": 5
+    },
+    {
+      "file": "purchase-orders.json",
+      "collection": "purchaseOrders",
+      "records": 5
+    },
+    {
+      "file": "price-history.json",
+      "collection": "priceHistory",
+      "records": 18
+    },
+    {
+      "file": "receipts.json",
+      "collection": "receipts",
+      "records": 3
+    },
+    {
+      "file": "crusher.json",
+      "collection": "crusher",
+      "records": 4
+    },
+    {
+      "file": "movements.json",
+      "collection": "movements",
+      "records": 20
+    },
+    {
+      "file": "furnaces.json",
+      "collection": "furnaces",
+      "records": 3
+    },
+    {
+      "file": "recipes.json",
+      "collection": "recipes",
+      "records": 6
+    },
+    {
+      "file": "lots.json",
+      "collection": "lots",
+      "records": 8
+    },
+    {
+      "file": "shipments.json",
+      "collection": "shipments",
+      "records": 4
+    },
+    {
+      "file": "notifications.json",
+      "collection": "notifications",
+      "records": 7
+    },
+    {
+      "file": "outbox.json",
+      "collection": "outbox",
+      "records": 5
+    },
+    {
+      "file": "users.json",
+      "collection": "users",
+      "records": 11
+    },
+    {
+      "file": "activity.json",
+      "collection": "activity",
+      "records": 8
+    }
+  ]
+}
