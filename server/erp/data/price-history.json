@@ -1,0 +1,164 @@
+[
+  {
+    "id": "PH-001",
+    "materialId": "H01",
+    "supplierId": "T01",
+    "date": "2026-01-12",
+    "unitPrice": 82.1,
+    "quantity": 12000,
+    "orderNo": "SA-2026-0003"
+  },
+  {
+    "id": "PH-002",
+    "materialId": "H01",
+    "supplierId": "T01",
+    "date": "2026-02-09",
+    "unitPrice": 83,
+    "quantity": 10000,
+    "orderNo": "SA-2026-0008"
+  },
+  {
+    "id": "PH-003",
+    "materialId": "H01",
+    "supplierId": "T04",
+    "date": "2026-03-11",
+    "unitPrice": 86.4,
+    "quantity": 8000,
+    "orderNo": "SA-2026-0012"
+  },
+  {
+    "id": "PH-004",
+    "materialId": "H01",
+    "supplierId": "T01",
+    "date": "2026-04-18",
+    "unitPrice": 83.1,
+    "quantity": 10000,
+    "orderNo": "SA-2026-0017"
+  },
+  {
+    "id": "PH-005",
+    "materialId": "H01",
+    "supplierId": "T01",
+    "date": "2026-05-02",
+    "unitPrice": 85,
+    "quantity": 12000,
+    "orderNo": "SA-2026-0021"
+  },
+  {
+    "id": "PH-006",
+    "materialId": "H01",
+    "supplierId": "T04",
+    "date": "2026-05-15",
+    "unitPrice": 85.7,
+    "quantity": 8000,
+    "orderNo": "SA-2026-0023"
+  },
+  {
+    "id": "PH-007",
+    "materialId": "H01",
+    "supplierId": "T01",
+    "date": "2026-05-28",
+    "unitPrice": 84.8,
+    "quantity": 15000,
+    "orderNo": "SA-2026-0025"
+  },
+  {
+    "id": "PH-008",
+    "materialId": "H01",
+    "supplierId": "T01",
+    "date": "2026-06-12",
+    "unitPrice": 85.2,
+    "quantity": 10000,
+    "orderNo": "SA-2026-0028"
+  },
+  {
+    "id": "PH-009",
+    "materialId": "H01",
+    "supplierId": "T01",
+    "date": "2026-07-08",
+    "unitPrice": 87.3,
+    "quantity": 9000,
+    "orderNo": "SA-2026-0030"
+  },
+  {
+    "id": "PH-010",
+    "materialId": "H01",
+    "supplierId": "T04",
+    "date": "2026-08-14",
+    "unitPrice": 89.5,
+    "quantity": 7000,
+    "orderNo": "SA-2026-0033"
+  },
+  {
+    "id": "PH-011",
+    "materialId": "H01",
+    "supplierId": "T01",
+    "date": "2026-09-10",
+    "unitPrice": 86.1,
+    "quantity": 11000,
+    "orderNo": "SA-2026-0036"
+  },
+  {
+    "id": "PH-012",
+    "materialId": "H01",
+    "supplierId": "T01",
+    "date": "2026-10-05",
+    "unitPrice": 84.4,
+    "quantity": 10000,
+    "orderNo": "SA-2026-0039"
+  },
+  {
+    "id": "PH-013",
+    "materialId": "H01",
+    "supplierId": "T01",
+    "date": "2026-10-28",
+    "unitPrice": 85.2,
+    "quantity": 10000,
+    "orderNo": "SA-2026-0041"
+  },
+  {
+    "id": "PH-014",
+    "materialId": "H02",
+    "supplierId": "T03",
+    "date": "2026-08-02",
+    "unitPrice": 58.4,
+    "quantity": 12000,
+    "orderNo": "SA-2026-0032"
+  },
+  {
+    "id": "PH-015",
+    "materialId": "H02",
+    "supplierId": "T03",
+    "date": "2026-09-14",
+    "unitPrice": 60.1,
+    "quantity": 12500,
+    "orderNo": "SA-2026-0037"
+  },
+  {
+    "id": "PH-016",
+    "materialId": "H02",
+    "supplierId": "T03",
+    "date": "2026-11-01",
+    "unitPrice": 62.5,
+    "quantity": 10000,
+    "orderNo": "SA-2026-0043"
+  },
+  {
+    "id": "PH-017",
+    "materialId": "S01",
+    "supplierId": "T02",
+    "date": "2026-06-20",
+    "unitPrice": 10.8,
+    "quantity": 300,
+    "orderNo": "SA-2026-0029"
+  },
+  {
+    "id": "PH-018",
+    "materialId": "S01",
+    "supplierId": "T02",
+    "date": "2026-10-25",
+    "unitPrice": 12,
+    "quantity": 200,
+    "orderNo": "SA-2026-0042"
+  }
+]

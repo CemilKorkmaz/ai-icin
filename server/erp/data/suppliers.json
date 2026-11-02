@@ -1,0 +1,67 @@
+[
+  {
+    "id": "T01",
+    "code": "T01",
+    "name": "ABC Metal",
+    "category": "Hammadde",
+    "contact": "Selim Arslan",
+    "phone": "0212 444 01 01",
+    "email": "satış@abcmetal.example",
+    "tax": "1234567801",
+    "address": "İstanbul",
+    "lastPurchase": "2026-10-28",
+    "active": true
+  },
+  {
+    "id": "T02",
+    "code": "T02",
+    "name": "XYZ Kimya",
+    "category": "Sarf / Yardımcı",
+    "contact": "Elif Demir",
+    "phone": "0216 444 02 02",
+    "email": "siparis@xyzkimya.example",
+    "tax": "2234567802",
+    "address": "Kocaeli",
+    "lastPurchase": "2026-10-25",
+    "active": true
+  },
+  {
+    "id": "T03",
+    "code": "T03",
+    "name": "DEF Hurda",
+    "category": "Hammadde",
+    "contact": "Murat Kaya",
+    "phone": "0224 444 03 03",
+    "email": "info@defhurda.example",
+    "tax": "3234567803",
+    "address": "Bursa",
+    "lastPurchase": "2026-11-02",
+    "active": true
+  },
+  {
+    "id": "T04",
+    "code": "T04",
+    "name": "GHI Alaşım",
+    "category": "Hammadde",
+    "contact": "Zeynep Ak",
+    "phone": "0232 444 04 04",
+    "email": "satis@ghialasim.example",
+    "tax": "4234567804",
+    "address": "İzmir",
+    "lastPurchase": "2026-10-14",
+    "active": true
+  },
+  {
+    "id": "T05",
+    "code": "T05",
+    "name": "Endüstriyel Gaz",
+    "category": "Yardımcı",
+    "contact": "Can Öz",
+    "phone": "0212 444 05 05",
+    "email": "siparis@endustriyelgaz.example",
+    "tax": "5234567805",
+    "address": "İstanbul",
+    "lastPurchase": "2026-10-30",
+    "active": true
+  }
+]

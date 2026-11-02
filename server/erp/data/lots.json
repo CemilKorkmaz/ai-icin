@@ -1,0 +1,322 @@
+[
+  {
+    "id": "DK-2026-0131",
+    "code": "DK-2026-0131",
+    "alloy": "6063",
+    "diameterMm": 178,
+    "lengthM": 6,
+    "billetCount": 92,
+    "weightTon": 18.4,
+    "furnaceId": "F20",
+    "recipeId": "RCP-01",
+    "stage": "Mamul Stok",
+    "status": "Sevke Hazır",
+    "startedAt": "2026-10-30T05:40:00+03:00",
+    "stageStartedAt": "2026-10-31T12:20:00+03:00",
+    "paused": false,
+    "scrapTon": 0.22,
+    "remainingMetalTon": 1.6,
+    "remainingDecision": "Ocakta bırakıldı",
+    "alerts": [],
+    "history": [
+      {
+        "stage": "Ergitme",
+        "at": "2026-10-30T05:40:00+03:00"
+      },
+      {
+        "stage": "Döküm",
+        "at": "2026-10-30T07:55:00+03:00"
+      },
+      {
+        "stage": "Testere",
+        "at": "2026-10-30T10:10:00+03:00"
+      },
+      {
+        "stage": "Homojenizasyon",
+        "at": "2026-10-30T13:00:00+03:00"
+      },
+      {
+        "stage": "Soğutma",
+        "at": "2026-10-30T19:00:00+03:00"
+      },
+      {
+        "stage": "Paketleme",
+        "at": "2026-10-31T10:00:00+03:00"
+      },
+      {
+        "stage": "Mamul Stok",
+        "at": "2026-10-31T12:20:00+03:00"
+      }
+    ]
+  },
+  {
+    "id": "DK-2026-0132",
+    "code": "DK-2026-0132",
+    "alloy": "6061",
+    "diameterMm": 152,
+    "lengthM": 6,
+    "billetCount": 88,
+    "weightTon": 14.6,
+    "furnaceId": "F35",
+    "recipeId": "RCP-03",
+    "stage": "Mamul Stok",
+    "status": "Sevke Hazır",
+    "startedAt": "2026-10-31T06:10:00+03:00",
+    "stageStartedAt": "2026-11-01T09:15:00+03:00",
+    "paused": false,
+    "scrapTon": 0.31,
+    "remainingMetalTon": 0,
+    "remainingDecision": "Boş dökülüp hammaddeye",
+    "alerts": [],
+    "history": [
+      {
+        "stage": "Ergitme",
+        "at": "2026-10-31T06:10:00+03:00"
+      },
+      {
+        "stage": "Döküm",
+        "at": "2026-10-31T08:30:00+03:00"
+      },
+      {
+        "stage": "Testere",
+        "at": "2026-10-31T11:00:00+03:00"
+      },
+      {
+        "stage": "Homojenizasyon",
+        "at": "2026-10-31T14:00:00+03:00"
+      },
+      {
+        "stage": "Soğutma",
+        "at": "2026-10-31T21:00:00+03:00"
+      },
+      {
+        "stage": "Paketleme",
+        "at": "2026-11-01T08:00:00+03:00"
+      },
+      {
+        "stage": "Mamul Stok",
+        "at": "2026-11-01T09:15:00+03:00"
+      }
+    ]
+  },
+  {
+    "id": "DK-2026-0133",
+    "code": "DK-2026-0133",
+    "alloy": "6063",
+    "diameterMm": 178,
+    "lengthM": 6,
+    "billetCount": 90,
+    "weightTon": 18,
+    "furnaceId": "F20",
+    "recipeId": "RCP-01",
+    "stage": "Paketleme",
+    "status": "Devam ediyor",
+    "startedAt": "2026-11-01T05:30:00+03:00",
+    "stageStartedAt": "2026-11-02T08:10:00+03:00",
+    "paused": false,
+    "scrapTon": 0.18,
+    "remainingMetalTon": 2,
+    "remainingDecision": "Ocakta bırakıldı",
+    "alerts": [],
+    "history": [
+      {
+        "stage": "Ergitme",
+        "at": "2026-11-01T05:30:00+03:00"
+      },
+      {
+        "stage": "Döküm",
+        "at": "2026-11-01T07:45:00+03:00"
+      },
+      {
+        "stage": "Testere",
+        "at": "2026-11-01T10:20:00+03:00"
+      },
+      {
+        "stage": "Homojenizasyon",
+        "at": "2026-11-01T13:00:00+03:00"
+      },
+      {
+        "stage": "Soğutma",
+        "at": "2026-11-01T19:00:00+03:00"
+      },
+      {
+        "stage": "Paketleme",
+        "at": "2026-11-02T08:10:00+03:00"
+      }
+    ]
+  },
+  {
+    "id": "DK-2026-0134",
+    "code": "DK-2026-0134",
+    "alloy": "6063",
+    "diameterMm": 178,
+    "lengthM": 6,
+    "billetCount": 86,
+    "weightTon": 17.2,
+    "furnaceId": "F20",
+    "recipeId": "RCP-01",
+    "stage": "Soğutma",
+    "status": "Devam ediyor",
+    "startedAt": "2026-11-01T12:00:00+03:00",
+    "stageStartedAt": "2026-11-02T07:20:00+03:00",
+    "paused": false,
+    "scrapTon": 0.27,
+    "remainingMetalTon": 0,
+    "remainingDecision": "Başka ocağa aktarıldı",
+    "alerts": [],
+    "history": [
+      {
+        "stage": "Ergitme",
+        "at": "2026-11-01T12:00:00+03:00"
+      },
+      {
+        "stage": "Döküm",
+        "at": "2026-11-01T14:30:00+03:00"
+      },
+      {
+        "stage": "Testere",
+        "at": "2026-11-01T17:00:00+03:00"
+      },
+      {
+        "stage": "Homojenizasyon",
+        "at": "2026-11-01T20:00:00+03:00"
+      },
+      {
+        "stage": "Soğutma",
+        "at": "2026-11-02T07:20:00+03:00"
+      }
+    ]
+  },
+  {
+    "id": "DK-2026-0135",
+    "code": "DK-2026-0135",
+    "alloy": "6061",
+    "diameterMm": 152,
+    "lengthM": 6,
+    "billetCount": 80,
+    "weightTon": 13.5,
+    "furnaceId": "F35",
+    "recipeId": "RCP-03",
+    "stage": "Homojenizasyon",
+    "status": "Süre Aşımı",
+    "startedAt": "2026-11-01T18:00:00+03:00",
+    "stageStartedAt": "2026-11-01T22:00:00+03:00",
+    "paused": false,
+    "scrapTon": 0.44,
+    "remainingMetalTon": 3.2,
+    "remainingDecision": null,
+    "alerts": [
+      "Homojenizasyon reçete süresi aşıldı"
+    ],
+    "history": [
+      {
+        "stage": "Ergitme",
+        "at": "2026-11-01T18:00:00+03:00"
+      },
+      {
+        "stage": "Döküm",
+        "at": "2026-11-01T20:10:00+03:00"
+      },
+      {
+        "stage": "Testere",
+        "at": "2026-11-01T21:20:00+03:00"
+      },
+      {
+        "stage": "Homojenizasyon",
+        "at": "2026-11-01T22:00:00+03:00"
+      }
+    ]
+  },
+  {
+    "id": "DK-2026-0136",
+    "code": "DK-2026-0136",
+    "alloy": "6063",
+    "diameterMm": 178,
+    "lengthM": 6,
+    "billetCount": 84,
+    "weightTon": 16.9,
+    "furnaceId": "F20",
+    "recipeId": "RCP-01",
+    "stage": "Testere",
+    "status": "Devam ediyor",
+    "startedAt": "2026-11-02T00:30:00+03:00",
+    "stageStartedAt": "2026-11-02T09:40:00+03:00",
+    "paused": false,
+    "scrapTon": 0.35,
+    "remainingMetalTon": 1.1,
+    "remainingDecision": null,
+    "alerts": [],
+    "history": [
+      {
+        "stage": "Ergitme",
+        "at": "2026-11-02T00:30:00+03:00"
+      },
+      {
+        "stage": "Döküm",
+        "at": "2026-11-02T03:00:00+03:00"
+      },
+      {
+        "stage": "Testere",
+        "at": "2026-11-02T09:40:00+03:00"
+      }
+    ]
+  },
+  {
+    "id": "DK-2026-0137",
+    "code": "DK-2026-0137",
+    "alloy": "6063",
+    "diameterMm": 178,
+    "lengthM": 6,
+    "billetCount": 0,
+    "weightTon": 17.6,
+    "furnaceId": "F35",
+    "recipeId": "RCP-02",
+    "stage": "Döküm",
+    "status": "Devam ediyor",
+    "startedAt": "2026-11-02T04:00:00+03:00",
+    "stageStartedAt": "2026-11-02T08:05:00+03:00",
+    "paused": false,
+    "scrapTon": 0.12,
+    "remainingMetalTon": null,
+    "remainingDecision": null,
+    "alerts": [],
+    "history": [
+      {
+        "stage": "Ergitme",
+        "at": "2026-11-02T04:00:00+03:00"
+      },
+      {
+        "stage": "Döküm",
+        "at": "2026-11-02T08:05:00+03:00"
+      }
+    ]
+  },
+  {
+    "id": "DK-2026-0138",
+    "code": "DK-2026-0138",
+    "alloy": "6063",
+    "diameterMm": 178,
+    "lengthM": 6,
+    "billetCount": 0,
+    "weightTon": 20,
+    "furnaceId": "F20",
+    "recipeId": "RCP-01",
+    "stage": "Ergitme",
+    "status": "Devam ediyor",
+    "startedAt": "2026-11-02T06:10:00+03:00",
+    "stageStartedAt": "2026-11-02T06:10:00+03:00",
+    "paused": false,
+    "scrapTon": 0,
+    "remainingMetalTon": 3,
+    "remainingDecision": null,
+    "alerts": [
+      "2. saatte karıştırma uyarısı"
+    ],
+    "history": [
+      {
+        "stage": "Ergitme",
+        "at": "2026-11-02T06:10:00+03:00"
+      }
+    ]
+  }
+]

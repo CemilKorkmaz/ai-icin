@@ -1,0 +1,16 @@
+# Çalışma zamanında üretilen dosyalar (kaynak koda girmez)
+server/erp/backups/
+server/erp/logs/
+server/erp/db/*.sqlite
+server/erp/db/*.db
+server/erp/files/
+
+# Genel
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+node_modules/
+.env
+.env.local
+*.log

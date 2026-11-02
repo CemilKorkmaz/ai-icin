@@ -1,0 +1,67 @@
+[
+  {
+    "id": "OB-0001",
+    "createdAt": "2026-11-02T14:21:00+03:00",
+    "channel": "sms",
+    "to": "+9053x xxx xx 01",
+    "subject": "Homojenizasyon süre aşımı",
+    "body": "DK-2026-0135 homojenizasyon süresi aşıldı. Bakım kontrolü gerekli.",
+    "source": "Üretim / Homojenizasyon",
+    "status": "queued",
+    "attempt": 0,
+    "nextRetryAt": null,
+    "lastError": ""
+  },
+  {
+    "id": "OB-0002",
+    "createdAt": "2026-11-02T13:06:00+03:00",
+    "channel": "sms",
+    "to": "+9053x xxx xx 02",
+    "subject": "Ergitme karıştırma uyarısı",
+    "body": "DK-2026-0138: 2. saat karıştırma zamanı.",
+    "source": "Üretim / Ergitme",
+    "status": "queued",
+    "attempt": 0,
+    "nextRetryAt": null,
+    "lastError": ""
+  },
+  {
+    "id": "OB-0003",
+    "createdAt": "2026-11-02T08:00:00+03:00",
+    "channel": "email",
+    "to": "yonetim@anadolu-aluminyum.local",
+    "subject": "Günlük üretim raporu / 01.11.2026",
+    "body": "Üretim 68,4 ton · Fire %2,1 · Kritik stok 2 kalem.",
+    "source": "Zamanlanmış Rapor",
+    "status": "sent",
+    "attempt": 1,
+    "nextRetryAt": null,
+    "lastError": ""
+  },
+  {
+    "id": "OB-0004",
+    "createdAt": "2026-11-02T09:30:00+03:00",
+    "channel": "email",
+    "to": "gelistirici@anadolu-aluminyum.local",
+    "subject": "Talep: Fiyat grafiğinde tedarikçi filtresi",
+    "body": "Satın alma ekranında tedarikçi bazlı karşılaştırma istiyoruz.",
+    "source": "Kullanıcı Talebi",
+    "status": "sent",
+    "attempt": 1,
+    "nextRetryAt": null,
+    "lastError": ""
+  },
+  {
+    "id": "OB-0005",
+    "createdAt": "2026-11-02T03:00:00+03:00",
+    "channel": "cloud_backup",
+    "to": "Şifreli uzak yedek",
+    "subject": "Günlük yedek",
+    "body": "backup_2026-11-02_0300.zip",
+    "source": "Yedekleme",
+    "status": "queued",
+    "attempt": 0,
+    "nextRetryAt": null,
+    "lastError": ""
+  }
+]

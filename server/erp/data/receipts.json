@@ -1,0 +1,89 @@
+[
+  {
+    "id": "RC-001",
+    "no": "MK-2026-0043",
+    "date": "2026-10-28",
+    "orderId": "PO-001",
+    "supplierId": "T01",
+    "plate": "34 ABC 123",
+    "weighbridgeNo": "TF-2026-0398",
+    "receivedBy": "Ahmet Yılmaz",
+    "toCrusher": false,
+    "status": "Tamamlandı",
+    "notes": "Külçe ve çinko, eksiksiz teslim",
+    "items": [
+      {
+        "materialId": "H01",
+        "orderedQty": 10000,
+        "receivedQty": 10000,
+        "acceptedQty": 10000,
+        "rejectedQty": 0
+      },
+      {
+        "materialId": "H07",
+        "orderedQty": 200,
+        "receivedQty": 200,
+        "acceptedQty": 200,
+        "rejectedQty": 0
+      }
+    ]
+  },
+  {
+    "id": "RC-002",
+    "no": "MK-2026-0044",
+    "date": "2026-10-25",
+    "orderId": "PO-002",
+    "supplierId": "T02",
+    "plate": "34 XYZ 456",
+    "weighbridgeNo": "TF-2026-0395",
+    "receivedBy": "Ahmet Yılmaz",
+    "toCrusher": false,
+    "status": "Tamamlandı",
+    "notes": "Sarf malzeme",
+    "items": [
+      {
+        "materialId": "S01",
+        "orderedQty": 200,
+        "receivedQty": 200,
+        "acceptedQty": 200,
+        "rejectedQty": 0
+      },
+      {
+        "materialId": "S03",
+        "orderedQty": 150,
+        "receivedQty": 150,
+        "acceptedQty": 150,
+        "rejectedQty": 0
+      },
+      {
+        "materialId": "Y01",
+        "orderedQty": 100,
+        "receivedQty": 100,
+        "acceptedQty": 100,
+        "rejectedQty": 0
+      }
+    ]
+  },
+  {
+    "id": "RC-003",
+    "no": "MK-2026-0045",
+    "date": "2026-11-02",
+    "orderId": "PO-003",
+    "supplierId": "T03",
+    "plate": "34 DEF 789",
+    "weighbridgeNo": "TF-2026-0412",
+    "receivedBy": "Ahmet Yılmaz",
+    "toCrusher": true,
+    "status": "Kırıcıda",
+    "notes": "Yağmurlu havada gelen hurda, nem oranı yüksek",
+    "items": [
+      {
+        "materialId": "H02",
+        "orderedQty": 10000,
+        "receivedQty": 10200,
+        "acceptedQty": 10200,
+        "rejectedQty": 0
+      }
+    ]
+  }
+]

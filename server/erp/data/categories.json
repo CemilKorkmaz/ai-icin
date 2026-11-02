@@ -1,0 +1,27 @@
+[
+  {
+    "id": "C1",
+    "name": "Hammadde",
+    "color": "#4f46e5"
+  },
+  {
+    "id": "C2",
+    "name": "Sarf Malzeme",
+    "color": "#06b6d4"
+  },
+  {
+    "id": "C3",
+    "name": "Yardımcı Malzeme",
+    "color": "#8b5cf6"
+  },
+  {
+    "id": "C4",
+    "name": "Yan Ürün",
+    "color": "#f59e0b"
+  },
+  {
+    "id": "C5",
+    "name": "Mamul",
+    "color": "#16a34a"
+  }
+]
