@@ -1,0 +1,222 @@
+[
+  {
+    "id": "MCH-01",
+    "plantId": "P1",
+    "type": "FURNACE",
+    "name": "A Fırını",
+    "capacityTon": 20,
+    "mode": "PLC",
+    "plcId": "PLC-1",
+    "active": true,
+    "installedAt": "2021-04-12"
+  },
+  {
+    "id": "MCH-02",
+    "plantId": "P1",
+    "type": "FURNACE",
+    "name": "B Fırını",
+    "capacityTon": 35,
+    "mode": "PLC",
+    "plcId": "PLC-1",
+    "active": true,
+    "installedAt": "2021-04-12"
+  },
+  {
+    "id": "MCH-03",
+    "plantId": "P1",
+    "type": "FURNACE",
+    "name": "C Fırını",
+    "capacityTon": 20,
+    "mode": "PLC",
+    "plcId": "PLC-1",
+    "active": true,
+    "installedAt": "2022-08-03"
+  },
+  {
+    "id": "MCH-04",
+    "plantId": "P1",
+    "type": "FURNACE",
+    "name": "D Fırını",
+    "capacityTon": 35,
+    "mode": "PLC",
+    "plcId": "PLC-1",
+    "active": true,
+    "installedAt": "2023-02-19"
+  },
+  {
+    "id": "MCH-05",
+    "plantId": "P1",
+    "type": "FURNACE",
+    "name": "E Fırını",
+    "capacityTon": 20,
+    "mode": "PLC",
+    "plcId": "PLC-1",
+    "active": false,
+    "installedAt": "2025-06-11"
+  },
+  {
+    "id": "MCH-06",
+    "plantId": "P1",
+    "type": "CAST_TABLE",
+    "name": "Tabla 1",
+    "capacityTon": 1,
+    "mode": "PLC",
+    "plcId": "PLC-1",
+    "active": true,
+    "installedAt": "2021-04-12"
+  },
+  {
+    "id": "MCH-07",
+    "plantId": "P1",
+    "type": "CAST_TABLE",
+    "name": "Tabla 2",
+    "capacityTon": 1,
+    "mode": "PLC",
+    "plcId": "PLC-1",
+    "active": true,
+    "installedAt": "2022-08-03"
+  },
+  {
+    "id": "MCH-08",
+    "plantId": "P1",
+    "type": "SAW",
+    "name": "Testere 1",
+    "capacityTon": 0,
+    "mode": "PLC",
+    "plcId": "PLC-1",
+    "active": true,
+    "installedAt": "2021-05-02"
+  },
+  {
+    "id": "MCH-09",
+    "plantId": "P1",
+    "type": "SAW",
+    "name": "Testere 2",
+    "capacityTon": 0,
+    "mode": "PLC",
+    "plcId": "PLC-1",
+    "active": true,
+    "installedAt": "2023-01-18"
+  },
+  {
+    "id": "MCH-10",
+    "plantId": "P1",
+    "type": "HOMO_FURNACE",
+    "name": "Homojen 1",
+    "capacityTon": 25,
+    "mode": "PLC",
+    "plcId": "PLC-1",
+    "active": true,
+    "installedAt": "2021-04-12"
+  },
+  {
+    "id": "MCH-11",
+    "plantId": "P1",
+    "type": "HOMO_FURNACE",
+    "name": "Homojen 2",
+    "capacityTon": 25,
+    "mode": "PLC",
+    "plcId": "PLC-1",
+    "active": true,
+    "installedAt": "2021-04-12"
+  },
+  {
+    "id": "MCH-12",
+    "plantId": "P1",
+    "type": "HOMO_FURNACE",
+    "name": "Homojen 3",
+    "capacityTon": 25,
+    "mode": "PLC",
+    "plcId": "PLC-1",
+    "active": true,
+    "installedAt": "2022-09-14"
+  },
+  {
+    "id": "MCH-13",
+    "plantId": "P1",
+    "type": "HOMO_FURNACE",
+    "name": "Homojen 4",
+    "capacityTon": 25,
+    "mode": "PLC",
+    "plcId": "PLC-1",
+    "active": true,
+    "installedAt": "2024-03-07"
+  },
+  {
+    "id": "MCH-14",
+    "plantId": "P1",
+    "type": "CONT_HOMO",
+    "name": "Continue Homojen 1",
+    "capacityTon": 12,
+    "mode": "PLC",
+    "plcId": "PLC-1",
+    "active": true,
+    "installedAt": "2024-11-20"
+  },
+  {
+    "id": "MCH-15",
+    "plantId": "P2",
+    "type": "FURNACE",
+    "name": "1. Ocak",
+    "capacityTon": 20,
+    "mode": "MANUAL",
+    "plcId": null,
+    "active": true,
+    "installedAt": "2019-03-05"
+  },
+  {
+    "id": "MCH-16",
+    "plantId": "P2",
+    "type": "FURNACE",
+    "name": "2. Ocak",
+    "capacityTon": 35,
+    "mode": "MANUAL",
+    "plcId": null,
+    "active": true,
+    "installedAt": "2019-03-05"
+  },
+  {
+    "id": "MCH-17",
+    "plantId": "P2",
+    "type": "CAST_TABLE",
+    "name": "Tabla 1",
+    "capacityTon": 1,
+    "mode": "MANUAL",
+    "plcId": null,
+    "active": true,
+    "installedAt": "2019-03-05"
+  },
+  {
+    "id": "MCH-18",
+    "plantId": "P2",
+    "type": "SAW",
+    "name": "Testere 1",
+    "capacityTon": 0,
+    "mode": "MANUAL",
+    "plcId": null,
+    "active": true,
+    "installedAt": "2020-07-22"
+  },
+  {
+    "id": "MCH-19",
+    "plantId": "P2",
+    "type": "HOMO_FURNACE",
+    "name": "Homojen 1",
+    "capacityTon": 25,
+    "mode": "MANUAL",
+    "plcId": null,
+    "active": true,
+    "installedAt": "2020-07-22"
+  },
+  {
+    "id": "MCH-20",
+    "plantId": "P2",
+    "type": "ROTARY",
+    "name": "Döner Ocak",
+    "capacityTon": 8,
+    "mode": "MANUAL",
+    "plcId": null,
+    "active": true,
+    "installedAt": "2018-01-15"
+  }
+]

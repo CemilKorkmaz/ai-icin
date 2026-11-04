@@ -1,0 +1,44 @@
+[
+  {
+    "id": "BF-1",
+    "materialId": "B01",
+    "fate": "recycle",
+    "destination": "Döner ocak",
+    "note": "Cüruf geri kazanımı"
+  },
+  {
+    "id": "BF-2",
+    "materialId": "B02",
+    "fate": "sale",
+    "destination": "Stone (doğrulanacak)",
+    "note": "Talaş eritilemez, dışarı satılır"
+  },
+  {
+    "id": "BF-3",
+    "materialId": "B03",
+    "fate": "remelt",
+    "destination": "A Fırını",
+    "note": "Kafa kesimi tekrar fırına"
+  },
+  {
+    "id": "BF-4",
+    "materialId": "B04",
+    "fate": "recycle",
+    "destination": "Döküm yolluğu",
+    "note": "Döngüsel artık"
+  },
+  {
+    "id": "BF-5",
+    "materialId": "B05",
+    "fate": "remelt",
+    "destination": "Ergitme",
+    "note": "Fire biyet"
+  },
+  {
+    "id": "BF-6",
+    "materialId": "B06",
+    "fate": "waste",
+    "destination": "Atık sahası",
+    "note": "Nem / yabancı madde"
+  }
+]

@@ -28,6 +28,23 @@
 | 16 | `outbox.json` | İnternet bekleyen SMS / e-posta / yedek kuyruğu | — |
 | 17 | `users.json` | Kullanıcılar ve roller | — |
 | 18 | `activity.json` | Son aktiviteler / denetim özeti | — |
+| 19 | `plants.json` | Fabrika profilleri ve çalışma modu (`MANUAL` / `PLC`) | — |
+| 20 | `machine-types.json` | Kullanıcı tanımlı makine tipleri | — |
+| 21 | `machines.json` | Modüler makine parkı; ilk kurulumda boştur | plant_id, type, plc_id |
+| 22 | `casting-paths.json` | Fırın ile döküm tablası arası yollar ve tutma tonajı | from_machine_id, table_id |
+| 23 | `plc-connections.json` | Fabrika PLC bağlantıları: IP, protokol, port, tarama çevrimi | plant_id |
+| 24 | `plc-tags.json` | Dört temel sinyalin PLC adres eşleştirmesi | plc_id, machine_id |
+| 25 | `signal-states.json` | Makine başına son dört sinyal durumu | machine_id, signal |
+| 26 | `homogenization-recipes.json` | Homojenizasyon sıcaklık ve süre reçeteleri | alloy |
+| 27 | `homogenization-batches.json` | Karışık partiler, çoklu döküm kodu + adet, planlanan/gerçekleşen süre | lot_ids, recipe_id, furnace_id |
+| 28 | `cooling-batches.json` | Soğutma partileri ve devralınan veri | batch_id |
+| 29 | `oil-rules.json` | Parametrik yağ eşikleri ve kesim sayaçları | machine_id |
+| 30 | `blade-rules.json` | Bıçak ömrü parametreleri ve sayaçlar | machine_id |
+| 31 | `maintenance-events.json` | Yağ dolumu, bıçak değişimi, bakıma gönderme kayıtları | machine_id |
+| 32 | `by-product-fates.json` | Yan ürün akıbeti: `remelt`, `recycle`, `sale`, `waste` | material_id |
+| 33 | `events.json` | Döküm kodu bazlı olay günlüğü (her aşamadan bir satır) | lot_id, machine_id |
+| 34 | `inbox-queue.json` | Arayüzden gelen kuyruk kayıtlarının durum izi | client_id, lot_id |
+| 35 | `vendor-updates.json` | Uzaktan güncelleme ve sürüm geçmişi | plant_id |
 
 ---
 
@@ -272,6 +289,16 @@ Kurallar: stok düşümü **yalnızca** `managerApproved && accountingApproved` 
 | Fire biyet | `fire biyet boyu × kesit × özgül ağırlık` | Döküm, testere |
 | Giren-çıkan farkı | `giren hammadde − (mamul + yan ürün + satılan)` | Raporlar |
 | Kritik seviye | `stock < min` → kırmızı; `min ≤ stock < min×1.2` → sarı; `min×1.2 ≤ stock ≤ max` → yeşil; `stock > max` → mavi | Stok |
+| Silindir kütlesi | `π × (çap_mm/2000)² × (uzunluk_mm/1000) × yoğunluk × adet` | Kesim Hesap Motoru |
+| Kafa kesimi | `silindir(D, kafa_mm, ρ, adet × kafa_adedi)` | Kesim Hesap Motoru |
+| Talaş | `silindir(D, bıçak_mm, ρ, kesim_sayısı)` | Kesim Hesap Motoru |
+| Net biyet | `dökülen − kafa − talaş − fire_biyet` | Kütle dengesi |
+| Kütle zinciri | her olay `balance = önceki_balance + delta` | Olay & Arşiv |
+| Yol tutma | `path.holdTon` (1,0 / 1,5 / 2,0 ton) | Döküm Yolları |
+| Geometri doğrulama | `|kayıtlı_ton − adet × birim_kütle| / kayıtlı_ton × 100` | Sapma uyarısı |
+| Yağ kalan | `100 × (1 − cutsSinceFill / cutsPerTank)` | Yağ & Bakım |
+| Bıçak kullanım | `100 × cutsSinceChange / maxCuts` | Yağ & Bakım |
+| Homojen sapma | `gerçekleşen_dk − planlanan_dk` | Homojenizasyon Partisi |
 
 Sabitler (alüminyum özgül ağırlığı, bıçak kalınlığı, yolluk/filtre artığı) **ayarlarda malzeme/ocak bazında tanımlanır**, koda gömülmez.
 
@@ -323,6 +350,14 @@ Tüm yazma uçları idempotent `client_id` kabul eder; çevrimdışı istemcinin
 | 14 | Raporlar & İstatistik | Raporlama | tümü | Dönem seçimi, üretim/tüketim grafikleri, giren-çıkan, yazdır/CSV |
 | 15 | Bildirimler & Kuyruk | Sistem | notifications, outbox | Çevrimiçi/çevrimdışı anahtarı, kuyruğu boşaltma, mesaj oluşturma |
 | 16 | Ayarlar | Sistem | settings, users | Roller, sunucu adresi, yedek yolu, JSON içe/dışa aktarma, tema, demo sıfırlama |
+| 17 | Makine Parkı | Makine & Kurulum | plants, machineTypes, machines | Boş başlangıç, fabrika profili seçimi, makine ekleme, `MANUAL`/`PLC` modu |
+| 18 | Döküm Yolları | Makine & Kurulum | castingPaths, machines | Kısa/uzun yol, 1,0 / 1,5 / 2,0 ton tutma parametresi |
+| 19 | Kesim Hesap Motoru | Makine & Kurulum | calc.js, lots, byProductFates | 6300/6000/300/3 mm canlı hesap, kafa ve talaş ayrımı, geometri sapması |
+| 20 | Yağ & Bakım | Makine & Kurulum | oilRules, bladeRules, maintenanceEvents | Parametrik eşikler, sayaçlar, dolum/değişim kaydı, uyarı |
+| 21 | Homojenizasyon Partisi | Üretim | homogenizationBatches, recipes | Çoklu döküm kodu + adet, reçete, start, 8/9 saat sapması |
+| 22 | Olay & Arşiv | Üretim | events, inboxQueue | 21/18/17/14 ton zinciri satır satır, bakiye ve akıbet |
+| 23 | PLC Durum | Makine & Kurulum | signalStates, plcTags | Yalnızca dört sinyal, demo değerleriyle; tag adresleri görünmez |
+| 24 | Merkezi Yönetim | Yönetim | plants, plcConnections, plcTags, vendorUpdates | Firma/IP/protokol eşleştirme, güncelleme geçmişi, geliştirici ekranı |
 
 ---
 
@@ -334,5 +369,32 @@ Tüm yazma uçları idempotent `client_id` kabul eder; çevrimdışı istemcinin
 - `server/erp/scripts/backup.py` → anlık görüntü + harici disk kopyası + checksum + saklama temizliği.
 - `server/erp/scripts/outbox_worker.py` → internet varken `queued` kayıtları SMS/SMTP'ye iletir, başarısızlığı yeniden dener.
 - `tools/build_docx.py` → tüm dokümanlardan tek Word dosyası üretir.
+- `app/js/calc.js` → geometrik kütle, kütle dengesi, yağ/bıçak ve homojenizasyon formüllerinin tek modülü.
+- `server/erp/inbox/` → HTML arayüzünün yazdığı olay kuyruğu (`pending`, `processing`, `processed`, `dead-letter`).
+- `server/erp/archive/YYYY/MM/{döküm kodu}/events.jsonl` → append-only olay günlüğü ve `snapshot.json`.
+- `server/erp/scripts/event_worker.py` → kuyruğu 1–3 saniyede tarar, hesaplar, arşive yazar, doğrular, sonra arşivler (silmez).
+- `server/erp/scripts/plc_poller.py` → dört sinyali demo olarak üreten opsiyonel simülatör; gerçek sürücü sonraki aşamadadır.
 
 **Senkronizasyon ilkesi:** prototip tarayıcıda `localStorage` kullanır; gerçek kurulumda bu katman IndexedDB + senkronizasyon kuyruğuna, sunucu tarafı ise işlemsel veritabanına geçer. Ekran kodunun veri erişim katmanı dışında değişmesi gerekmez.
+
+
+---
+
+## 7. Olay Satırı ve Kuyruk Şemaları
+
+`events.json` koleksiyonundaki her kayıt, bir döküm kodunun yaşam döngüsündeki **tek bir adımı** temsil eder. Üzerine yazılmaz, satır silinmez; düzeltme gerekiyorsa ters işlem içeren yeni bir olay eklenir.
+
+| Alan | Açıklama |
+| --- | --- |
+| `id`, `seq` | Olay kimliği ve döküm kodu içindeki artan sıra |
+| `lotId`, `plantId`, `machineId` | İzlenebilirlik bağlantıları |
+| `type` | `CAST_START`, `TRANSFER`, `PATH_HOLD`, `CAST_NET`, `HEAD_CUT`, `SAWDUST`, `SCRAP_BILLET`, `NET_BILLET`, `HOMOGEN_START`, `HOMOGEN_OVERRUN`, `HOMOGEN_END`, `COOLING_END`, `SHIPMENT`, `SIGNAL_*`, `MAINTENANCE`, `GEOMETRY_MISMATCH` |
+| `at`, `actor`, `source` | ISO 8601 zaman, aktör, kaynak (`MANUAL`, `PLC`, `WORKER`, `IMPORT`) |
+| `grossTon`, `deltaTon`, `balanceTon` | İşlem öncesi, değişim ve sonraki bakiye; birim alanıyla birlikte |
+| `materialId`, `fate` | İlgili malzeme ve akıbeti |
+| `payload`, `ref`, `note` | Ölçümler, belge referansı, açıklama |
+| `clientId`, `checksum` | Idempotency anahtarı ve satır sağlama toplamı |
+
+`inbox-queue.json` kayıtları `clientId`, `type`, `lotId`, `createdAt`, `source`, `payload`, `schemaVersion`, `status`, `retryCount`, `lastError` alanlarını taşır. Aynı `clientId` ikinci kez gelirse olay çift yazılmaz. Kuyruk ile arşivin ayrı klasörlerde tutulması ve silme yerine doğrulama kuralı `docs/09` içinde ayrıntılıdır.
+
+**Şema sürümü:** saha görüşmesiyle gelen 17 yeni koleksiyon ve olay alanları `schemaVersion: 2` ile işaretlenir. `manifest.json` içindeki `schema_version` değeri `node tools/export_seed.mjs` ile otomatik güncellenir.

@@ -19,7 +19,8 @@
 9. Önceliklendirme
 10. Riskler ve Çözüm Önerileri
 11. Genel Plandaki Sektörel Sapmaların Düzeltilmesi
-12. Sonraki Adımlar
+12. Saha Görüşmesiyle Gelen Kapsam Genişlemesi
+13. Sonraki Adımlar
 
 ---
 
@@ -189,20 +190,19 @@ Her faz sonunda dokümanlar güncellenir; kapsam kaymasını önlemek için yeni
 
 Bu deponun gerçek düzeni planlanan yapıyı yansıtır:
 
-```
-ai-icin/
-├── README.md                        # Genel bakış ve çalıştırma
-├── docs/                            # Plan, rapor, mimari kararları, Word çıktısı
-├── app/                             # Çalışan PWA prototipi (frontend)
-│   ├── index.html, manifest.webmanifest, sw.js
-│   ├── css/style.css
-│   ├── js/ (seed, store, icons, ui, views, app)
-│   └── assets/
-├── server/erp/                      # Firma sunucusundaki ERP klasörü modeli
-│   ├── data/                        # JSON arşiv (malzeme, emir, hareket, reçete...)
-│   └── scripts/                     # backup.py, outbox_worker.py, validate_data.py
-└── tools/                           # build_docx.py, export_seed.mjs
-```
+Depo kökünde `README.md` genel bakışı ve çalıştırma adımlarını verir. `docs/` klasörü plan, rapor, mimari kararları ve tek Word çıktısını taşır. `app/` çalışan PWA prototipidir: giriş dosyaları `index.html`, `manifest.webmanifest` ve `sw.js`; tasarım sistemi `css/style.css`; JavaScript modülleri `js/` altında `seed`, `store`, `calc`, `icons`, `ui`, `views` ve `app` olarak ayrılır; simgeler `assets/` içindedir.
+
+`server/erp/` firma sunucusundaki `ERP` klasörünün modelidir. `data/` altında otuz beş JSON koleksiyonu ve `manifest.json` bulunur. `scripts/` altında `backup.py`, `outbox_worker.py`, `validate_data.py`, `event_worker.py` ve `plc_poller.py` çalışır. `inbox/` arayüzden gelen olay kuyruğunu, `archive/` döküm kodu bazlı kalıcı olay günlüğünü tutar. `backups/` ve `logs/` çalışma zamanında oluşur. `tools/` altında `build_docx.py`, `export_seed.mjs`, `make_icons.py` ve `smoke_test.mjs` bulunur.
+
+| Klasör | İçerik |
+| --- | --- |
+| `docs/` | `00`–`10` Markdown dokümanlar + `Dokumhane-ERP-Plan.docx` |
+| `app/` | PWA: kabuk, 24 ekran, hesap motoru, tasarım sistemi, ikonlar |
+| `server/erp/data/` | 35 JSON koleksiyonu, `manifest.json`, `README.md` |
+| `server/erp/scripts/` | Yedekleme, giden kutu, doğrulama, olay işçisi, PLC denetçisi |
+| `server/erp/inbox/` | Olay kuyruğu ve örnek kayıtlar |
+| `server/erp/archive/` | Append-only olay günlüğü ve örnek `events.jsonl` |
+| `tools/` | Word üretici, seed aktarımı, ikon üretici, duman testi |
 
 Gerçek üretim kurulumunda `app/` bir API'ye bağlanır, `server/erp/data/` JSON snapshot'ları arşiv olarak kalır; istemci tarafındaki geçici `localStorage` yerini sunucu veritabanı ve IndexedDB senkronizasyonuna bırakır.
 
@@ -255,11 +255,36 @@ Ayrıca genel planda bulunmayıp sohbette sonradan eklenen ve bu plana dahil edi
 
 ---
 
-## 12. Sonraki Adımlar
+## 12. Saha Görüşmesiyle Gelen Kapsam Genişlemesi
+
+İlk sohbetten sonra mühendisle yapılan saha görüşmesi (`docs/06`) sistemi tek fabrikaya yazılmış bir ERP olmaktan çıkarıp **çok fabrikalı, modüler, olay tabanlı bir endüstriyel ürün** hâline getirmiştir. Ana plana eklenen başlıklar aşağıdadır.
+
+| Yeni başlık | Plana etkisi | Ayrıntı |
+| --- | --- | --- |
+| Kütle dengesi zinciri | Üretim modülü | 21 ton başlangıç, 3 ton aktarım, 1 ton yolluk, 17 ton döküm, 14 ton net biyet; her adım ayrı olay |
+| Döküm yolu tutma miktarı | Makine modülü | Aynı metal kısa yolda 1 ton, uzun yolda 1,5 veya 2 ton tutar; hat parametresi |
+| Kesim hesap motoru | Üretim modülü | 6300 / 6000 / 300 / 3 mm, Ø178, yoğunluk ile kafa, talaş ve net ürün ayrımı |
+| Yan ürün akıbeti | Stok modülü | Kafa `remelt`, talaş `sale`, yolluk `recycle`, kırıcı firesi `waste` |
+| Parametrik bakım | Bildirim modülü | Yağ tankı kesim eşiği, bıçak ömrü, bakım kaydı ve uyarı |
+| Karışık homojenizasyon partisi | Üretim modülü | Tek partiye birden fazla döküm kodundan adet satırları; 8 saat planlanan, 9 saat gerçekleşen |
+| Modüler makine parkı | Sistem modülü | İlk açılışta boş; makine tipleri ve kapasiteler fabrika profiline göre |
+| İki çalışma modu | Sistem modülü | `MANUAL` operatör girişi, `PLC` otomatik okuma; iş mantığı aynı |
+| Dört PLC sinyali | Entegrasyon modülü | Kapı, döküm modu/devrilme, alarm, çalışma; gereksiz veri okunmaz |
+| Merkezi yönetim ekranı | Yeni arayüz | Firma, PLC IP, protokol, tag eşleştirme, uzaktan güncelleme; **geliştirici ekip içindir** |
+| Olay tabanlı arşiv | Veri katmanı | `inbox` kuyruğu, `archive/YYYY/MM/DK-.../events.jsonl`, silme yerine doğrula ve arşivle |
+| Mini PC ile kurulum | Uygulama sırası | Önce merkezi yönetim, sonra modüller, en son gerçek PLC |
+
+En önemli düzeltme şudur: modüler yapı **fabrika operatörüne değil, yazılımı geliştiren ekibe** hizmet eder. Yeni makine veya fabrikaya özel kural gerektiğinde yapılandırmayı geliştirici ekip uzaktan uygular; operatör ekranı sade kalır. Bu karar, bakım hizmeti ve 5 ilâ 10 yıllık ürün ömrü planının temelini oluşturur.
+
+Güncel aşama sırası ve kurulum düzeni `docs/10` içinde verilmiştir; `docs/03` Bölüm 6'daki Faz 0–5 sırası korunmakla birlikte bu yeni sırayla eşleştirilmiştir.
+
+---
+
+## 13. Sonraki Adımlar
 
 1. Bu dokümanların ve `docs/Dokumhane-ERP-Plan.docx` çıktısının onaylanması.
 2. Prototip ekranlarının sahada operatörlerle gözden geçirilmesi; renk/akış geri bildirimleri.
-3. `docs/04` içindeki mimari kararların (sunucu, DB, VPN, outbox)IT ekibiyle netleştirilmesi.
+3. `docs/04` içindeki mimari kararların (sunucu, DB, VPN, outbox) IT ekibiyle netleştirilmesi.
 4. `docs/05` veri modelinin API sözleşmesine dönüştürülmesi ve Faz 1 geliştirmeye başlanması.
 5. Her faz sonunda bu planın güncellenmesi.
 

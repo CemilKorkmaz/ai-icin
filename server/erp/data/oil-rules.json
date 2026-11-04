@@ -1,0 +1,24 @@
+[
+  {
+    "id": "OIL-1",
+    "machineId": "MCH-08",
+    "tankLitres": 120,
+    "cutsPerTank": 100,
+    "warnAt": 90,
+    "cutsSinceFill": 86,
+    "cutBasis": "count",
+    "lastFillAt": "2026-11-01T08:00:00+03:00",
+    "active": true
+  },
+  {
+    "id": "OIL-2",
+    "machineId": "MCH-09",
+    "tankLitres": 120,
+    "cutsPerTank": 150,
+    "warnAt": 140,
+    "cutsSinceFill": 42,
+    "cutBasis": "count",
+    "lastFillAt": "2026-11-02T06:00:00+03:00",
+    "active": true
+  }
+]

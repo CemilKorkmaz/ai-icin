@@ -7,7 +7,9 @@ Firma içi sunucuda (Windows Server, Linux veya NAS) `C:\ERP` / `/srv/erp` altı
 | Klasör | İçerik | Bu depoda |
 | --- | --- | --- |
 | `data/` | Koleksiyon bazlı JSON arşiv + `manifest.json` | ✅ Gerçek dosyalar var |
-| `scripts/` | Yedekleme, giden kutu işçisi, veri doğrulama | ✅ Çalışan scriptler var |
+| `scripts/` | Yedekleme, giden kutu, doğrulama, olay işçisi, PLC denetçisi | ✅ Çalışan scriptler var |
+| `inbox/` | Arayüzden gelen olay kuyruğu | ✅ README + örnek kayıtlar var |
+| `archive/` | Döküm kodu bazlı olay günlüğü | ✅ README + örnek `events.jsonl` var |
 | `backups/` | Günlük anlık görüntüler | ⚙️ `backup.py` çalışınca oluşur |
 | `logs/` | İşlem logları | ⚙️ Scriptler çalışınca oluşur |
 | `db/` | Canlı veritabanı / dump | ⚙️ Gerçek kurulumda eklenir |
@@ -26,7 +28,15 @@ python3 scripts/validate_data.py
 # 2) Yedekleme: snapshot + checksum + harici disk + 30 gün saklama
 python3 scripts/backup.py --retention-days 30
 
-# 3) Giden kutu: çevrimdışı biriken SMS / e-posta / bulut yedeğini işle
+# 3) Olay kuyruğu: arayüzden gelen JSON'ları hesaplayıp arşivle (SİLMEZ)
+python3 scripts/event_worker.py --dry-run             # örnekleri raporlar
+python3 scripts/event_worker.py --once                # tek tur
+python3 scripts/event_worker.py --loop --interval 3   # 1–3 sn tarama
+
+# 4) PLC konfigürasyon denetimi (gerçek sürücü yok, dört sinyal kuralı)
+python3 scripts/plc_poller.py --dry-run
+
+# 5) Giden kutu: çevrimdışı biriken SMS / e-posta / bulut yedeğini işle
 python3 scripts/outbox_worker.py --dry-run      # önce deneme
 python3 scripts/outbox_worker.py                # gerçek (env değişkenleriyle)
 ```
@@ -46,9 +56,12 @@ Tetikleyici: Her gün 03:00 ve her saat başı (artımlı)
 0 3 * * *  cd /srv/erp && python3 scripts/backup.py --retention-days 30 >> logs/cron.log 2>&1
 */15 * * * * cd /srv/erp && python3 scripts/outbox_worker.py >> logs/cron.log 2>&1
 0 8 * * *  cd /srv/erp && python3 scripts/report_generator.py >> logs/cron.log 2>&1
+* * * * *  cd /srv/erp && python3 scripts/event_worker.py --once >> logs/cron.log 2>&1
 ```
 
-> `report_generator.py` (günlük/haftalık/aylık raporları üretip `outbox`'a yazan zamanlayıcı) Faz 3'te eklenir; prototipte **Bildirimler & Kuyruk → Zamanlanmış Raporlar** ekranı bu davranışı gösterir.
+> `report_generator.py` (günlük/haftalık/aylık raporları üretip `outbox`'a yazan zamanlayıcı) hâlâ **yer tutucudur**, bu depoda dosyası yoktur; prototipte **Bildirimler & Kuyruk → Zamanlanmış Raporlar** ekranı bu davranışı gösterir. `event_worker.py` ise gerçekten çalışır.
+
+`ERP/inbox/` ile `ERP/archive/` ayrımı, konuşmada "JSON'ları HTML'ler sadece okur, veri yazacaksa bir şeye yazar" denilen kuralın dosya sistemindeki karşılığıdır. Kuyruk kaydı **silinmez**: önce arşive yazılıp SHA-256 ile doğrulanır, sonra `archived` durumuna alınır. Ayrıntı `docs/09`.
 
 ## Dayanıklılık kontrol listesi
 
@@ -58,6 +71,8 @@ Tetikleyici: Her gün 03:00 ve her saat başı (artımlı)
 - [x] Başarısız yedeklemenin loglanması
 - [ ] Aylık **restore testi** (operasyonel süreç)
 - [ ] İkinci "soğuk yedek" sunucu ve UPS (altyapı)
+- [x] Olay günlüğü + kuyruk ayrımı, idempotent `clientId`, dead-letter ve checksum
+- [x] Arşiv, `inbox/processed/` ve checksum dosyalarının yedek kapsamına alınması
 - [ ] İstemci IndexedDB senkronizasyon kuyruğu (Faz 4)
 
 ## Uzak erişim

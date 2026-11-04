@@ -1,0 +1,29 @@
+[
+  {
+    "id": "P1",
+    "code": "FIRM1",
+    "name": "Anadolu Alüminyum",
+    "city": "Kocaeli",
+    "mode": "PLC",
+    "active": true,
+    "note": "5 fırın, 2 döküm tablası, 4 homojen fırın, 2 testere, 1 sürekli homojenizasyon"
+  },
+  {
+    "id": "P2",
+    "code": "FIRM2",
+    "name": "Marmara Alüminyum",
+    "city": "Bursa",
+    "mode": "MANUAL",
+    "active": true,
+    "note": "Döner ocak var; PLC bağlantısı istenmiyor, operatör veri giriyor"
+  },
+  {
+    "id": "P3",
+    "code": "FIRM3",
+    "name": "Ege Ekstrüzyon",
+    "city": "İzmir",
+    "mode": "PLC",
+    "active": false,
+    "note": "Pasif demo profili"
+  }
+]

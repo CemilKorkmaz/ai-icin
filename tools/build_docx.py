@@ -27,6 +27,11 @@ FILES = [
     ('03-ana-plan-dokumani.md', 'BÖLÜM 3 — Ana Plan Dokümanı'),
     ('04-teknik-mimari-kararlar.md', 'BÖLÜM 4 — Teknik Mimari Kararları'),
     ('05-veri-modeli-ve-ekranlar.md', 'BÖLÜM 5 — Veri Modeli ve Ekran Envanteri'),
+    ('06-saha-gorusmesi-duzeltilmis-metin.md', 'BÖLÜM 6 — Saha Görüşmesi: Düzeltilmiş Teknik Anlatım'),
+    ('07-uretim-hesap-motoru.md', 'BÖLÜM 7 — Üretim Hesap Motoru'),
+    ('08-moduler-makine-ve-merkezi-yonetim.md', 'BÖLÜM 8 — Modüler Makine ve Merkezi Yönetim'),
+    ('09-olay-tabanli-json-arsivleme.md', 'BÖLÜM 9 — Olay Tabanlı JSON Arşivleme'),
+    ('10-kurulum-ve-yol-haritasi-v2.md', 'BÖLÜM 10 — Kurulum ve Yol Haritası (Sürüm 2)'),
 ]
 
 W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'

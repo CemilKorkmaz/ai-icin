@@ -1,0 +1,24 @@
+[
+  {
+    "id": "BLD-1",
+    "machineId": "MCH-08",
+    "maxCuts": 1200,
+    "warnAt": 1100,
+    "cutsSinceChange": 1140,
+    "bladeNo": "B-2026-0088",
+    "bladeMm": 3,
+    "lastChangeAt": "2026-10-24T07:30:00+03:00",
+    "active": true
+  },
+  {
+    "id": "BLD-2",
+    "machineId": "MCH-09",
+    "maxCuts": 1500,
+    "warnAt": 1400,
+    "cutsSinceChange": 310,
+    "bladeNo": "B-2026-0091",
+    "bladeMm": 3,
+    "lastChangeAt": "2026-11-01T07:30:00+03:00",
+    "active": true
+  }
+]

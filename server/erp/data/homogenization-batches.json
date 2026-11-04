@@ -1,0 +1,94 @@
+[
+  {
+    "id": "HMB-001",
+    "code": "HMB-2026-0041",
+    "plantId": "P1",
+    "machineId": "MCH-10",
+    "recipeId": "HR-01",
+    "status": "Süre Aşımı",
+    "startedAt": "2026-11-01T22:00:00+03:00",
+    "endedAt": "2026-11-02T07:00:00+03:00",
+    "plannedMinutes": 480,
+    "actualMinutes": 540,
+    "lots": [
+      {
+        "lotId": "DK-2026-0135",
+        "count": 20
+      }
+    ],
+    "totalCount": 20,
+    "operator": "U09",
+    "note": "8 saat doldu, fırın 1 saat daha çalıştı"
+  },
+  {
+    "id": "HMB-002",
+    "code": "HMB-2026-0042",
+    "plantId": "P1",
+    "machineId": "MCH-11",
+    "recipeId": "HR-01",
+    "status": "Devam ediyor",
+    "startedAt": "2026-11-02T09:00:00+03:00",
+    "endedAt": null,
+    "plannedMinutes": 480,
+    "actualMinutes": null,
+    "lots": [
+      {
+        "lotId": "DK-2026-0131",
+        "count": 20
+      },
+      {
+        "lotId": "DK-2026-0132",
+        "count": 15
+      },
+      {
+        "lotId": "DK-2026-0133",
+        "count": 10
+      }
+    ],
+    "totalCount": 45,
+    "operator": "U09",
+    "note": "Karışık parti: üç farklı döküm kodu"
+  },
+  {
+    "id": "HMB-003",
+    "code": "HMB-2026-0043",
+    "plantId": "P1",
+    "machineId": "MCH-12",
+    "recipeId": "HR-02",
+    "status": "Tamamlandı",
+    "startedAt": "2026-11-01T06:00:00+03:00",
+    "endedAt": "2026-11-01T15:00:00+03:00",
+    "plannedMinutes": 540,
+    "actualMinutes": 540,
+    "lots": [
+      {
+        "lotId": "DK-2026-0134",
+        "count": 30
+      }
+    ],
+    "totalCount": 30,
+    "operator": "U09",
+    "note": "Planlanan sürede tamamlandı"
+  },
+  {
+    "id": "HMB-004",
+    "code": "HMB-2026-0044",
+    "plantId": "P2",
+    "machineId": "MCH-19",
+    "recipeId": "HR-03",
+    "status": "Tamamlandı",
+    "startedAt": "2026-10-31T08:00:00+03:00",
+    "endedAt": "2026-10-31T15:00:00+03:00",
+    "plannedMinutes": 420,
+    "actualMinutes": 420,
+    "lots": [
+      {
+        "lotId": "DK-2026-0136",
+        "count": 25
+      }
+    ],
+    "totalCount": 25,
+    "operator": "Operatör",
+    "note": "PLC yok, süre operatör tarafından girildi"
+  }
+]

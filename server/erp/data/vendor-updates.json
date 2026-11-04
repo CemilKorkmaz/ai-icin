@@ -1,0 +1,47 @@
+[
+  {
+    "id": "VU-001",
+    "plantId": "P1",
+    "version": "0.9.0",
+    "kind": "Kurulum",
+    "note": "Firma 1 profili ve 14 makine tanımlandı",
+    "appliedBy": "Max",
+    "at": "2026-10-01T09:00:00+03:00"
+  },
+  {
+    "id": "VU-002",
+    "plantId": "P1",
+    "version": "0.9.1",
+    "kind": "Tag Eşlemesi",
+    "note": "A Fırını dört PLC sinyali eşleştirildi",
+    "appliedBy": "Max",
+    "at": "2026-10-03T11:20:00+03:00"
+  },
+  {
+    "id": "VU-003",
+    "plantId": "P2",
+    "version": "0.9.2",
+    "kind": "Makine Eklendi",
+    "note": "Döner ocak modülü, PLC olmadan",
+    "appliedBy": "Max",
+    "at": "2026-10-18T15:45:00+03:00"
+  },
+  {
+    "id": "VU-004",
+    "plantId": "P1",
+    "version": "1.0.0",
+    "kind": "Parametre Değişikliği",
+    "note": "Uzun yol tutma miktarı 2,0 tona güncellendi",
+    "appliedBy": "Max",
+    "at": "2026-11-01T10:00:00+03:00"
+  },
+  {
+    "id": "VU-005",
+    "plantId": "P1",
+    "version": "1.0.0",
+    "kind": "Modül Güncellemesi",
+    "note": "Olay tabanlı arşiv ve kesim hesap motoru",
+    "appliedBy": "Max",
+    "at": "2026-11-02T08:30:00+03:00"
+  }
+]

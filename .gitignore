@@ -14,3 +14,12 @@ node_modules/
 .env
 .env.local
 *.log
+
+# Olay kuyruğu / arşiv: yalnızca README ve examples takip edilir
+server/erp/inbox/*.json
+server/erp/inbox/processing/
+server/erp/inbox/processed/
+server/erp/inbox/dead-letter/
+server/erp/archive/20*/
+server/erp/archive/processed-clients.json
+server/erp/archive/events/

@@ -43,7 +43,7 @@ Külçe, silisyum, magnezyum, filtre, tıkaç gibi doğrudan kullanılabilir mal
 
 ### 2.2 Kırıcı İşlemleri ve Fire
 
-Kırıcıya sevk edilen hurda için operatör brüt giriş miktarını, ayıklanan fire miktarını ve fire nedenini girer. Sistem net çıkış miktarını ve fire oranını otomatik hesaplar. Örneğin on ton hurda gelmiş ve ayıklama sonucu yedi yüz kilogram fire ayrılmışsa net stok dokuz ton üç yüz kilogram olarak güncellenir ve fire oranı yüzde 6,86 olarak kaydedilir. Fire nedeni nemli malzeme, yabancı madde, paslı malzeme veya plastik karışımı gibi seçeneklerden belirlenir; firenin hurda sahasına, geri dönüşüme veya atığa gittiği de kaydedilir. Fire oranı yönetici tarafından belirlenen eşiği aştığında sistem otomatik uyarı üretir.
+Kırıcıya sevk edilen hurda için operatör brüt giriş miktarını, ayıklanan fire miktarını ve fire nedenini girer. Sistem net çıkış miktarını ve fire oranını otomatik hesaplar. Örneğin on ton hurda gelmiş ve ayıklama sonucu yedi yüz kilogram fire ayrılmışsa net stok dokuz ton üç yüz kilogram olarak güncellenir ve fire oranı yüzde 7,00 olarak kaydedilir. Fire nedeni nemli malzeme, yabancı madde, paslı malzeme veya plastik karışımı gibi seçeneklerden belirlenir; firenin hurda sahasına, geri dönüşüme veya atığa gittiği de kaydedilir. Fire oranı yönetici tarafından belirlenen eşiği aştığında sistem otomatik uyarı üretir.
 
 Kırıcı kaydı stok hareketlerine iki satır olarak yansır: brüt malzemenin fire kadar azaltılması ve ayrılan miktarın yan ürün stokuna eklenmesi. Böylece giren hammaddenin tamamının muhasebesi kapanmış olur.
 
@@ -119,11 +119,11 @@ Dökümden çıkan biyetler testere birimine gelir. Operatör döküm kodunu se�
 
 ### 5.2 Kafa Kesimi
 
-Her biyetin iki ucundaki kafa bölümleri kesilir. Operatör kesilen kafa uzunluğunu girdiğinde sistem, dökümden gelen biyet sayısı ve çap bilgisinden kafaların toplam tonajını hesaplar ve yan ürün stokuna ekler.
+Her biyetin iki ucundaki kafa bölümleri kesilir. Operatör kesilen kafa uzunluğunu girdiğinde sistem, dökümden gelen biyet sayısı ve çap bilgisinden kafaların toplam tonajını hesaplar ve yan ürün stokuna ekler. Sahadaki ölçümde döküm boyu 6300 milimetre, ürün boyu 6000 milimetre, kafa payı 300 milimetre ve bıçak payı 3 milimetredir; 178 milimetre çaplı bir biyetin 300 milimetrelik kafası yaklaşık 20,16 kilogram gelir. Kafa kesimi tekrar fırına atılmak üzere ayrılır, satılmaz. Kafa payının tek uçtan mı iki uçtan mı alındığı ve bıçak payının döküm boyuna dâhil olup olmadığı fabrika parametresi olarak tutulur; 6000, 300 ve 3 milimetrenin toplamı 6303 milimetre olduğu için oluşan 3 milimetrelik sapma gizlenmez, ölçüm sapması olarak olay kaydına yazılır.
 
 ### 5.3 Talaş Fire Hesabı
 
-Testere bıçağı kalınlığı ve biyet çapı kullanılarak her kesimde oluşan talaş miktarı hesaplanır. Örneğin üç milimetrelik bıçak için kesit alanı ile bıçak kalınlığı çarpılır, toplam kesim sayısıyla çarpılarak döküm bazlı talaş fire tonajı bulunur ve talaş stoğuna eklenir.
+Testere bıçağı kalınlığı ve biyet çapı kullanılarak her kesimde oluşan talaş miktarı hesaplanır. Örneğin üç milimetrelik bıçak için kesit alanı ile bıçak kalınlığı çarpılır, toplam kesim sayısıyla çarpılarak döküm bazlı talaş fire tonajı bulunur ve talaş stoğuna eklenir. Bu, uzunluk üzerinden değil hacim ve yoğunluk üzerinden yapılan bir hesaptır; 178 milimetre çap ve 2700 kilogram/metreküp yoğunluk için tek kesimde oluşan talaş yaklaşık 0,2016 kilogramdır. Talaş kafa kesiminden ayrı tutulur, çünkü tekrar eritilemez ve dışarıya satılır. Kafa kesimi yeniden fırına gider, talaş satışa gider; sistem bu iki akıbeti aynı yan ürün kategorisi içinde ayrı alanlarla kaydeder. Kayıp hiçbir zaman sabit bir kilogram değeri olarak yazılmaz.
 
 ### 5.4 Biyet Fire
 
@@ -135,7 +135,7 @@ Testere işleminin toplam süresi kaydedilir. Süre, beklenen değerin üzerine 
 
 ### 5.6 Yağ Tüketimi
 
-Kesim sayısı ve kesim süresine bağlı olarak tahmini testere yağı tüketimi hesaplanır ve yardımcı malzeme stokundan otomatik düşülür.
+Kesim sayısı ve kesim süresine bağlı olarak tahmini testere yağı tüketimi hesaplanır ve yardımcı malzeme stokundan otomatik düşülür. Fabrika, bir tank dolumu yağın kaç kesim gittiğini kendisi tanımlar; örneğin yüz kesim girildiyse sistem kesim sayacını izler ve eşiğe gelindiğinde bakım personeline yağ dolumu uyarısı gönderir. Aynı sayaç mantığı testere bıçağının ömrü için de kullanılır: bıçak belirli kesim sayısına ulaştığında uyarı üretilir, bakıma gönderildiğinde veya yenisi takıldığında yeni bıçak numarası ve tarih kaydedilir. Bütün bu eşikler parametredir, fabrikadan fabrikaya değişir.
 
 ---
 
@@ -143,11 +143,11 @@ Kesim sayısı ve kesim süresine bağlı olarak tahmini testere yağı tüketim
 
 ### 6.1 Reçete Seçimi ve Süreç Başlatma
 
-Testereden çıkan biyetler homojenizasyon fırınına aktarılır. Operatör alaşım ve çapa göre reçeteyi seçer; örneğin 6063 alaşım ve 178 milimetre çap için tanımlı sıcaklık ve süre değerleri otomatik yüklenir. Start verildiğinde sistem saymaya başlar ve döküm kodu korunur.
+Testereden çıkan biyetler homojenizasyon fırınına aktarılır. Operatör alaşım ve çapa göre reçeteyi seçer; örneğin 6063 alaşım ve 178 milimetre çap için tanımlı sıcaklık ve süre değerleri otomatik yüklenir. Start verildiğinde sistem saymaya başlar ve döküm kodu korunur. Operatör aynı fırına farklı döküm kodlarından karışık biyet atabilir; parti, her döküm kodu için ayrı adet satırı taşır. Böylece bir partide birinci dökümden yirmi, ikinci dökümden on beş, üçüncü dökümden on adet biyet birlikte işlenebilir ve izlenebilirlik bozulmaz.
 
 ### 6.2 Süre Aşımı Uyarısı
 
-Homojenizasyon süresi reçetede tanımlı süreyi aşar ve operatör duraklatma yapmamışsa sistem yöneticiye uyarı gönderir. Bu uyarı fırında arıza veya proses anomalisi şüphesine işaret eder.
+Homojenizasyon süresi reçetede tanımlı süreyi aşar ve operatör duraklatma yapmamışsa sistem yöneticiye uyarı gönderir. Bu uyarı fırında arıza veya proses anomalisi şüphesine işaret eder. Süre dolduğu hâlde fırın çalışmaya devam ediyorsa işlem durdurulmaz; planlanan süre, gerçekleşen süre ve aradaki sapma ayrı ayrı kaydedilir. Örneğin reçete sekiz saat istemiş, işlem dokuz saatte bitmişse kayıt "planlanan sekiz saat, gerçekleşen dokuz saat, bir saat sapma, süre aşımı" biçiminde tutulur.
 
 ### 6.3 Soğutma Prosesi
 
@@ -213,7 +213,7 @@ Kritik stok uyarıları, ergitme zamanlama uyarıları, proses süre aşımı uy
 
 ### 10.2 İzlenebilirlik
 
-Her biyet döküm kodu üzerinden geriye doğru izlenebilir: mamul biyetin hangi dökümden çıktığı, dökümde hangi şarjın kullanıldığı, şarjda hangi hammaddelerin hangi tedarikçiden hangi fiyata alındığı ve hangi proseslerden geçtiği zincir hâlinde kayıtlıdır.
+Her biyet döküm kodu üzerinden geriye doğru izlenebilir: mamul biyetin hangi dökümden çıktığı, dökümde hangi şarjın kullanıldığı, şarjda hangi hammaddelerin hangi tedarikçiden hangi fiyata alındığı ve hangi proseslerden geçtiği zincir hâlinde kayıtlıdır. Bu zincir tek bir büyük kaydın üzerine yazılmasıyla değil, her aşamadan bir olay satırı düşürülerek tutulur. Döküm kodu açılır, aktarım, yollukta tutulan metal, kafa kesimi, talaş, net biyet, homojenizasyon, soğutma ve sevkiyat ayrı satırlar olarak eklenir; her satır kendi bakiyesini ve zaman damgasını taşır. Böylece dosya kabarmaz, geçmiş değiştirilemez ve sonradan oluşan bir durum yeni satır olarak eklenir.
 
 ### 10.3 Otomatik Stok Entegrasyonu
 
@@ -231,4 +231,4 @@ Yönetici, satın alma personeli, stok sorumlusu, kırıcı operatörü, ocakç�
 
 ## Kapanış
 
-Bu rapor, alüminyum dökümhane ERP sisteminin satın alma aşamasından sevkiyat arşivine kadar tüm işlevsel hatlarını kapsar. Bir sonraki adımda bu metin, `docs/02` içindeki Faz 1 ekran planına, `docs/03` içindeki ana plan dokümanına ve `docs/04` içindeki yazılım altyapı kararlarına temel girdi olarak kullanılmıştır. Şekil ve şema bilgisi bu dokümanda yer almaz; görsel mimari anlatımı yalnızca metin olarak `docs/04` içinde bulunur.
+Bu rapor, alüminyum dökümhane ERP sisteminin satın alma aşamasından sevkiyat arşivine kadar tüm işlevsel hatlarını kapsar. Bir sonraki adımda bu metin, `docs/02` içindeki Faz 1 ekran planına, `docs/03` içindeki ana plan dokümanına ve `docs/04` içindeki yazılım altyapı kararlarına temel girdi olarak kullanılmıştır. Bu dokümanda şekil, şema, ok veya kutu çizimi yoktur; bütün süreç yalnızca başlıklar ve anlamlı, sıralı anlatım olarak verilmiştir. Teknik mimari kararları da yine yalnızca metin ve tablo olarak `docs/04` içinde, saha görüşmesinden gelen ayrıntılı hesap, modüler makine, olay arşivi ve kurulum kararları `docs/06` ile `docs/10` arasında bulunur.
