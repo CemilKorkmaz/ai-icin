@@ -12,9 +12,13 @@ globalThis.window = { dispatchEvent: () => {} };
 globalThis.CustomEvent = class { constructor(type) { this.type = type; } };
 
 const { VIEWS, NAV, GROUP_OF } = await import('../app/js/views/index.js');
-const { D, stockState, orderTotal } = await import('../app/js/store.js');
+const { D, store, appendJournal, stockState, orderTotal } = await import('../app/js/store.js');
 const { SEED, STAGES } = await import('../app/js/seed.js');
 const { cuttingReport, geometryCheck, maintenanceStatus, durationCheck, cylinderMassKg } = await import('../app/js/calc.js');
+const {
+  amounts, salesEntry, purchaseEntry, buildEntry, trialBalance, isBalanced,
+  lotCost, salesMargin, creditCheck, kpiSnapshot, postingEffects, INTEGRATION_MATRIX
+} = await import('../app/js/posting.js');
 
 let failures = 0;
 const check = (cond, msg) => { if (!cond) { console.error('  ✗', msg); failures++; } };
@@ -82,8 +86,8 @@ const dur = durationCheck({ startedAt: '2026-11-01T22:00:00+03:00', endedAt: '20
 check(dur.overrunMinutes === 60 && dur.status === 'Süre Aşımı', '8/9 saat homojenizasyon sapması yanlış');
 console.log(`✓ Hesap motoru: talaş ${cut.unitSawdustKg} kg/kesim · kafa ${cut.unitHeadKg} kg · net ${cut.netBilletTon} t`);
 
-// 6) Saha görüşmesi koleksiyonları (docs/05, schemaVersion 2)
-check(SEED.schemaVersion === 2, 'Şema sürümü 2 olmalı');
+// 6) Saha görüşmesi koleksiyonları (docs/05, schemaVersion 3)
+check(SEED.schemaVersion === 3, 'Şema sürümü 3 olmalı');
 for (const key of ['plants', 'machineTypes', 'machines', 'castingPaths', 'plcConnections', 'plcTags',
   'signalStates', 'homogenizationRecipes', 'homogenizationBatches', 'coolingBatches',
   'oilRules', 'bladeRules', 'maintenanceEvents', 'byProductFates', 'events', 'inboxQueue', 'vendorUpdates']) {
@@ -102,6 +106,69 @@ let bal = 0; let ok = true;
 chain.forEach((e) => { bal = Math.round((bal + e.deltaTon) * 10000) / 10000; if (Math.abs(bal - e.balanceTon) > 0.001) ok = false; });
 check(ok, 'Olay bakiyeleri ardışık değil');
 console.log(`✓ ${d.machines.length} makine · ${d.castingPaths.length} yol · ${d.events.length} olay · ${d.plcTags.length} PLC tag`);
+
+// 7) Genel ERP karşılaştırmasıyla eklenen ticari / finansal katman (docs/11)
+for (const key of ['accounts', 'customers', 'quotations', 'salesOrders', 'purchaseRequests',
+  'purchaseQuotes', 'invoices', 'journalEntries', 'payments', 'warehouses',
+  'stockCounts', 'reservations', 'costRecords', 'employees', 'shifts',
+  'budgets', 'periodClosures', 'integrationRules']) {
+  check(Array.isArray(d[key]) && d[key].length > 0, `${key} koleksiyonu eksik/boş`);
+}
+check(d.integrationRules.length === INTEGRATION_MATRIX.length, 'Entegrasyon matrisi ile seed verisi uyuşmuyor');
+check(d.accounts.every((a) => a.code && a.name), 'Hesap planında kod/ad eksik');
+
+const a20 = amounts(1542000, 20);
+check(a20.vat === 308400 && a20.gross === 1850400, 'KDV / brüt tutar hesabı hatalı');
+check(d.invoices.every((i) => Math.abs(i.net + i.vat - i.gross) < 0.01), 'Faturada net + KDV ≠ brüt');
+check(d.invoices.every((i) => Math.abs(i.net * i.vatRate / 100 - i.vat) < 0.01), 'Fatura KDV oranı tutarsız');
+
+const je = salesEntry(d.invoices.find((i) => i.no === 'FTR-2026-1142'));
+check(isBalanced(je) && je.totalDebit === 1850400, 'Satış fişi borç/alacak dengesi bozuk');
+const pe = purchaseEntry(d.invoices.find((i) => i.no === 'AF-2026-0311'));
+check(isBalanced(pe) && pe.totalDebit === 1022400, 'Alış fişi borç/alacak dengesi bozuk');
+check(d.journalEntries.every(isBalanced), 'Dengesiz muhasebe fişi var');
+const tb = trialBalance(d.journalEntries, d.accounts);
+check(tb.balanced, 'Mizan borç = alacak değil');
+check(tb.totals.debit > 0 && tb.rows.length >= d.accounts.length, 'Mizan satırları eksik');
+
+const c139 = lotCost(d.costRecords.find((r) => r.lotId === 'DK-2026-0139'));
+check(c139.consistent && c139.total === 412000, 'DK-2026-0139 maliyet kalemleri toplamı yanlış');
+check(Math.abs(c139.unitCostPerTon - 29428.57) < 0.01, 'Birim maliyet (₺/ton) yanlış');
+check(d.costRecords.every((r) => lotCost(r).consistent), 'Tutarsız maliyet kaydı var');
+const margin = salesMargin({ revenue: 18 * 118500, costTon: c139.netTon, unitCostPerTon: c139.unitCostPerTon });
+check(margin.grossProfit > 0 && margin.marginPct > 0, 'Brüt kâr hesaplanamadı');
+
+const m01 = d.customers.find((c) => c.id === 'M01');
+check(creditCheck(m01, 1000000).ok === true, 'Kredi limiti uygunken reddedildi');
+check(creditCheck(m01, 3000000).ok === false, 'Kredi limiti aşımı yakalanmadı');
+check(d.periodClosures.some((pc) => pc.status === 'Açık' && pc.period === d.settings.currentPeriod), 'Açık dönem kaydı yok');
+check(d.stockCounts.every((c) => c.countedKg - c.expectedKg === c.differenceKg), 'Sayım farkı tutarsız');
+check(d.employees.every((e) => d.users.some((u) => u.id === e.userId)), 'Personel kullanıcıya bağlı değil');
+check(d.shifts.some((s) => s.start > s.end), 'Gece vardiyası (gün aşan) örneği yok');
+
+const kpi = kpiSnapshot(d);
+check(kpi.revenue > 0 && kpi.budgetUsagePct > 0 && kpi.productionTon > 0, 'Çapraz modül KPI üretilemedi');
+const fx = postingEffects('SHIPMENT_APPROVED', {
+  shipment: d.shipments.find((s) => !s.postingDone), invoice: d.invoices[0],
+  journal: je, customer: m01, movement: d.movements[0], costRecord: c139
+});
+check(fx.length === 8, 'Tek kayıt çok etki listesi 8 kayıt üretmeli');
+check(new Set(fx.map((x) => x.collection)).size === 8, 'Etki edilen koleksiyonlar tekilleşmedi');
+
+// Idempotency: aynı clientId ile ikinci fiş yazılmamalı.
+const dupe = buildEntry({
+  id: 'JE-TEST', no: 'MF-TEST', date: '2026-11-04', period: '2026-11',
+  description: 'Duman testi', sourceModule: 'Test', sourceId: 'TEST', clientId: 'SMOKE-DUPE',
+  lines: [
+    { accountId: 'A102', accountCode: '102', debit: 100, credit: 0 },
+    { accountId: 'A120', accountCode: '120', debit: 0, credit: 100 }
+  ]
+});
+const before = d.journalEntries.length;
+store.change((data) => { appendJournal(dupe); appendJournal(dupe); });
+check(d.journalEntries.length === before + 1, 'Aynı clientId ile çift muhasebe fişi yazıldı');
+check(!isBalanced({ lines: [{ debit: 100, credit: 0 }] }), 'Dengesiz fiş kabul edildi');
+console.log(`✓ ${d.accounts.length} hesap · ${d.journalEntries.length} fiş · ${d.invoices.length} fatura · ${d.integrationRules.length} kural · mizan dengeli`);
 
 console.log(`\nSonuç: ${failures ? failures + ' HATA' : 'TÜM TESTLER GEÇTİ'}`);
 process.exit(failures ? 1 : 0);

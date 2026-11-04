@@ -1,7 +1,9 @@
 /* ERP Studio — uygulama kabuğu önbelleği.
    Kapalı çevrim: sunucuya erişim kesilse de arayüz açılmaya devam eder. */
 
-const CACHE = 'erp-studio-v1';
+// Şema sürümüyle birlikte yükseltildi: yeni modüller (calc, posting, engineering,
+// enterprise) çevrimdışı ilk açılışta da önbellekte bulunmalıdır.
+const CACHE = 'erp-studio-v3';
 const SHELL = [
   './',
   './index.html',
@@ -13,6 +15,8 @@ const SHELL = [
   './js/app.js',
   './js/store.js',
   './js/seed.js',
+  './js/calc.js',
+  './js/posting.js',
   './js/icons.js',
   './js/ui.js',
   './js/views/index.js',
@@ -22,7 +26,9 @@ const SHELL = [
   './js/views/production.js',
   './js/views/shipping.js',
   './js/views/reports.js',
-  './js/views/system.js'
+  './js/views/system.js',
+  './js/views/engineering.js',
+  './js/views/enterprise.js'
 ];
 
 self.addEventListener('install', (event) => {

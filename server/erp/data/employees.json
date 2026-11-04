@@ -1,0 +1,68 @@
+[
+  {
+    "id": "EMP-01",
+    "userId": "U06",
+    "name": "Hasan Çelik",
+    "department": "Üretim",
+    "role": "Ocakçı / Ergitme",
+    "shiftId": "SH-01",
+    "startDate": "2021-03-15",
+    "payrollRef": "Harici bordro servisi",
+    "active": true
+  },
+  {
+    "id": "EMP-02",
+    "userId": "U07",
+    "name": "Emre Şahin",
+    "department": "Üretim",
+    "role": "Döküm Operatörü",
+    "shiftId": "SH-01",
+    "startDate": "2022-06-01",
+    "payrollRef": "Harici bordro servisi",
+    "active": true
+  },
+  {
+    "id": "EMP-03",
+    "userId": "U08",
+    "name": "Fatih Aydın",
+    "department": "Üretim",
+    "role": "Testere Operatörü",
+    "shiftId": "SH-02",
+    "startDate": "2020-09-10",
+    "payrollRef": "Harici bordro servisi",
+    "active": true
+  },
+  {
+    "id": "EMP-04",
+    "userId": "U09",
+    "name": "Serkan Koç",
+    "department": "Üretim",
+    "role": "Homojenizasyon",
+    "shiftId": "SH-02",
+    "startDate": "2023-01-09",
+    "payrollRef": "Harici bordro servisi",
+    "active": true
+  },
+  {
+    "id": "EMP-05",
+    "userId": "U03",
+    "name": "Ahmet Yılmaz",
+    "department": "Hammadde",
+    "role": "Stok Sorumlusu",
+    "shiftId": "SH-03",
+    "startDate": "2019-11-04",
+    "payrollRef": "Harici bordro servisi",
+    "active": true
+  },
+  {
+    "id": "EMP-06",
+    "userId": "U11",
+    "name": "Elif Arslan",
+    "department": "Muhasebe",
+    "role": "Muhasebe / Fatura",
+    "shiftId": "SH-03",
+    "startDate": "2021-07-19",
+    "payrollRef": "Harici bordro servisi",
+    "active": true
+  }
+]

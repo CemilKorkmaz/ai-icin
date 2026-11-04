@@ -1,0 +1,80 @@
+[
+  {
+    "id": "PAY-001",
+    "no": "TH-2026-0041",
+    "kind": "Tahsilat",
+    "partyType": "customer",
+    "partyId": "M01",
+    "date": "2026-11-02",
+    "amount": 480000,
+    "method": "Banka",
+    "invoiceId": "INV-001",
+    "journalId": "JE-003",
+    "notes": "Kısmi tahsilat"
+  },
+  {
+    "id": "PAY-002",
+    "no": "OD-2026-0038",
+    "kind": "Ödeme",
+    "partyType": "supplier",
+    "partyId": "T01",
+    "date": "2026-11-02",
+    "amount": 620000,
+    "method": "Banka",
+    "invoiceId": "INV-003",
+    "journalId": "JE-004",
+    "notes": "Külçe alımı"
+  },
+  {
+    "id": "PAY-003",
+    "no": "TH-2026-0042",
+    "kind": "Tahsilat",
+    "partyType": "customer",
+    "partyId": "M04",
+    "date": "2026-11-02",
+    "amount": 59160,
+    "method": "Kasa",
+    "invoiceId": "INV-005",
+    "journalId": null,
+    "notes": "Talaş satışı peşin"
+  },
+  {
+    "id": "PAY-004",
+    "no": "OD-2026-0039",
+    "kind": "Ödeme",
+    "partyType": "supplier",
+    "partyId": "T05",
+    "date": "2026-10-30",
+    "amount": 4608,
+    "method": "Banka",
+    "invoiceId": "INV-006",
+    "journalId": null,
+    "notes": "Argon tüp"
+  },
+  {
+    "id": "PAY-005",
+    "no": "TH-2026-0043",
+    "kind": "Tahsilat",
+    "partyType": "customer",
+    "partyId": "M02",
+    "date": "2026-11-03",
+    "amount": 250000,
+    "method": "Banka",
+    "invoiceId": "INV-002",
+    "journalId": null,
+    "notes": "Ön ödeme"
+  },
+  {
+    "id": "PAY-006",
+    "no": "OD-2026-0040",
+    "kind": "Ödeme",
+    "partyType": "supplier",
+    "partyId": "T02",
+    "date": "2026-11-03",
+    "amount": 180000,
+    "method": "Banka",
+    "invoiceId": "INV-004",
+    "journalId": null,
+    "notes": "Sarf malzeme kısmi"
+  }
+]

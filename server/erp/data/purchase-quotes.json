@@ -1,0 +1,68 @@
+[
+  {
+    "id": "PQ-001",
+    "requestId": "PR-002",
+    "supplierId": "T02",
+    "unitPrice": 5.5,
+    "quantity": 150,
+    "leadDays": 3,
+    "validUntil": "2026-11-10",
+    "status": "Seçildi",
+    "score": 92
+  },
+  {
+    "id": "PQ-002",
+    "requestId": "PR-002",
+    "supplierId": "T04",
+    "unitPrice": 5.9,
+    "quantity": 150,
+    "leadDays": 7,
+    "validUntil": "2026-11-12",
+    "status": "Reddedildi",
+    "score": 74
+  },
+  {
+    "id": "PQ-003",
+    "requestId": "PR-003",
+    "supplierId": "T02",
+    "unitPrice": 225,
+    "quantity": 200,
+    "leadDays": 5,
+    "validUntil": "2026-11-15",
+    "status": "Bekliyor",
+    "score": 88
+  },
+  {
+    "id": "PQ-004",
+    "requestId": "PR-003",
+    "supplierId": "T04",
+    "unitPrice": 219,
+    "quantity": 200,
+    "leadDays": 9,
+    "validUntil": "2026-11-16",
+    "status": "Bekliyor",
+    "score": 81
+  },
+  {
+    "id": "PQ-005",
+    "requestId": "PR-004",
+    "supplierId": "T04",
+    "unitPrice": 640,
+    "quantity": 8,
+    "leadDays": 4,
+    "validUntil": "2026-11-14",
+    "status": "Bekliyor",
+    "score": 90
+  },
+  {
+    "id": "PQ-006",
+    "requestId": "PR-004",
+    "supplierId": "T02",
+    "unitPrice": 665,
+    "quantity": 8,
+    "leadDays": 2,
+    "validUntil": "2026-11-11",
+    "status": "Bekliyor",
+    "score": 86
+  }
+]

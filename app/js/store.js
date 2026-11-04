@@ -1,6 +1,8 @@
 import { SEED } from './seed.js';
 
-const KEY = 'erp_demo_state_v1';
+// Şema sürümü değiştiğinde eski localStorage verisi yeni koleksiyonlar olmadan
+// yüklenmesin; anahtar sürüme bağlıdır (bkz. docs/11 Bölüm 6).
+const KEY = `erp_demo_state_v${SEED.schemaVersion}`;
 const clone = (o) => JSON.parse(JSON.stringify(o));
 
 class Store {
@@ -61,6 +63,11 @@ export function matName(id) { const m = material(id); return m ? m.name : '—';
 export function supplier(id) { return D().suppliers.find((s) => s.id === id) || null; }
 export function supplierName(id) { const s = supplier(id); return s ? s.name : '—'; }
 export function order(id) { return D().purchaseOrders.find((o) => o.id === id) || null; }
+export function customer(id) { return (D().customers || []).find((c) => c.id === id) || null; }
+export function customerName(id) { const c = customer(id); return c ? c.name : '—'; }
+export function account(id) { return (D().accounts || []).find((a) => a.id === id) || null; }
+export function accountName(id) { const a = account(id); return a ? `${a.code} · ${a.name}` : '—'; }
+export function warehouseName(id) { const w = (D().warehouses || []).find((x) => x.id === id); return w ? w.name : '—'; }
 export function furnace(id) { return D().furnaces.find((f) => f.id === id) || null; }
 export function recipe(id) { return D().recipes.find((r) => r.id === id) || null; }
 export function lot(id) { return D().lots.find((l) => l.id === id) || null; }
@@ -141,6 +148,20 @@ export function flushOutbox() {
   d.outbox.forEach((o) => { if (o.status === 'queued') { o.status = 'sent'; o.attempt += 1; n += 1; } });
   if (n) addActivity(`${n} kuyruk kaydı yeniden gönderildi`, 'mail');
   return n;
+}
+
+/**
+ * Borç / alacak fişini tek noktadan yazar.
+ * Dengesiz fiş kabul edilmez; aynı clientId ikinci kez gelirse çift kayıt oluşmaz.
+ * "Tek kayıt, çok etki" kuralının finans tarafındaki idempotency garantisidir.
+ */
+export function appendJournal(entry) {
+  const d = D();
+  if (!entry || entry.balanced !== true) return false;
+  if (!Array.isArray(d.journalEntries)) d.journalEntries = [];
+  if (entry.clientId && d.journalEntries.some((x) => x.clientId === entry.clientId)) return false;
+  d.journalEntries.unshift(entry);
+  return true;
 }
 
 /* ---------- Üretim hesapları ---------- */

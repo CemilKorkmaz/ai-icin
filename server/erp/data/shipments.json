@@ -17,6 +17,7 @@
     "invoiceNo": "FTR-2026-1142",
     "status": "Arşivlendi",
     "archived": true,
+    "postingDone": true,
     "notes": "DK-2026-0130 parti sevki"
   },
   {
@@ -39,6 +40,7 @@
     "invoiceNo": "",
     "status": "Muhasebe Onayı Bekliyor",
     "archived": false,
+    "postingDone": false,
     "notes": "Kantar fişi TF-2026-0418"
   },
   {
@@ -59,6 +61,7 @@
     "invoiceNo": "",
     "status": "Yönetici Onayı Bekliyor",
     "archived": false,
+    "postingDone": false,
     "notes": "Talaş satışı"
   },
   {
@@ -81,6 +84,30 @@
     "invoiceNo": "",
     "status": "Yönetici Onayı Bekliyor",
     "archived": false,
+    "postingDone": false,
     "notes": ""
+  },
+  {
+    "id": "SV-0005",
+    "no": "SV-2026-0093",
+    "date": "2026-11-03",
+    "lotIds": [
+      "DK-2026-0139"
+    ],
+    "materialId": null,
+    "kind": "Mamul",
+    "customer": "Anadolu Profil A.Ş.",
+    "plate": "34 ENT 118",
+    "weighbridgeKg": 14000,
+    "requestedKg": 14000,
+    "managerApproved": true,
+    "managerBy": "U01",
+    "accountingApproved": true,
+    "accountBy": "U11",
+    "invoiceNo": "",
+    "status": "Onaylandı",
+    "archived": false,
+    "postingDone": false,
+    "notes": "Entegrasyon demosu: iki onay tamam, muhasebe fişi bekliyor"
   }
 ]

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "PC-001",
+    "period": "2026-09",
+    "status": "Kapatıldı",
+    "trialBalanceOk": true,
+    "postedEntries": 42,
+    "checkedBy": "U11",
+    "closedAt": "2026-10-02T10:00:00+03:00",
+    "notes": "Mizan dengeli, KDV beyanı hazırlandı"
+  },
+  {
+    "id": "PC-002",
+    "period": "2026-10",
+    "status": "Kapatıldı",
+    "trialBalanceOk": true,
+    "postedEntries": 51,
+    "checkedBy": "U11",
+    "closedAt": "2026-11-02T11:30:00+03:00",
+    "notes": "Alış faturaları ve stok değerlemesi kontrol edildi"
+  },
+  {
+    "id": "PC-003",
+    "period": "2026-11",
+    "status": "Açık",
+    "trialBalanceOk": true,
+    "postedEntries": 8,
+    "checkedBy": null,
+    "closedAt": null,
+    "notes": "Ay içi; kapanış için mizan ve bütçe sapması beklenir"
+  }
+]

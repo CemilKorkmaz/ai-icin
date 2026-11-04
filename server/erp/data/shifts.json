@@ -1,0 +1,62 @@
+[
+  {
+    "id": "SH-01",
+    "name": "A Vardiyası",
+    "start": "06:00",
+    "end": "14:00",
+    "plantId": "P1",
+    "date": "2026-11-03",
+    "supervisorId": "U06",
+    "operatorIds": [
+      "U06",
+      "U07"
+    ],
+    "handoverNote": "DK-2026-0138 şarjı devredildi",
+    "eventCount": 4
+  },
+  {
+    "id": "SH-02",
+    "name": "B Vardiyası",
+    "start": "14:00",
+    "end": "22:00",
+    "plantId": "P1",
+    "date": "2026-11-03",
+    "supervisorId": "U09",
+    "operatorIds": [
+      "U08",
+      "U09"
+    ],
+    "handoverNote": "Testere 1 yağ sayacı 90 kesim",
+    "eventCount": 3
+  },
+  {
+    "id": "SH-03",
+    "name": "C Vardiyası",
+    "start": "22:00",
+    "end": "06:00",
+    "plantId": "P1",
+    "date": "2026-11-03",
+    "supervisorId": "U03",
+    "operatorIds": [
+      "U03",
+      "U11"
+    ],
+    "handoverNote": "Sayım farkı onaya bekliyor",
+    "eventCount": 2
+  },
+  {
+    "id": "SH-04",
+    "name": "İdari",
+    "start": "08:00",
+    "end": "18:00",
+    "plantId": "P1",
+    "date": "2026-11-03",
+    "supervisorId": "U01",
+    "operatorIds": [
+      "U01",
+      "U02"
+    ],
+    "handoverNote": "Satın alma talep onayları",
+    "eventCount": 0
+  }
+]

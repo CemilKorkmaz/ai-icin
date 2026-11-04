@@ -1,0 +1,62 @@
+[
+  {
+    "id": "QT-001",
+    "no": "TK-2026-0071",
+    "customerId": "M01",
+    "date": "2026-10-20",
+    "alloy": "6063",
+    "diameterMm": 178,
+    "lengthMm": 6000,
+    "ton": 18,
+    "unitPrice": 118500,
+    "validUntil": "2026-11-05",
+    "status": "Onaylandı",
+    "salesOrderId": "SO-001",
+    "notes": "Kasım sevki"
+  },
+  {
+    "id": "QT-002",
+    "no": "TK-2026-0072",
+    "customerId": "M02",
+    "date": "2026-10-24",
+    "alloy": "6061",
+    "diameterMm": 152,
+    "lengthMm": 6000,
+    "ton": 14,
+    "unitPrice": 122000,
+    "validUntil": "2026-11-08",
+    "status": "Onaylandı",
+    "salesOrderId": "SO-002",
+    "notes": ""
+  },
+  {
+    "id": "QT-003",
+    "no": "TK-2026-0073",
+    "customerId": "M03",
+    "date": "2026-10-28",
+    "alloy": "6063",
+    "diameterMm": 178,
+    "lengthMm": 6000,
+    "ton": 16,
+    "unitPrice": 119200,
+    "validUntil": "2026-11-12",
+    "status": "Bekliyor",
+    "salesOrderId": null,
+    "notes": "Fiyat revizyonu istendi"
+  },
+  {
+    "id": "QT-004",
+    "no": "TK-2026-0074",
+    "customerId": "M05",
+    "date": "2026-10-15",
+    "alloy": "6063",
+    "diameterMm": 152,
+    "lengthMm": 6000,
+    "ton": 12,
+    "unitPrice": 117800,
+    "validUntil": "2026-10-30",
+    "status": "Kaybedildi",
+    "salesOrderId": null,
+    "notes": "Rakip daha düşük teklif verdi"
+  }
+]

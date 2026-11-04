@@ -6,7 +6,7 @@ Firma içi sunucuda (Windows Server, Linux veya NAS) `C:\ERP` / `/srv/erp` altı
 
 | Klasör | İçerik | Bu depoda |
 | --- | --- | --- |
-| `data/` | Koleksiyon bazlı JSON arşiv + `manifest.json` | ✅ Gerçek dosyalar var |
+| `data/` | 53 JSON dosyası: 52 koleksiyon + `manifest.json` | ✅ Gerçek dosyalar var |
 | `scripts/` | Yedekleme, giden kutu, doğrulama, olay işçisi, PLC denetçisi | ✅ Çalışan scriptler var |
 | `inbox/` | Arayüzden gelen olay kuyruğu | ✅ README + örnek kayıtlar var |
 | `archive/` | Döküm kodu bazlı olay günlüğü | ✅ README + örnek `events.jsonl` var |
@@ -22,7 +22,7 @@ Firma içi sunucuda (Windows Server, Linux veya NAS) `C:\ERP` / `/srv/erp` altı
 ## Komutlar
 
 ```bash
-# 1) Veri bütünlüğü (referanslar, kabul/fire hesapları, aşama adları)
+# 1) Veri bütünlüğü (referanslar, kabul/fire, mizan, KDV, maliyet, sayım, dönem)
 python3 scripts/validate_data.py
 
 # 2) Yedekleme: snapshot + checksum + harici disk + 30 gün saklama
@@ -73,8 +73,29 @@ Tetikleyici: Her gün 03:00 ve her saat başı (artımlı)
 - [ ] İkinci "soğuk yedek" sunucu ve UPS (altyapı)
 - [x] Olay günlüğü + kuyruk ayrımı, idempotent `clientId`, dead-letter ve checksum
 - [x] Arşiv, `inbox/processed/` ve checksum dosyalarının yedek kapsamına alınması
+- [x] Finansal koleksiyonların (fiş, fatura, cari, maliyet) `data/` yedeğine dahil edilmesi
 - [ ] İstemci IndexedDB senkronizasyon kuyruğu (Faz 4)
 
 ## Uzak erişim
 
 İnternetten doğrudan IP/port açılmaz. WireGuard/Tailscale VPN + MFA + rol bazlı yetki kullanılır; geliştirici hesabı salt-okunurdur. Bkz. `docs/04` Bölüm 7.
+
+---
+
+## Ticari ve finansal koleksiyonlar (Sürüm 1.1)
+
+`docs/11` karşılaştırmasıyla `data/` altına 18 koleksiyon eklendi. Bunlar üretim olaylarının finansal karşılığıdır; ayrı bir veritabanı veya servis gerektirmezler.
+
+| Koleksiyon | Görevi |
+| --- | --- |
+| `accounts.json` | 12 hesaplı örnek tekdüzen hesap planı |
+| `customers.json`, `quotations.json`, `sales-orders.json` | Müşteri kartı, satış teklifi, sipariş ve kredi kontrolü |
+| `purchase-requests.json`, `purchase-quotes.json` | Talep, onay ve tedarikçi teklifi |
+| `invoices.json`, `journal-entries.json`, `payments.json` | Fatura, çift taraflı muhasebe fişi, tahsilat ve ödeme |
+| `warehouses.json`, `stock-counts.json`, `reservations.json` | Depo, fiziki sayım ve sipariş rezervasyonu |
+| `cost-records.json`, `budgets.json`, `period-closures.json` | Döküm kodu maliyeti, bütçe ve dönem kapanışı |
+| `employees.json`, `shifts.json` | Personel ve vardiya; bordro harici servistedir |
+| `integration-rules.json` | Tetikleyici başına üretilen kayıtların matrisi |
+
+`validate_data.py` her fişte borç ile alacağın eşitliğini, `clientId` benzersizliğini, KDV ve fatura tutarlarını, maliyet kalemleri toplamını ve sayım farkını doğrular; mizan dengeli değilse dönem kapatılamaz. Prototipte aynı mantık `app/js/posting.js` içinde çalışır. Gerçek kurulumda bütün bu yazımlar `db/` içinde tek transaction ile yapılır.
+

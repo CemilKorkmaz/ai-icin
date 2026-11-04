@@ -1,8 +1,8 @@
 {
-  "schema_version": 2,
-  "generated_at": "2026-11-04T12:23:14.449Z",
+  "schema_version": 3,
+  "generated_at": "2026-11-04T16:04:24.340Z",
   "source": "app/js/seed.js (node tools/export_seed.mjs)",
-  "note": "Koleksiyon dosyaları doğrudan kayıt dizisidir (settings.json tek nesnedir). schemaVersion 2: saha görüşmesiyle gelen makine parkı, döküm yolları, PLC, homojenizasyon, bakım ve olay günlüğü koleksiyonları eklendi. Olayların kalıcı hâli server/erp/archive/ altındadır.",
+  "note": "Koleksiyon dosyaları doğrudan kayıt dizisidir (settings.json tek nesnedir). schemaVersion 3: genel ERP karşılaştırmasıyla müşteri/cari, satış siparişi, talep ve teklif, fatura, borç-alacak fişi, ödeme, depo, rezervasyon, sayım, maliyet, personel, vardiya, bütçe, dönem kapanışı ve entegrasyon kuralları eklendi. Olayların kalıcı hâli server/erp/archive/ altındadır.",
   "stages": [
     "Ergitme",
     "Döküm",
@@ -89,7 +89,7 @@
     {
       "file": "shipments.json",
       "collection": "shipments",
-      "records": 4
+      "records": 5
     },
     {
       "file": "notifications.json",
@@ -195,6 +195,96 @@
       "file": "activity.json",
       "collection": "activity",
       "records": 8
+    },
+    {
+      "file": "accounts.json",
+      "collection": "accounts",
+      "records": 12
+    },
+    {
+      "file": "customers.json",
+      "collection": "customers",
+      "records": 5
+    },
+    {
+      "file": "quotations.json",
+      "collection": "quotations",
+      "records": 4
+    },
+    {
+      "file": "sales-orders.json",
+      "collection": "salesOrders",
+      "records": 5
+    },
+    {
+      "file": "purchase-requests.json",
+      "collection": "purchaseRequests",
+      "records": 5
+    },
+    {
+      "file": "purchase-quotes.json",
+      "collection": "purchaseQuotes",
+      "records": 6
+    },
+    {
+      "file": "invoices.json",
+      "collection": "invoices",
+      "records": 6
+    },
+    {
+      "file": "journal-entries.json",
+      "collection": "journalEntries",
+      "records": 8
+    },
+    {
+      "file": "payments.json",
+      "collection": "payments",
+      "records": 6
+    },
+    {
+      "file": "warehouses.json",
+      "collection": "warehouses",
+      "records": 5
+    },
+    {
+      "file": "stock-counts.json",
+      "collection": "stockCounts",
+      "records": 4
+    },
+    {
+      "file": "reservations.json",
+      "collection": "reservations",
+      "records": 5
+    },
+    {
+      "file": "cost-records.json",
+      "collection": "costRecords",
+      "records": 5
+    },
+    {
+      "file": "employees.json",
+      "collection": "employees",
+      "records": 6
+    },
+    {
+      "file": "shifts.json",
+      "collection": "shifts",
+      "records": 4
+    },
+    {
+      "file": "budgets.json",
+      "collection": "budgets",
+      "records": 5
+    },
+    {
+      "file": "period-closures.json",
+      "collection": "periodClosures",
+      "records": 3
+    },
+    {
+      "file": "integration-rules.json",
+      "collection": "integrationRules",
+      "records": 10
     }
   ]
 }

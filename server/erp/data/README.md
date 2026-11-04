@@ -38,6 +38,14 @@ node tools/export_seed.mjs
 | `by-product-fates.json` | Kafa `remelt`, talaş `sale`, yolluk `recycle` ayrımı |
 | `events.json`, `inbox-queue.json` | Döküm kodu bazlı olay günlüğü ve kuyruk durum izi |
 | `vendor-updates.json` | Uzaktan güncelleme ve sürüm geçmişi |
+| `accounts.json` | 12 hesaplı örnek tekdüzen hesap planı |
+| `customers.json`, `quotations.json`, `sales-orders.json` | Müşteri/cari, satış teklifi, sipariş ve kredi limiti |
+| `purchase-requests.json`, `purchase-quotes.json` | Satın alma talebi, onay ve tedarikçi teklifi |
+| `invoices.json`, `journal-entries.json`, `payments.json` | Fatura, çift taraflı muhasebe fişi, tahsilat/ödeme |
+| `warehouses.json`, `stock-counts.json`, `reservations.json` | Depo lokasyonu, fiziki sayım, rezervasyon |
+| `cost-records.json`, `budgets.json`, `period-closures.json` | Döküm kodu maliyeti, bütçe, dönem kapanışı |
+| `employees.json`, `shifts.json` | Personel ve vardiya (bordro bu sistemde değil) |
+| `integration-rules.json` | Tetikleyici ve ürettiği kayıtların matrisi (`docs/11`) |
 
 ## Kurallar
 
@@ -45,8 +53,12 @@ node tools/export_seed.mjs
 - Ondalık ayırıcı nokta; miktar `quantity` + `unit` ikilisiyle yazılır.
 - Tüm bağlantılar **ID** iledir; malzeme adı değişse geçmiş kayıtlar bozulmaz.
 - Stok bakiyesi JSON'da anlık fotoğraftır; gerçek kurulumda `movements` kayıtlarından türetilir.
-- `schemaVersion: 2` ile saha görüşmesi koleksiyonları eklenmiştir; olayların **kalıcı** hâli `../archive/YYYY/MM/{döküm kodu}/events.jsonl` içindedir, `events.json` prototipin okuma görünümüdür.
+- `schemaVersion: 3` ile saha görüşmesi (17) ve genel ERP karşılaştırması (18) koleksiyonları eklenmiştir; toplam 53 dosya, 52 koleksiyon dizisi ve 1 `settings.json` nesnesi vardır; olayların **kalıcı** hâli `../archive/YYYY/MM/{döküm kodu}/events.jsonl` içindedir, `events.json` prototipin okuma görünümüdür.
 - Olay satırı silinmez, üzerine yazılmaz; düzeltme ters işlem içeren yeni satır olarak eklenir.
+- Muhasebe fişinde borç toplamı alacak toplamına eşittir; `clientId` benzersizdir; düzeltme ters fişle yapılır.
+- Faturada `vat = net × vatRate / 100` ve `gross = net + vat`; maliyette beş kalem toplamı `totalCost` ile aynıdır.
+- Sayım farkı `countedKg − expectedKg` değeridir; onaylanan fark düzeltme fişine bağlanır.
+- `schemaVersion` değiştiğinde yerel depolama anahtarı da değişir; eski şema yeni koleksiyonlar olmadan yüklenmez.
 - UTF-8, girintili (2 boşluk) JSON; dosya sonunda satır sonu vardır.
 
-Bütünlük kontrolü: `python3 server/erp/scripts/validate_data.py`
+Bütünlük kontrolü: `python3 server/erp/scripts/validate_data.py` (52 koleksiyon + `settings`, mizan ve finansal kurallar dahil)

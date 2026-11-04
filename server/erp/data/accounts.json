@@ -1,0 +1,98 @@
+[
+  {
+    "id": "A100",
+    "code": "100",
+    "name": "Kasa",
+    "type": "Dönen Varlık",
+    "normal": "Borç",
+    "active": true
+  },
+  {
+    "id": "A102",
+    "code": "102",
+    "name": "Bankalar",
+    "type": "Dönen Varlık",
+    "normal": "Borç",
+    "active": true
+  },
+  {
+    "id": "A120",
+    "code": "120",
+    "name": "Alıcılar",
+    "type": "Dönen Varlık",
+    "normal": "Borç",
+    "active": true
+  },
+  {
+    "id": "A150",
+    "code": "150",
+    "name": "İlk Madde ve Malzeme",
+    "type": "Dönen Varlık",
+    "normal": "Borç",
+    "active": true
+  },
+  {
+    "id": "A153",
+    "code": "153",
+    "name": "Ticari Mallar",
+    "type": "Dönen Varlık",
+    "normal": "Borç",
+    "active": true
+  },
+  {
+    "id": "A191",
+    "code": "191",
+    "name": "İndirilecek KDV",
+    "type": "Dönen Varlık",
+    "normal": "Borç",
+    "active": true
+  },
+  {
+    "id": "A320",
+    "code": "320",
+    "name": "Satıcılar",
+    "type": "Kısa Vadeli Borç",
+    "normal": "Alacak",
+    "active": true
+  },
+  {
+    "id": "A391",
+    "code": "391",
+    "name": "Hesaplanan KDV",
+    "type": "Kısa Vadeli Borç",
+    "normal": "Alacak",
+    "active": true
+  },
+  {
+    "id": "A600",
+    "code": "600",
+    "name": "Yurt İçi Satışlar",
+    "type": "Gelir",
+    "normal": "Alacak",
+    "active": true
+  },
+  {
+    "id": "A620",
+    "code": "620",
+    "name": "Satılan Ticari Mal Maliyeti",
+    "type": "Gider",
+    "normal": "Borç",
+    "active": true
+  },
+  {
+    "id": "A730",
+    "code": "730",
+    "name": "Üretim Maliyeti",
+    "type": "Maliyet",
+    "normal": "Borç",
+    "active": true
+  },
+  {
+    "id": "A740",
+    "code": "740",
+    "name": "Genel Üretim Gideri",
+    "type": "Maliyet",
+    "normal": "Borç",
+    "active": true
+  }
+]

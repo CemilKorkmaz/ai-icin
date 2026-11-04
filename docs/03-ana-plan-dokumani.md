@@ -20,7 +20,8 @@
 10. Riskler ve Çözüm Önerileri
 11. Genel Plandaki Sektörel Sapmaların Düzeltilmesi
 12. Saha Görüşmesiyle Gelen Kapsam Genişlemesi
-13. Sonraki Adımlar
+13. Genel ERP Karşılaştırmasıyla Gelen Ticari ve Finansal Katman
+14. Sonraki Adımlar
 
 ---
 
@@ -90,8 +91,13 @@ Bu akışın her adımı stok hareketi üretir. Yan ürünler (cüruf, talaş, k
 | 5 | İstatistik & Raporlama | Üretim, tüketim, fire, giren-çıkan, çıktı alma |
 | 6 | Bildirim & Entegrasyon | Sistem içi bildirim, SMS, e-posta, PLC telemetri, giden kutu |
 | 7 | Sistem Yönetimi | Kullanıcılar, roller, temel tanımlar, yedekleme, denetim logu, bağlantı ayarları |
+| 8 | Satış & Müşteri | Müşteri kartı, satış teklifi, sipariş, kredi limiti, rezervasyon, cari bakiye |
+| 9 | Muhasebe & Finans | Hesap planı, alış/satış faturası, çift taraflı fiş, mizan, tahsilat/ödeme, dönem kapanışı |
+| 10 | Maliyet & Bütçe | Döküm kodu bazında beş kalem maliyet, birim maliyet, brüt kâr, dönemsel bütçe |
+| 11 | Depo & Personel | Depo lokasyonları, fiziki sayım, personel kartı, vardiya, operatör izi |
+| 12 | Entegrasyon | Tetikleyici başına üretilen kayıtlar, tek kayıt çok etki, idempotent muhasebeleştirme |
 
-Modüller bağımsız ekranlar hâlinde tasarlanır ancak tek veri modelini paylaşır: malzeme kartı, stok hareketi, döküm kodu, onay akışı ve bildirim kuyruğu.
+Modüller bağımsız ekranlar hâlinde tasarlanır ancak tek veri modelini paylaşır: malzeme kartı, stok hareketi, döküm kodu, onay akışı, cari hesap, muhasebe fişi ve bildirim kuyruğu. 8 ile 12 arasındaki modüller `docs/11` içindeki genel ERP karşılaştırmasıyla eklenmiştir; üretim ve satın alma akışını değiştirmez, ortak veri modelini ticari ve finansal tarafa genişletir.
 
 ---
 
@@ -124,6 +130,22 @@ Kritik stok, zamanlama, süre aşımı, fire oranı ve onay bekleyen işlemler i
 ### 4.7 Sistem Yönetimi
 
 Kullanıcı ve rol yönetimi, görev ayrılığı, temel tanımlar (birim, kategori, ocak, eşik, vardiya), denetim logu, otomatik yedekleme, JSON içe/dışa aktarma, bağlantı durumu ve sunucu adresi ayarları.
+
+### 4.8 Satış & Müşteri
+
+Müşteri kartında vergi numarası, ödeme vadesi, kredi limiti, güncel bakiye ve risk tutulur. Satış teklifinden sipariş doğar; sipariş onayında kredi kontrolü yapılır ve uygun döküm kodu rezerve edilir. Sevkiyat iki onaydan geçtikten sonra fatura, muhasebe fişi, cari bakiye, maliyet yansıması ve olay satırı aynı işlemde yazılır. Ayrıntılar `docs/11` Bölüm 3 ve 4'tedir.
+
+### 4.9 Muhasebe & Finans
+
+On iki hesaplı örnek hesap planı, alış ve satış faturaları, parametrik KDV, çift taraflı borç/alacak fişleri, mizan, tahsilat/ödeme kayıtları ve dönem kapanışı. Her fişte borç alacağa eşittir; dengesiz fiş yazılmaz, aynı `clientId` ile çift kayıt oluşmaz, düzeltme ters fişle yapılır.
+
+### 4.10 Maliyet & Bütçe
+
+Maliyet nesnesi döküm kodudur. Hammadde, enerji, sarf, işçilik ve fire ayrı kalemlerde toplanır; net tona bölünerek birim maliyet üretilir ve satış geliriyle karşılaştırılıp brüt kâr hesaplanır. Dönemsel bütçe kalemlerinde planlanan ve gerçekleşen birlikte izlenir.
+
+### 4.11 Depo & Personel
+
+Beş depo lokasyonu, sipariş rezervasyonları ve fiziki sayım kayıtları tutulur. Sayım farkı onaylandığında stok düzeltme hareketi, düzeltme fişi ve denetim izi birlikte yazılır. Personel kartı kullanıcı hesabına ve vardiyaya bağlanır; olay günlüğündeki aktör bu yapıya dayanır. Maaş ve bordro hesabı harici serviste kalır.
 
 ---
 
@@ -190,16 +212,16 @@ Her faz sonunda dokümanlar güncellenir; kapsam kaymasını önlemek için yeni
 
 Bu deponun gerçek düzeni planlanan yapıyı yansıtır:
 
-Depo kökünde `README.md` genel bakışı ve çalıştırma adımlarını verir. `docs/` klasörü plan, rapor, mimari kararları ve tek Word çıktısını taşır. `app/` çalışan PWA prototipidir: giriş dosyaları `index.html`, `manifest.webmanifest` ve `sw.js`; tasarım sistemi `css/style.css`; JavaScript modülleri `js/` altında `seed`, `store`, `calc`, `icons`, `ui`, `views` ve `app` olarak ayrılır; simgeler `assets/` içindedir.
+Depo kökünde `README.md` genel bakışı ve çalıştırma adımlarını verir. `docs/` klasörü plan, rapor, mimari kararları ve tek Word çıktısını taşır. `app/` çalışan PWA prototipidir: giriş dosyaları `index.html`, `manifest.webmanifest` ve `sw.js`; tasarım sistemi `css/style.css`; JavaScript modülleri `js/` altında `seed`, `store`, `calc`, `posting`, `icons`, `ui`, `views` ve `app` olarak ayrılır; simgeler `assets/` içindedir. `posting.js` muhasebeleştirme, maliyet ve entegrasyon hesaplarını taşır.
 
-`server/erp/` firma sunucusundaki `ERP` klasörünün modelidir. `data/` altında otuz beş JSON koleksiyonu ve `manifest.json` bulunur. `scripts/` altında `backup.py`, `outbox_worker.py`, `validate_data.py`, `event_worker.py` ve `plc_poller.py` çalışır. `inbox/` arayüzden gelen olay kuyruğunu, `archive/` döküm kodu bazlı kalıcı olay günlüğünü tutar. `backups/` ve `logs/` çalışma zamanında oluşur. `tools/` altında `build_docx.py`, `export_seed.mjs`, `make_icons.py` ve `smoke_test.mjs` bulunur.
+`server/erp/` firma sunucusundaki `ERP` klasörünün modelidir. `data/` altında elli üç JSON dosyası ve `manifest.json` bulunur; bunların elli ikisi koleksiyon dizisidir, biri `settings.json` nesnesidir. `scripts/` altında `backup.py`, `outbox_worker.py`, `validate_data.py`, `event_worker.py` ve `plc_poller.py` çalışır. `inbox/` arayüzden gelen olay kuyruğunu, `archive/` döküm kodu bazlı kalıcı olay günlüğünü tutar. `backups/` ve `logs/` çalışma zamanında oluşur. `tools/` altında `build_docx.py`, `export_seed.mjs`, `make_icons.py` ve `smoke_test.mjs` bulunur.
 
 | Klasör | İçerik |
 | --- | --- |
-| `docs/` | `00`–`10` Markdown dokümanlar + `Dokumhane-ERP-Plan.docx` |
-| `app/` | PWA: kabuk, 24 ekran, hesap motoru, tasarım sistemi, ikonlar |
-| `server/erp/data/` | 35 JSON koleksiyonu, `manifest.json`, `README.md` |
-| `server/erp/scripts/` | Yedekleme, giden kutu, doğrulama, olay işçisi, PLC denetçisi |
+| `docs/` | `00`–`11` Markdown dokümanlar + `Dokumhane-ERP-Plan.docx` |
+| `app/` | PWA: kabuk, 32 ekran, `calc.js` + `posting.js`, tasarım sistemi, ikonlar |
+| `server/erp/data/` | 53 JSON dosyası (52 koleksiyon + `manifest.json`), `README.md` |
+| `server/erp/scripts/` | Yedekleme, giden kutu, 52 koleksiyonu doğrulama, olay işçisi, PLC denetçisi |
 | `server/erp/inbox/` | Olay kuyruğu ve örnek kayıtlar |
 | `server/erp/archive/` | Append-only olay günlüğü ve örnek `events.jsonl` |
 | `tools/` | Word üretici, seed aktarımı, ikon üretici, duman testi |
@@ -280,7 +302,26 @@ Güncel aşama sırası ve kurulum düzeni `docs/10` içinde verilmiştir; `docs
 
 ---
 
-## 13. Sonraki Adımlar
+## 13. Genel ERP Karşılaştırmasıyla Gelen Ticari ve Finansal Katman
+
+İlk iki sohbetten sonra gelen genel ERP anlatımı (`docs/11`), sistemin departmanlar arası otomatik veri akışı ilkesini üretim tarafından finans tarafına taşımıştır. Kaynak metin bir elektrik taahhüt firmasının otel projesini örnek alır; bu projede maliyet nesnesi bir inşaat projesi değil, döküm kodudur. AutoCAD, BIM, bordro ve kampanya yönetimi kapsam dışında bırakılmıştır.
+
+| Eklenen kavram | Plana etkisi | Ayrıntı |
+| --- | --- | --- |
+| Müşteri kartı ve cari hesap | Yeni modül | Kredi limiti, bakiye, vade, risk, tahsilat |
+| Satış teklifi ve sipariş | Yeni modül | Rezervasyon, kısmi sevk, kredi onayı |
+| Talep, onay ve tedarikçi teklifi | Satın Alma genişletildi | Onay limiti, teklif karşılaştırması, emre dönüşüm |
+| Hesap planı ve çift taraflı fiş | Yeni modül | Borç = alacak, mizan, ters fişle düzeltme |
+| Fatura, ödeme, dönem kapanışı | Yeni modül | Parametrik KDV, vade, kapanış kontrolü |
+| Döküm kodu maliyeti | Üretim güçlendirildi | Beş kalem, birim maliyet, brüt kâr |
+| Depo, sayım, vardiya | Yeni modül | Lokasyon, denetim izi, operatör bağlantısı |
+| Entegrasyon matrisi | Çapraz katman | Tek kayıttan sekiz koleksiyona yazım |
+
+Bu katman Faz 1 ile Faz 2 sırasını bozmaz. Satın Alma ve Stok birinci faz, Üretim ikinci faz olarak korunur; ticari ve finansal kayıtlar bu iki fazın ortak veri modeli üzerine eklenir. Entegrasyon kuralı, onaylanmış bir sevkiyatın stok, fatura, fiş, cari, maliyet, olay, bildirim ve rapor kuyruğunu tek işlemde üretmesidir. Ayrıntılı boşluk analizi ve kapsam dışı kararlar `docs/11` içindedir.
+
+---
+
+## 14. Sonraki Adımlar
 
 1. Bu dokümanların ve `docs/Dokumhane-ERP-Plan.docx` çıktısının onaylanması.
 2. Prototip ekranlarının sahada operatörlerle gözden geçirilmesi; renk/akış geri bildirimleri.
