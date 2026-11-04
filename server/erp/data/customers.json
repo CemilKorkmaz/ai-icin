@@ -1,0 +1,72 @@
+[
+  {
+    "id": "M01",
+    "code": "M01",
+    "name": "Anadolu Profil A.Ş.",
+    "tax": "1122334455",
+    "city": "İstanbul",
+    "contact": "Kemal Yıldız",
+    "phone": "0212 444 11 01",
+    "paymentTerm": "30 gün",
+    "creditLimit": 2500000,
+    "balance": 480000,
+    "risk": "Düşük",
+    "active": true
+  },
+  {
+    "id": "M02",
+    "code": "M02",
+    "name": "Marmara Alüminyum Ltd.",
+    "tax": "2233445566",
+    "city": "Kocaeli",
+    "contact": "Sibel Tunç",
+    "phone": "0262 444 22 02",
+    "paymentTerm": "45 gün",
+    "creditLimit": 1800000,
+    "balance": 620000,
+    "risk": "Orta",
+    "active": true
+  },
+  {
+    "id": "M03",
+    "code": "M03",
+    "name": "Ege Ekstrüzyon",
+    "tax": "3344556677",
+    "city": "İzmir",
+    "contact": "Onur Aksoy",
+    "phone": "0232 444 33 03",
+    "paymentTerm": "30 gün",
+    "creditLimit": 1200000,
+    "balance": 210000,
+    "risk": "Düşük",
+    "active": true
+  },
+  {
+    "id": "M04",
+    "code": "M04",
+    "name": "DEF Hurda",
+    "tax": "3234567803",
+    "city": "Bursa",
+    "contact": "Murat Kaya",
+    "phone": "0224 444 03 03",
+    "paymentTerm": "Peşin",
+    "creditLimit": 600000,
+    "balance": 95000,
+    "risk": "Düşük",
+    "active": true
+  },
+  {
+    "id": "M05",
+    "code": "M05",
+    "name": "Bursa Profil Sanayi",
+    "tax": "4455667788",
+    "city": "Bursa",
+    "contact": "Nazlı Erdem",
+    "phone": "0224 444 55 05",
+    "paymentTerm": "60 gün",
+    "creditLimit": 900000,
+    "balance": 0,
+    "risk": "Yeni",
+    "active": true
+  }
+]

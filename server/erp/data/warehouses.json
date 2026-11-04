@@ -1,0 +1,52 @@
+[
+  {
+    "id": "W1",
+    "code": "W1",
+    "name": "Hammadde Deposu",
+    "plantId": "P1",
+    "kind": "Hammadde",
+    "capacityTon": 200,
+    "keeperId": "U03",
+    "active": true
+  },
+  {
+    "id": "W2",
+    "code": "W2",
+    "name": "Sarf Deposu",
+    "plantId": "P1",
+    "kind": "Sarf Malzeme",
+    "capacityTon": 40,
+    "keeperId": "U03",
+    "active": true
+  },
+  {
+    "id": "W3",
+    "code": "W3",
+    "name": "Yan Ürün Deposu",
+    "plantId": "P1",
+    "kind": "Yan Ürün",
+    "capacityTon": 60,
+    "keeperId": "U04",
+    "active": true
+  },
+  {
+    "id": "W4",
+    "code": "W4",
+    "name": "Mamul Biyet Deposu",
+    "plantId": "P1",
+    "kind": "Mamul",
+    "capacityTon": 500,
+    "keeperId": "U10",
+    "active": true
+  },
+  {
+    "id": "W5",
+    "code": "W5",
+    "name": "Sevkiyat Sahası",
+    "plantId": "P1",
+    "kind": "Geçici",
+    "capacityTon": 80,
+    "keeperId": "U10",
+    "active": true
+  }
+]

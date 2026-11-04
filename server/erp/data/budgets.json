@@ -1,0 +1,52 @@
+[
+  {
+    "id": "BG-001",
+    "period": "2026-11",
+    "category": "Hammadde",
+    "planned": 3200000,
+    "actual": 2410000,
+    "currency": "₺",
+    "owner": "Satın Alma",
+    "status": "Açık"
+  },
+  {
+    "id": "BG-002",
+    "period": "2026-11",
+    "category": "Enerji",
+    "planned": 480000,
+    "actual": 412000,
+    "currency": "₺",
+    "owner": "Üretim",
+    "status": "Açık"
+  },
+  {
+    "id": "BG-003",
+    "period": "2026-11",
+    "category": "Sarf Malzeme",
+    "planned": 120000,
+    "actual": 96500,
+    "currency": "₺",
+    "owner": "Üretim",
+    "status": "Açık"
+  },
+  {
+    "id": "BG-004",
+    "period": "2026-11",
+    "category": "Bakım",
+    "planned": 90000,
+    "actual": 74000,
+    "currency": "₺",
+    "owner": "Bakım",
+    "status": "Açık"
+  },
+  {
+    "id": "BG-005",
+    "period": "2026-11",
+    "category": "İşçilik",
+    "planned": 380000,
+    "actual": 340000,
+    "currency": "₺",
+    "owner": "İnsan Kaynakları",
+    "status": "Açık"
+  }
+]

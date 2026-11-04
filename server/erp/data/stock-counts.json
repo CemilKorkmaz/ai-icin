@@ -1,0 +1,54 @@
+[
+  {
+    "id": "SC-001",
+    "no": "SY-2026-0011",
+    "warehouseId": "W4",
+    "materialId": "M01",
+    "expectedKg": 54000,
+    "countedKg": 54125,
+    "differenceKg": 125,
+    "countedBy": "U03",
+    "at": "2026-11-03T08:30:00+03:00",
+    "status": "Onaylandı",
+    "journalId": "JE-008"
+  },
+  {
+    "id": "SC-002",
+    "no": "SY-2026-0012",
+    "warehouseId": "W1",
+    "materialId": "H01",
+    "expectedKg": 18500,
+    "countedKg": 18480,
+    "differenceKg": -20,
+    "countedBy": "U03",
+    "at": "2026-11-03T09:10:00+03:00",
+    "status": "Fark Bekliyor",
+    "journalId": null
+  },
+  {
+    "id": "SC-003",
+    "no": "SY-2026-0013",
+    "warehouseId": "W2",
+    "materialId": "S02",
+    "expectedKg": 28,
+    "countedKg": 28,
+    "differenceKg": 0,
+    "countedBy": "U04",
+    "at": "2026-11-03T09:40:00+03:00",
+    "status": "Onaylandı",
+    "journalId": null
+  },
+  {
+    "id": "SC-004",
+    "no": "SY-2026-0014",
+    "warehouseId": "W3",
+    "materialId": "B02",
+    "expectedKg": 1500,
+    "countedKg": 1505,
+    "differenceKg": 5,
+    "countedBy": "U04",
+    "at": "2026-11-03T10:05:00+03:00",
+    "status": "Taslak",
+    "journalId": null
+  }
+]

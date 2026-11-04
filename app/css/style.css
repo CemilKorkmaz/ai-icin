@@ -612,3 +612,19 @@ tr.clickable { cursor: pointer; }
 @media (max-width: 900px) {
   .calc-row.big { grid-column: auto; }
 }
+
+/* ------------------------------------------------------------------
+   v1.1 — Ticari & finansal ekranlar (docs/11)
+   Mizan, cari, maliyet ve entegrasyon matrisi için küçük yardımcılar.
+   ------------------------------------------------------------------ */
+td.num, .money-num { font-variant-numeric: tabular-nums; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.chip-row .order-chip { font-size: 11px; padding: 4px 10px; color: var(--text); }
+.ledger-ok { color: var(--ok); font-weight: 650; }
+.ledger-bad { color: var(--danger); font-weight: 650; }
+.data tfoot td { background: var(--surface-2); border-top: 1px solid var(--border-strong); }
+.data tbody td .order-chip { margin-right: 3px; }
+@media (max-width: 720px) {
+  .data tfoot td { font-size: 11px; }
+  .chip-row { gap: 4px; }
+}

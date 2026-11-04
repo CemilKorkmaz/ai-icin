@@ -277,4 +277,35 @@ Konuşmada tarif edilen "tuşa basınca JSON'a kayıt düşer, merkezi yazılım
 | JSON | Arşiv / aktarım / yedek | Arşiv + **olay günlüğü** + işlem kuyruğu |
 | Kurulum | On-premise sunucu | Mini PC ile başlangıç, aşamalı büyüme |
 
+## 13. Tek Kayıt, Çok Etki: Ticari ve Finansal Bütünlük
+
+Genel ERP karşılaştırması (`docs/11`), ilk iki sohbette cevaplanan altyapı sorularına yeni bir boyut eklemiştir: departmanlar aynı veritabanını paylaşmakla kalmaz, aynı işlemden beslenir. Bu bölüm o ilkenin finans tarafındaki teknik kararlarını kayda geçirir.
+
+### 13.1 Ortak veri kaynağı ve işlem sınırı
+
+Prototipte `app/js/seed.js` tek veri kaynağı, `localStorage` ise geçici istemci deposudur. Yerel anahtar şema sürümüne bağlanmıştır; sürüm değiştiğinde yeni koleksiyonları içermeyen eski veri yüklenmez. Gerçek kurulumda doğruluk kaynağı işlemsel veritabanıdır. Bir sevkiyatın stok hareketi, faturası, muhasebe fişi, cari bakiyesi ve olay satırı **tek veritabanı işlemi** içinde yazılır; yarıda kalan yazım kabul edilmez. JSON arşiv ve `manifest.json` bu işlemin dışa aktarım görünümü olarak kalır.
+
+### 13.2 Çift taraflı kayıt ve mizan
+
+On iki hesaplı örnek hesap planı `accounts` koleksiyonundadır. `app/js/posting.js` içindeki `buildEntry` borç ve alacak toplamını hesaplar, dengesiz fişi `balanced: false` ile işaretler. `appendJournal` dengesiz fişi ve aynı `clientId` ile gelen ikinci fişi reddeder. Bu, `docs/09` içindeki olay idempotency kuralının muhasebe karşılığıdır. Fiş silinmez veya düzeltilmez; düzeltme ters işlem fişi olarak eklenir. Mizan, tüm fişlerin hesap bazında borç ve alacak toplamını üretir; dönem kapanışı mizan dengeli değilse engellenir.
+
+### 13.3 Belge zinciri ve referans bütünlüğü
+
+Satış teklifi, sipariş, rezervasyon, sevkiyat, fatura, fiş ve tahsilat birbirine ID ile bağlanır. Alış tarafında talep, onay, tedarikçi teklifi, satın alma emri, mal kabul, alış faturası ve ödeme aynı disiplinle izlenir. Müşteri adı, tedarikçi adı veya malzeme adı hiçbir kayıtta birincil bağlantı değildir. `validate_data.py` bu referansları, KDV hesabını, fatura tutarlarını, maliyet kalemleri toplamını, sayım farkını ve vardiya saatlerini birlikte doğrular.
+
+### 13.4 Kapsam sınırları
+
+Maaş, bordro, izin ve performans verisi bu sistemde tutulmaz; yalnızca operatör, vardiya ve olay aktörü bağlantısı vardır. KDV beyannamesi, e-fatura, banka mutabakatı, çoklu para birimi ve grup konsolidasyonu dış entegrasyonlardır. CAD, BIM ve teknik çizim yazılımı entegrasyonu hedeflenmez. Bu sınırlar operatör ekranını sade tutar ve geliştirici ekibin merkezi yönetim ekranıyla yetki ayrımını korur.
+
+### 13.5 Kapalı çevrim ile ilişki
+
+Finansal kayıtlar üretim gibi çevrimdışıyken de oluşur. Dışa gönderilmesi gereken rapor maili, SMS ve uzak yedek `outbox` kuyruğuna yazılır; internet geldiğinde `outbox_worker.py` işler. Muhasebe fişi çevrimdışıyken de dengeli yazılır, daha sonra senkronize edilir. Böylece ilk sohbette istenen "kapalı çevrimde üretim devam etsin, internete açıldığında mesajlar gitsin" kuralı ticari taraf için de geçerli olur.
+
+| Karar | Önceki durum | Yeni durum |
+| --- | --- | --- |
+| Finansal kayıt | Fatura numarası sevkiyatta serbest metindi | Müşteri kartı, fatura, fiş, cari, ödeme, mizan |
+| Departman etkileşimi | Üretim olayları ve stok hareketi | Tek onaydan sekiz koleksiyona atomik yazım |
+| Doğrulama | Referans ve kütle dengesi | Ayrıca borç = alacak, KDV, maliyet, sayım, dönem |
+| Şema | `schemaVersion: 2` | `schemaVersion: 3`, sürüme bağlı yerel anahtar |
+
 Bu doküman, `docs/Dokumhane-ERP-Plan.docx` içinde de yer alır ve "yapay zekâya verilip genel yazılım altyapı şemasının oluşturulması" için gereken teknik girdiyi sağlar.

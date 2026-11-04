@@ -9,6 +9,10 @@ import {
   machinesView, pathsView, cuttingView, maintenanceView,
   batchesView, eventsView, plcView, vendorView
 } from './engineering.js';
+import {
+  salesOrdersView, customersView, purchaseRequestsView, financeView,
+  costingView, warehouseView, hrView, integrationView
+} from './enterprise.js';
 
 export const VIEWS = {
   dashboard,
@@ -16,6 +20,7 @@ export const VIEWS = {
   orders: ordersView,
   prices: pricesView,
   suppliers: suppliersView,
+  requests: purchaseRequestsView,
   stock: stockView,
   receipts: receiptsView,
   crusher: crusherView,
@@ -24,14 +29,21 @@ export const VIEWS = {
   recipes: recipesView,
   batches: batchesView,
   events: eventsView,
-  shipments: shipmentsView,
-  archive: archiveView,
-  reports: reportsView,
   machines: machinesView,
   paths: pathsView,
   cutting: cuttingView,
   maintenance: maintenanceView,
   plc: plcView,
+  sales: salesOrdersView,
+  customers: customersView,
+  finance: financeView,
+  costing: costingView,
+  warehouse: warehouseView,
+  hr: hrView,
+  shipments: shipmentsView,
+  archive: archiveView,
+  reports: reportsView,
+  integration: integrationView,
   vendor: vendorView,
   notifications: notificationsView,
   settings: settingsView
@@ -43,7 +55,8 @@ export const NAV = [
     { id: 'materials', label: 'Malzeme Tanımları', icon: 'tag' },
     { id: 'orders', label: 'Satın Alma Emirleri', icon: 'cart' },
     { id: 'prices', label: 'Fiyat Takibi', icon: 'trend' },
-    { id: 'suppliers', label: 'Tedarikçiler', icon: 'users' }
+    { id: 'suppliers', label: 'Tedarikçiler', icon: 'users' },
+    { id: 'requests', label: 'Talep & Teklif Akışı', icon: 'clipboard' }
   ] },
   { group: 'HAMMADDE & STOK', items: [
     { id: 'stock', label: 'Stok Durumu', icon: 'warehouse' },
@@ -64,11 +77,22 @@ export const NAV = [
     { id: 'maintenance', label: 'Yağ & Bakım', icon: 'gauge' },
     { id: 'plc', label: 'PLC Durum', icon: 'activity' }
   ] },
+  { group: 'TİCARİ & FİNANS', items: [
+    { id: 'sales', label: 'Satış Siparişleri', icon: 'cart' },
+    { id: 'customers', label: 'Müşteriler & Cari', icon: 'wallet' },
+    { id: 'finance', label: 'Muhasebe & Fişler', icon: 'receipt' },
+    { id: 'costing', label: 'Maliyet & Kârlılık', icon: 'scale' }
+  ] },
+  { group: 'DEPOLAMA & PERSONEL', items: [
+    { id: 'warehouse', label: 'Depo, Rezervasyon & Sayım', icon: 'warehouse' },
+    { id: 'hr', label: 'Personel & Vardiya', icon: 'briefcase' }
+  ] },
   { group: 'SEVKİYAT', items: [
     { id: 'shipments', label: 'Sevkiyat & Onaylar', icon: 'truck' },
     { id: 'archive', label: 'Arşiv', icon: 'archive' }
   ] },
   { group: 'RAPORLAMA', items: [{ id: 'reports', label: 'Raporlar & İstatistik', icon: 'chart' }] },
+  { group: 'ENTEGRASYON', items: [{ id: 'integration', label: 'Entegrasyon Matrisi', icon: 'link' }] },
   { group: 'YÖNETİM', items: [{ id: 'vendor', label: 'Merkezi Yönetim', icon: 'shield' }] },
   { group: 'SİSTEM', items: [
     { id: 'notifications', label: 'Bildirimler & Kuyruk', icon: 'bell' },

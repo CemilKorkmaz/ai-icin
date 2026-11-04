@@ -1,6 +1,6 @@
 # 05 — Veri Modeli, API Sözleşmesi ve Ekran Envanteri
 
-**Amaç:** `docs/01`–`docs/04` arasında tarif edilen işlevlerin somut veri karşılıklarını, hesap kurallarını ve prototipteki ekranların envanterini vermek. Bu doküman, Faz 1 geliştirmesinde API sözleşmesi olarak kullanılır.
+**Amaç:** `docs/01`–`docs/11` arasında tarif edilen işlevlerin somut veri karşılıklarını, hesap kurallarını ve prototipteki ekranların envanterini vermek. Sürüm 1.1 itibarıyla **53 varlık** ve **32 ekran** kapsanır. Bu doküman, Faz 1 geliştirmesinde API sözleşmesi olarak kullanılır.
 
 **Ortak kurallar:** Tüm tarih/saat değerleri ISO 8601 (`2026-11-02T09:30:00+03:00`), tüm ondalıklar nokta ile, tüm miktarlar `quantity` + `unit` ikilisiyle yazılır. Referanslar **ID** iledir; malzeme adı hiçbir kayıtta birincil bağlantı olarak kullanılmaz. `server/erp/data/` altındaki **koleksiyon dosyaları doğrudan kayıt dizisidir** (`settings.json` tek nesnedir); sürüm, üretim zamanı ve dosya listesi `manifest.json` içinde tutulur. Uygulamanın **Ayarlar → Veri Yönetimi** ekranından alınan tam yedek ise tüm koleksiyonları tek bir JSON nesnesinde birleştirir ve `schemaVersion` alanını taşır.
 
@@ -45,6 +45,24 @@
 | 33 | `events.json` | Döküm kodu bazlı olay günlüğü (her aşamadan bir satır) | lot_id, machine_id |
 | 34 | `inbox-queue.json` | Arayüzden gelen kuyruk kayıtlarının durum izi | client_id, lot_id |
 | 35 | `vendor-updates.json` | Uzaktan güncelleme ve sürüm geçmişi | plant_id |
+| 36 | `accounts.json` | Örnek tekdüzen hesap planı (12 hesap) | — |
+| 37 | `customers.json` | Müşteri kartı, kredi limiti, cari bakiye, risk | — |
+| 38 | `quotations.json` | Satış teklifleri, fiyat ve geçerlilik tarihi | customer_id, sales_order_id |
+| 39 | `sales-orders.json` | Sipariş, ton, birim fiyat, rezerve ve sevk edilen ton | customer_id, quotation_id |
+| 40 | `purchase-requests.json` | Satın alma talebi, gerekçe, onay izi | material_id, order_id |
+| 41 | `purchase-quotes.json` | Tedarikçi teklifi, fiyat, teslim süresi, puan | request_id, supplier_id |
+| 42 | `invoices.json` | Alış / satış faturası, net, KDV, brüt, vade, durum | party_id, source_id |
+| 43 | `journal-entries.json` | Çift taraflı muhasebe fişi ve satırları | account_id, client_id |
+| 44 | `payments.json` | Tahsilat ve ödeme, banka/kasa, fatura ve fiş bağlantısı | party_id, invoice_id, journal_id |
+| 45 | `warehouses.json` | Depo lokasyonları, kapasite ve sorumlu | plant_id, keeper_id |
+| 46 | `stock-counts.json` | Fiziki sayım, beklenen/sayılan, fark, düzeltme fişi | warehouse_id, material_id, journal_id |
+| 47 | `reservations.json` | Satış siparişi ile döküm kodu ve depo bağlantısı | sales_order_id, lot_id, warehouse_id |
+| 48 | `cost-records.json` | Döküm kodu bazında beş kalem maliyet ve birim maliyet | lot_id, period |
+| 49 | `employees.json` | Personel kartı, kullanıcı ve vardiya eşleşmesi | user_id, shift_id |
+| 50 | `shifts.json` | Vardiya, sorumlu, operatörler, devir notu | supervisor_id, operator_ids |
+| 51 | `budgets.json` | Dönemsel planlanan ve gerçekleşen bütçe | period, category |
+| 52 | `period-closures.json` | Mizan doğrulaması ve dönem kapanış durumu | period |
+| 53 | `integration-rules.json` | Tetikleyici ve ürettiği kayıtların matrisi | — |
 
 ---
 
@@ -358,6 +376,14 @@ Tüm yazma uçları idempotent `client_id` kabul eder; çevrimdışı istemcinin
 | 22 | Olay & Arşiv | Üretim | events, inboxQueue | 21/18/17/14 ton zinciri satır satır, bakiye ve akıbet |
 | 23 | PLC Durum | Makine & Kurulum | signalStates, plcTags | Yalnızca dört sinyal, demo değerleriyle; tag adresleri görünmez |
 | 24 | Merkezi Yönetim | Yönetim | plants, plcConnections, plcTags, vendorUpdates | Firma/IP/protokol eşleştirme, güncelleme geçmişi, geliştirici ekranı |
+| 25 | Talep & Teklif Akışı | Satın Alma | purchaseRequests, purchaseQuotes | Talep onayı, teklif karşılaştırması, seçilen tekliften emir ve fiyat geçmişi |
+| 26 | Satış Siparişleri | Ticari & Finans | salesOrders, quotations, customers | Kredi kontrolü, otomatik rezervasyon, kısmi sevk |
+| 27 | Müşteriler & Cari | Ticari & Finans | customers, payments | Limit kullanımı, risk, tahsilat ve beraberinde muhasebe fişi |
+| 28 | Muhasebe & Fişler | Ticari & Finans | accounts, journalEntries, invoices, payments | Mizan, fiş satırları, alış faturası ve fiş yazımı, dönem kapanışı |
+| 29 | Maliyet & Kârlılık | Ticari & Finans | costRecords, budgets, salesOrders | Beş kalem maliyet, birim maliyet, brüt kâr, bütçe sapması, çapraz KPI |
+| 30 | Depo, Rezervasyon & Sayım | Depolama & Personel | warehouses, reservations, stockCounts | Lokasyonlar, rezervasyon serbest bırakma, sayım farkı ve düzeltme fişi |
+| 31 | Personel & Vardiya | Depolama & Personel | employees, shifts, events | Vardiya ataması, gece vardiyası, olay-operatör izi; bordro hariç |
+| 32 | Entegrasyon Matrisi | Entegrasyon | integrationRules, tüm koleksiyonlar | Tek düğmeyle onaylı sevkiyattan sekiz koleksiyona atomik yazım |
 
 ---
 
@@ -397,4 +423,42 @@ Tüm yazma uçları idempotent `client_id` kabul eder; çevrimdışı istemcinin
 
 `inbox-queue.json` kayıtları `clientId`, `type`, `lotId`, `createdAt`, `source`, `payload`, `schemaVersion`, `status`, `retryCount`, `lastError` alanlarını taşır. Aynı `clientId` ikinci kez gelirse olay çift yazılmaz. Kuyruk ile arşivin ayrı klasörlerde tutulması ve silme yerine doğrulama kuralı `docs/09` içinde ayrıntılıdır.
 
-**Şema sürümü:** saha görüşmesiyle gelen 17 yeni koleksiyon ve olay alanları `schemaVersion: 2` ile işaretlenir. `manifest.json` içindeki `schema_version` değeri `node tools/export_seed.mjs` ile otomatik güncellenir.
+**Şema sürümü:** saha görüşmesiyle gelen 17 yeni koleksiyon ve olay alanları `schemaVersion: 2`, genel ERP karşılaştırmasıyla gelen 18 ticari/finansal koleksiyon `schemaVersion: 3` ile işaretlenir. `manifest.json` içindeki `schema_version` değeri `node tools/export_seed.mjs` ile otomatik güncellenir. Yerel depolama anahtarı `erp_demo_state_v3` biçiminde sürüme bağlıdır; eski şemanın yeni koleksiyonlar olmadan yüklenmesi engellenir.
+
+---
+
+## 8. Ticari ve Finansal Şemalar (`schemaVersion: 3`)
+
+`docs/11` ile eklenen kayıtların zorunlu alanları aşağıdadır. Tüm tutarlar para birimiyle birlikte, tüm tarihler ISO 8601 ile yazılır.
+
+| Kayıt | Alanlar | Kural |
+| --- | --- | --- |
+| Hesap (`accounts`) | `id`, `code`, `name`, `type`, `normal`, `active` | `code` benzersiz; fiş satırları bu ID'ye bağlanır |
+| Müşteri (`customers`) | `id`, `code`, `name`, `tax`, `paymentTerm`, `creditLimit`, `balance`, `risk` | `balance` limiti aşarsa sipariş kredi onayına düşer |
+| Fatura (`invoices`) | `id`, `no`, `direction`, `partyType`, `partyId`, `date`, `net`, `vatRate`, `vat`, `gross`, `status`, `period` | `vat = net × vatRate / 100`, `gross = net + vat` |
+| Muhasebe fişi (`journalEntries`) | `id`, `no`, `date`, `period`, `lines[]`, `totalDebit`, `totalCredit`, `balanced`, `clientId` | Borç = alacak; `clientId` benzersiz; satır silinmez |
+| Fiş satırı | `accountId`, `accountCode`, `debit`, `credit`, `note` | Her satırda borç veya alacaktan biri sıfırdır |
+| Ödeme (`payments`) | `id`, `kind`, `partyId`, `date`, `amount`, `method`, `invoiceId`, `journalId` | Tahsilat alacağı azaltır, ödeme borcu azaltır |
+| Maliyet (`costRecords`) | `lotId`, `period`, `netTon`, beş maliyet kalemi, `totalCost`, `unitCostPerTon`, `unitCostPerKg` | Kalemler toplamı `totalCost` ile aynı; birim maliyet toplam / net ton |
+| Sayım (`stockCounts`) | `warehouseId`, `materialId`, `expectedKg`, `countedKg`, `differenceKg`, `status`, `journalId` | `differenceKg = countedKg − expectedKg` |
+| Rezervasyon (`reservations`) | `salesOrderId`, `lotId`, `warehouseId`, `ton`, `status` | `lotId` döküm koduna veya `—` değerine bağlıdır |
+| Entegrasyon kuralı (`integrationRules`) | `trigger`, `module`, `produces[]`, `accountEffect`, `autoPost`, `requiresApproval` | `produces` boş olamaz; otomatik/onay alanları boolean |
+
+## 9. Tek Kayıt, Çok Etki Kuralları
+
+`app/js/posting.js` saf hesap modülüdür; DOM veya depolama bilgisi içermez. Dışa açtığı başlıca işlevler `amounts`, `buildEntry`, `salesEntry`, `purchaseEntry`, `trialBalance`, `isBalanced`, `lotCost`, `salesMargin`, `creditCheck`, `kpiSnapshot` ve `postingEffects` işlevleridir.
+
+| Tetikleyici | Üretilen kayıtlar | Hesap etkisi |
+| --- | --- | --- |
+| Satış siparişi onayı | Rezervasyon, kredi kontrolü, cari hareket | Henüz fiş yok |
+| İki kademeli sevkiyat onayı | Stok çıkışı, satış faturası, fiş, cari bakiye, maliyet, olay, bildirim, giden kutu | 120 borç, 600 ve 391 alacak |
+| Mal kabul | Stok girişi, fiyat geçmişi, emir durumu, olay | Fatura gelene kadar bekler |
+| Alış faturası | Fiş, satıcı cari, ödeme vadesi, bütçe gerçekleşen | 150 ve 191 borç, 320 alacak |
+| Talep onayı ve teklif seçimi | Teklif çağrısı, satın alma emri, fiyat geçmişi, talep durumu | Yok |
+| Üretim olayı (`NET_BILLET`) | Yan ürün, mamul stok, döküm kodu maliyeti, olay | 730 borç, 150 alacak |
+| Fiziki sayım farkı | Düzeltme hareketi, düzeltme fişi, denetim izi | 153 borç, 730 alacak |
+| Tahsilat / ödeme | Cari bakiye, banka hareketi, fiş | 102 borç, 120 alacak |
+| Dönem kapanışı | Mizan kontrolü, bütçe sapması, yönetim raporu, arşiv | Borç = alacak doğrulaması |
+
+Bütün kurallar `integrationRules` koleksiyonunda veri olarak da tutulur; kod ile veri kopyası `tools/smoke_test.mjs` tarafından karşılaştırılır. `validate_data.py` fiş dengesini, KDV tutarlarını, maliyet toplamlarını, sayım farkını ve dönem kapanış koşulunu da doğrular. Ayrıntılı gerekçe ve kapsam dışı kararlar `docs/11` içindedir.
+

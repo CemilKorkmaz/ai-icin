@@ -2,7 +2,7 @@
 
 Bu doküman, saha görüşmesinin sonundaki isteğe cevap verir: "Sen yapın nasıl kuracağımızı bir bul bakayım... Biz bir mini PC, bu senin laptopun olur, sistemi kuracağız, çalıştıracağız. Ama bizim merkezi yönetimi önce yapmamız gerekiyor." Ayrıca düzenleme sitesinin önerdiği geliştirme sırası, yeni görüşmedeki bulgularla birlikte güncellenir.
 
-Önceki `docs/03` içindeki Faz 0–5 sırası korunur; bu doküman onu **çok fabrikalı, modüler ve olay tabanlı** ürün yapısına göre yeniden sıralar. Şekil ve şema çizilmez.
+Önceki `docs/03` içindeki Faz 0–5 sırası korunur; bu doküman onu **çok fabrikalı, modüler ve olay tabanlı** ürün yapısına göre yeniden sıralar. Sürüm 1.1'de genel ERP karşılaştırmasıyla (`docs/11`) ticari ve finansal katman eklenmiş, aşama sırası korunmuştur. Şekil ve şema çizilmez.
 
 ---
 
@@ -77,6 +77,21 @@ Abi konuşmanın sonunda bütün yazılımın hemen yazılmasını istemez. İst
 
 Aşama 0 ile 6 arası, abinin "önce merkezi yönetimi yapmamız gerekiyor" cümlesinin somut karşılığıdır. Aşama 8'den sonrası gerçek saha kurulumunda, VPN + MFA + rol bazlı yetki ile birlikte yapılır.
 
+### 4.1 Sürüm 1.1 eki: ticari ve finansal katman
+
+Genel ERP karşılaştırması yeni bir aşama gerektirmedi; aşama 1'de kurulan ortak veri modeli ile aşama 7'deki raporlama arasına **çapraz bir katman** eklendi. Bu katman üretim sırasını değiştirmez, aynı olay ve kayıtları finans tarafına taşır.
+
+| Eklenen iş | Çıkış kriteri | Bu depodaki durumu |
+| --- | --- | --- |
+| Müşteri, satış siparişi, teklif ve rezervasyon | Kredi limiti kontrolü, rezerve ton, kısmi sevk | **Prototipte hazır** |
+| Talep, onay, tedarikçi teklifi | Teklif seçilince emir ve fiyat geçmişi oluşuyor | **Prototipte hazır** |
+| Hesap planı, fatura, muhasebe fişi, mizan | Borç = alacak, dengesiz fiş reddediliyor | **Prototipte hazır** |
+| Döküm kodu maliyeti ve brüt kâr | Beş kalem toplamı ve birim maliyet tutarlı | **Prototipte hazır** |
+| Depo, sayım, personel ve vardiya | Sayım farkı stok + fiş + denetim izi üretiyor | **Prototipte hazır** |
+| Entegrasyon matrisi | Tek onaydan sekiz koleksiyona atomik yazım | **Prototipte hazır** |
+
+Gerçek kurulumda bu katman aşama 8'deki işlemsel veritabanına taşınır: fişler, stok hareketleri ve cari bakiyeler tek transaction içinde yazılır. Prototipte aynı davranış tek bir `store.change` çağrısıyla taklit edilir.
+
 ---
 
 ## 5. Her aşamada uygulanacak doğrulama
@@ -85,7 +100,8 @@ Aşama 0 ile 6 arası, abinin "önce merkezi yönetimi yapmamız gerekiyor" cüm
 2. `python3 server/erp/scripts/validate_data.py` ile koleksiyon referansları, kütle dengesi ve yeni makine/olay şemaları doğrulanır.
 3. `python3 server/erp/scripts/event_worker.py --dry-run` ile kuyruk işleme simüle edilir.
 4. `python3 server/erp/scripts/backup.py` ile yedek alınır, sağlama toplamları doğrulanır.
-5. `python3 tools/build_docx.py` ile bütün dokümanlar tek Word dosyasına derlenir.
+5. `python3 tools/build_docx.py` ile on iki doküman tek Word dosyasına derlenir.
+6. `tools/smoke_test.mjs` mizan dengesini, KDV hesabını, maliyet kalemleri toplamını, kredi kontrolünü ve muhasebe fişi idempotency'sini doğrular.
 6. Örnek veriyle uçtan uca senaryo: DK kodu aç, aktarım ve yolluk olaylarını gir, kesim hesabını çalıştır, karışık homojenizasyon partisi başlat, süre aşımı üret, soğutma ve iki onaylı sevkiyatı tamamla, olay zincirini arşivden oku.
 
 Bu sıra, konuşmadaki "çalıştıracağız sistemi, deneyeceğiz" isteğinin test edilebilir hâle getirilmiş biçimidir.
@@ -104,6 +120,10 @@ Bu sıra, konuşmadaki "çalıştıracağız sistemi, deneyeceğiz" isteğinin t
 | 5–10 yıl sonra yeni fırın eklenememesi | Modüler tipler, sürüm geçmişi, uzaktan güncelleme | `docs/08` |
 | Ses kaydındaki belirsiz terimlerin koda girmesi | Parametre/serbest metin, doğrulama listesi | `docs/06` |
 | Tek fabrikaya özel sabit kod | `plantId` üzerinden çok fabrikalı profil | `docs/08` |
+| Aynı bilginin finans ve satışta tekrar girilmesi | Tek kayıt çok etki, entegrasyon matrisi | `docs/11` |
+| Dengesiz muhasebe fişi veya çift yazım | Borç = alacak kontrolü, benzersiz `clientId` | `docs/11` |
+| Fatura numarasının serbest metin olması | Müşteri kartı ve fatura koleksiyonu, ID ile bağlantı | `docs/11` |
+| Bordro verisiyle operatör ekranının kalabalıklaşması | Yalnızca vardiya ve operatör izi, bordro harici | `docs/11` |
 
 ---
 
@@ -112,3 +132,16 @@ Bu sıra, konuşmadaki "çalıştıracağız sistemi, deneyeceğiz" isteğinin t
 `docs/06` Bölüm 5'teki sekiz soru, aşama 8'e geçmeden önce mühendisle birlikte kapatılmalıdır. Özellikle 17 tondan 14 tona düşüşün üç kaleme dağılımı, 300 mm kafa payının tek/çift uç olması, bıçak payının döküm boyuna dâhil olup olmadığı ve yolluk tutma miktarının çarpan mı sabit tonaj mı olduğu, hesap motorunun varsayılanlarını doğrudan etkiler. `Stone`, `PIS`, `GNSL` ve `Barsa piyazesi` ifadeleri kesinleşene kadar kodda sabit değer olarak yer almaz.
 
 Bu dokümanlar tamamlandığında `docs/Dokumhane-ERP-Plan.docx` dosyası yeniden üretilir; sohbetin en baştaki hedefi olan "tüm işlevleri bir Word'e döküp yapay zekâya atıp genel yazılım altyapı şemasını oluşturmak" adımı, artık hem ilk sohbeti hem de bu saha görüşmesini kapsayan tek girdiyle yapılabilir.
+
+---
+
+## 8. Genel ERP karşılaştırmasının yol haritasına etkisi
+
+`docs/11` içindeki boşluk analizi, kaynak metnin "aynı işlem için beş farklı departman ayrı veri girmez" ilkesini bu projenin en zayıf noktası olarak işaret etmiştir. Üretim ve olay tarafında ilke uygulanıyordu; finans, cari ve satış tarafında uygulanmıyordu. Sürüm 1.1 bu eşitsizliği gidermiştir.
+
+Karşılaştırma sonucunda kapsama alınanlar: müşteri ve cari hesap, satış teklifi ve siparişi, satın alma talebi ve teklifi, hesap planı ve çift taraflı muhasebe fişi, fatura ve ödeme, dönem kapanışı, döküm kodu maliyeti, depo lokasyonu ve fiziki sayım, personel ve vardiya, entegrasyon matrisi. Kasten dışarıda bırakılanlar: bordro ve özlük, kampanya CRM'i, inşaat proje kartı, CAD/BIM, perakende POS, e-fatura ve banka mutabakatı, KDV beyannamesi, çoklu para birimi. Proje yönetimi modülünün karşılığı döküm kodu maliyet nesnesidir.
+
+Bu güncelleme `docs/06` içindeki sekiz açık soruyu kapatmaz; özellikle 17 tondan 14 tona düşüşün kafa, talaş ve fire biyet dağılımı ile 300 mm kafa payının tek veya çift uç olması, maliyet ve fire hesabını doğrudan etkiler. Bu sorular aşama 8'e geçmeden önce mühendisle birlikte netleştirilmelidir.
+
+Sohbetin en baştaki hedefi olan "tüm işlevleri bir Word'e döküp yapay zekâya atıp genel yazılım altyapı şemasını oluşturmak" adımı için girdi güncellenmiştir: `docs/Dokumhane-ERP-Plan.docx` artık `00` ile `11` arasındaki on iki dokümanı kapsar.
+

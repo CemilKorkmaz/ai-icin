@@ -1,0 +1,140 @@
+[
+  {
+    "id": "IR-01",
+    "trigger": "Satış siparişi onayı",
+    "module": "Satış",
+    "produces": [
+      "Rezervasyon",
+      "Kredi kontrolü",
+      "Müşteri cari hareketi"
+    ],
+    "accountEffect": "Henüz muhasebe fişi yok",
+    "autoPost": true,
+    "requiresApproval": false
+  },
+  {
+    "id": "IR-02",
+    "trigger": "İki kademeli sevkiyat onayı",
+    "module": "Sevkiyat",
+    "produces": [
+      "Stok çıkış hareketi",
+      "Satış faturası",
+      "Borç / alacak fişi",
+      "Müşteri bakiyesi",
+      "Maliyet yansıması",
+      "Bildirim + giden kutu",
+      "Olay satırı"
+    ],
+    "accountEffect": "120 borç / 600 + 391 alacak",
+    "autoPost": true,
+    "requiresApproval": true
+  },
+  {
+    "id": "IR-03",
+    "trigger": "Mal kabul",
+    "module": "Satın Alma",
+    "produces": [
+      "Stok giriş hareketi",
+      "Fiyat geçmişi",
+      "Emir karşılama durumu",
+      "Olay satırı"
+    ],
+    "accountEffect": "Fatura gelene kadar bekler",
+    "autoPost": true,
+    "requiresApproval": false
+  },
+  {
+    "id": "IR-04",
+    "trigger": "Alış faturası",
+    "module": "Muhasebe",
+    "produces": [
+      "Borç / alacak fişi",
+      "Satıcı cari hareketi",
+      "Ödeme vadesi",
+      "Bütçe gerçekleşen"
+    ],
+    "accountEffect": "150 + 191 borç / 320 alacak",
+    "autoPost": true,
+    "requiresApproval": true
+  },
+  {
+    "id": "IR-05",
+    "trigger": "Satın alma talebi onayı",
+    "module": "Satın Alma",
+    "produces": [
+      "Teklif çağrısı",
+      "Onay izi",
+      "Bildirim"
+    ],
+    "accountEffect": "Yok",
+    "autoPost": true,
+    "requiresApproval": true
+  },
+  {
+    "id": "IR-06",
+    "trigger": "Teklif seçimi",
+    "module": "Satın Alma",
+    "produces": [
+      "Satın alma emri",
+      "Fiyat geçmişi önizlemesi",
+      "Talep durumu"
+    ],
+    "accountEffect": "Yok",
+    "autoPost": true,
+    "requiresApproval": false
+  },
+  {
+    "id": "IR-07",
+    "trigger": "Üretim olayı (NET_BILLET)",
+    "module": "Üretim",
+    "produces": [
+      "Yan ürün kaydı",
+      "Mamul stok",
+      "Döküm kodu maliyeti",
+      "Olay günlüğü"
+    ],
+    "accountEffect": "730 borç / 150 alacak",
+    "autoPost": true,
+    "requiresApproval": false
+  },
+  {
+    "id": "IR-08",
+    "trigger": "Fiziki sayım farkı",
+    "module": "Depo",
+    "produces": [
+      "Düzeltme hareketi",
+      "Borç / alacak fişi",
+      "Denetim izi"
+    ],
+    "accountEffect": "153 borç / 730 alacak",
+    "autoPost": false,
+    "requiresApproval": true
+  },
+  {
+    "id": "IR-09",
+    "trigger": "Tahsilat / ödeme",
+    "module": "Finans",
+    "produces": [
+      "Cari bakiye",
+      "Banka hareketi",
+      "Borç / alacak fişi"
+    ],
+    "accountEffect": "102 borç / 120 alacak",
+    "autoPost": true,
+    "requiresApproval": false
+  },
+  {
+    "id": "IR-10",
+    "trigger": "Dönem kapanışı",
+    "module": "Finans",
+    "produces": [
+      "Mizan kontrolü",
+      "Bütçe sapması",
+      "Yönetim raporu",
+      "Arşiv"
+    ],
+    "accountEffect": "Borç = alacak doğrulaması",
+    "autoPost": false,
+    "requiresApproval": true
+  }
+]

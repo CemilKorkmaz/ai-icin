@@ -7,7 +7,9 @@ Kontroller:
   - malzeme / tedarikçi / ocak / reçete / emir / döküm kodu referansları,
   - mal kabul ve kırıcı hesaplarının (kabul+red=gelen, brüt-fire=net) tutarlılığı,
   - lots.stage değerlerinin manifestteki aşama listesinde olması,
-  - stok bakiyesi ile hareket toplamı farkı (bilgilendirici uyarı — demo snapshot).
+  - stok bakiyesi ile hareket toplamı farkı (bilgilendirici uyarı — demo snapshot),
+  - ticari/finansal katman: borç = alacak, KDV tutarları, cari/fatura referansları,
+    maliyet kalemleri toplamı, sayım farkı ve dönem kapanışı (docs/11).
 
 Kullanım: python3 server/erp/scripts/validate_data.py
 """
@@ -29,7 +31,12 @@ COLLECTIONS = [
     'plants', 'machine-types', 'machines', 'casting-paths', 'plc-connections', 'plc-tags',
     'signal-states', 'homogenization-recipes', 'homogenization-batches', 'cooling-batches',
     'oil-rules', 'blade-rules', 'maintenance-events', 'by-product-fates', 'events',
-    'inbox-queue', 'vendor-updates'
+    'inbox-queue', 'vendor-updates',
+    # Genel ERP karşılaştırmasıyla eklenen ticari / finansal katman (docs/11, schemaVersion 3)
+    'accounts', 'customers', 'quotations', 'sales-orders', 'purchase-requests',
+    'purchase-quotes', 'invoices', 'journal-entries', 'payments', 'warehouses',
+    'stock-counts', 'reservations', 'cost-records', 'employees', 'shifts',
+    'budgets', 'period-closures', 'integration-rules'
 ]
 
 SIGNALS = {'door', 'casting', 'alarm', 'running'}
@@ -256,6 +263,173 @@ def main() -> int:
             errors.append(f'inbox-queue/{q.get("id")}: clientId eksik (idempotency)')
     for vu in data['vendor-updates']:
         ref('vendor-updates', vu, 'plantId', plants, 'fabrika')
+
+
+    # ---------- Genel ERP karşılaştırması: ticari / finansal katman (docs/11) ----------
+    accounts = ids(data['accounts'])
+    customers = ids(data['customers'])
+    sales_orders = ids(data['sales-orders'])
+    requests = ids(data['purchase-requests'])
+    invoices = ids(data['invoices'])
+    journals = ids(data['journal-entries'])
+    warehouses = ids(data['warehouses'])
+    shifts = ids(data['shifts'])
+    users = ids(data['users'])
+    cost_ids = ids(data['cost-records'])
+
+    acct_codes = [a.get('code') for a in data['accounts'] if isinstance(a, dict)]
+    if len(acct_codes) != len(set(acct_codes)):
+        errors.append('accounts: yinelenen hesap kodu var')
+
+    for c in data['customers']:
+        if float(c.get('creditLimit') or 0) < 0 or float(c.get('balance') or 0) < 0:
+            errors.append(f'customers/{c.get("id")}: negatif limit veya bakiye')
+        if float(c.get('balance') or 0) > float(c.get('creditLimit') or 0):
+            errors.append(f'customers/{c.get("id")}: cari bakiye kredi limitini aşıyor')
+
+    for q in data['quotations']:
+        ref('quotations', q, 'customerId', customers, 'müşteri')
+        ref('quotations', q, 'salesOrderId', sales_orders, 'satış siparişi')
+        if q.get('status') not in ('Bekliyor', 'Onaylandı', 'Kaybedildi'):
+            errors.append(f'quotations/{q.get("id")}: geçersiz teklif durumu → {q.get("status")}')
+
+    for o in data['sales-orders']:
+        ref('sales-orders', o, 'customerId', customers, 'müşteri')
+        ref('sales-orders', o, 'quotationId', {x.get('id') for x in data['quotations']}, 'teklif')
+        if float(o.get('shippedTon') or 0) > float(o.get('ton') or 0) + 0.001:
+            errors.append(f'sales-orders/{o.get("id")}: sevk edilen ton sipariş tonunu aşıyor')
+        if float(o.get('unitPrice') or 0) <= 0:
+            errors.append(f'sales-orders/{o.get("id")}: birim fiyat eksik')
+
+    for r in data['purchase-requests']:
+        ref('purchase-requests', r, 'materialId', mats, 'malzeme')
+        ref('purchase-requests', r, 'orderId', orders, 'satın alma emri')
+        if float(r.get('quantity') or 0) <= 0:
+            errors.append(f'purchase-requests/{r.get("id")}: miktar sıfır/negatif')
+    for q in data['purchase-quotes']:
+        ref('purchase-quotes', q, 'requestId', requests, 'talep')
+        ref('purchase-quotes', q, 'supplierId', sups, 'tedarikçi')
+        if q.get('status') not in ('Bekliyor', 'Seçildi', 'Reddedildi'):
+            errors.append(f'purchase-quotes/{q.get("id")}: geçersiz teklif durumu → {q.get("status")}')
+    for req in data['purchase-requests']:
+        selected = [q for q in data['purchase-quotes'] if q.get('requestId') == req.get('id') and q.get('status') == 'Seçildi']
+        if len(selected) > 1:
+            errors.append(f'purchase-requests/{req.get("id")}: birden fazla teklif seçilmiş')
+
+    invoice_status = {'Bekliyor', 'Kısmi', 'Ödendi', 'İptal'}
+    for inv in data['invoices']:
+        if inv.get('direction') not in ('Satış', 'Alış'):
+            errors.append(f'invoices/{inv.get("id")}: geçersiz yön → {inv.get("direction")}')
+        party = customers if inv.get('partyType') == 'customer' else sups
+        ref('invoices', inv, 'partyId', party, 'cari taraf')
+        net = float(inv.get('net') or 0)
+        vat = float(inv.get('vat') or 0)
+        gross = float(inv.get('gross') or 0)
+        expected_vat = round(net * float(inv.get('vatRate') or 0) / 100, 2)
+        if abs(vat - expected_vat) > 0.01:
+            errors.append(f'invoices/{inv.get("id")}: KDV {vat} ≠ beklenen {expected_vat}')
+        if abs(net + vat - gross) > 0.01:
+            errors.append(f'invoices/{inv.get("id")}: net + KDV ≠ brüt')
+        if inv.get('status') not in invoice_status:
+            errors.append(f'invoices/{inv.get("id")}: geçersiz fatura durumu → {inv.get("status")}')
+
+    seen_clients = set()
+    for je in data['journal-entries']:
+        lines = je.get('lines') or []
+        debit = round(sum(float(l.get('debit') or 0) for l in lines), 2)
+        credit = round(sum(float(l.get('credit') or 0) for l in lines), 2)
+        if abs(debit - credit) > 0.01 or debit <= 0:
+            errors.append(f'journal-entries/{je.get("id")}: borç {debit} ≠ alacak {credit}')
+        if abs(debit - float(je.get('totalDebit') or 0)) > 0.01 or abs(credit - float(je.get('totalCredit') or 0)) > 0.01:
+            errors.append(f'journal-entries/{je.get("id")}: kayıtlı toplamlar satırlarla uyuşmuyor')
+        if je.get('balanced') is not True:
+            errors.append(f'journal-entries/{je.get("id")}: balanced alanı true olmalı')
+        cid = je.get('clientId')
+        if not cid:
+            errors.append(f'journal-entries/{je.get("id")}: clientId eksik (idempotency)')
+        elif cid in seen_clients:
+            errors.append(f'journal-entries/{je.get("id")}: yinelenen clientId → {cid}')
+        else:
+            seen_clients.add(cid)
+        for l in lines:
+            if l.get('accountId') not in accounts:
+                errors.append(f'journal-entries/{je.get("id")}: hesap yok → {l.get("accountId")}')
+
+    for pay in data['payments']:
+        party = customers if pay.get('partyType') == 'customer' else sups
+        ref('payments', pay, 'partyId', party, 'cari taraf')
+        ref('payments', pay, 'journalId', journals, 'muhasebe fişi')
+        ref('payments', pay, 'invoiceId', invoices, 'fatura')
+        if float(pay.get('amount') or 0) <= 0:
+            errors.append(f'payments/{pay.get("id")}: tutar sıfır/negatif')
+
+    for w in data['warehouses']:
+        ref('warehouses', w, 'plantId', plants, 'fabrika')
+        if float(w.get('capacityTon') or 0) < 0:
+            errors.append(f'warehouses/{w.get("id")}: negatif kapasite')
+    for rsv in data['reservations']:
+        ref('reservations', rsv, 'salesOrderId', sales_orders, 'satış siparişi')
+        ref('reservations', rsv, 'warehouseId', warehouses, 'depo')
+        if rsv.get('lotId') not in lots | {'—'}:
+            errors.append(f'reservations/{rsv.get("id")}: döküm kodu yok → {rsv.get("lotId")}')
+    for sc in data['stock-counts']:
+        ref('stock-counts', sc, 'warehouseId', warehouses, 'depo')
+        ref('stock-counts', sc, 'materialId', mats, 'malzeme')
+        ref('stock-counts', sc, 'journalId', journals, 'muhasebe fişi')
+        diff = float(sc.get('countedKg') or 0) - float(sc.get('expectedKg') or 0)
+        if abs(diff - float(sc.get('differenceKg') or 0)) > 0.001:
+            errors.append(f'stock-counts/{sc.get("id")}: sayılan − beklenen ≠ fark')
+
+    for cr in data['cost-records']:
+        ref('cost-records', cr, 'lotId', lots, 'döküm kodu')
+        parts = sum(float(cr.get(k) or 0) for k in ('materialCost', 'energyCost', 'consumableCost', 'laborCost', 'scrapCost'))
+        if abs(parts - float(cr.get('totalCost') or 0)) > 0.01:
+            errors.append(f'cost-records/{cr.get("id")}: maliyet kalemleri toplamı ≠ totalCost')
+        net_ton = float(cr.get('netTon') or 0)
+        if net_ton <= 0:
+            errors.append(f'cost-records/{cr.get("id")}: net ton sıfır/negatif')
+        elif abs(parts / net_ton - float(cr.get('unitCostPerTon') or 0)) > 0.01:
+            errors.append(f'cost-records/{cr.get("id")}: birim maliyet (₺/ton) tutarsız')
+
+    for emp in data['employees']:
+        ref('employees', emp, 'userId', users, 'kullanıcı')
+        ref('employees', emp, 'shiftId', shifts, 'vardiya')
+    for sh in data['shifts']:
+        ref('shifts', sh, 'supervisorId', users, 'vardiya sorumlusu')
+        for uid in sh.get('operatorIds') or []:
+            if uid not in users:
+                errors.append(f'shifts/{sh.get("id")}: operatör kullanıcısı yok → {uid}')
+        # Gece vardiyası 22:00–06:00 gibi günü aşabilir; bu meşrudur.
+        crosses_midnight = sh.get('start', '') >= '18:00' and sh.get('end', '') <= '08:00'
+        if sh.get('start') >= sh.get('end') and not crosses_midnight:
+            errors.append(f'shifts/{sh.get("id")}: başlangıç bitişten sonra (gece vardiyası değil)')
+
+    for b in data['budgets']:
+        if float(b.get('planned') or 0) <= 0 or float(b.get('actual') or 0) < 0:
+            errors.append(f'budgets/{b.get("id")}: planlanan/gerçekleşen tutar geçersiz')
+    periods = [pc.get('period') for pc in data['period-closures']]
+    if len(periods) != len(set(periods)):
+        errors.append('period-closures: yinelenen dönem')
+    for pc in data['period-closures']:
+        if pc.get('status') not in ('Açık', 'Kontrol Edildi', 'Kapatıldı'):
+            errors.append(f'period-closures/{pc.get("id")}: geçersiz durum → {pc.get("status")}')
+        if pc.get('status') == 'Kapatıldı' and pc.get('trialBalanceOk') is not True:
+            errors.append(f'period-closures/{pc.get("id")}: mizan doğrulanmadan dönem kapatılmış')
+    for rule in data['integration-rules']:
+        if not rule.get('produces'):
+            errors.append(f'integration-rules/{rule.get("id")}: üretilen kayıt listesi boş')
+        if not isinstance(rule.get('autoPost'), bool) or not isinstance(rule.get('requiresApproval'), bool):
+            errors.append(f'integration-rules/{rule.get("id")}: otomatik/onay alanı boolean değil')
+
+    for key in ('vatRate', 'currentPeriod', 'costingMethod', 'defaultWarehouseId', 'approvalLimitPurchase'):
+        if isinstance(settings, dict) and key not in settings:
+            errors.append(f'settings: {key} alanı eksik (schemaVersion 3)')
+
+    print(f'  ✓ {len(data["accounts"])} hesap · {len(data["journal-entries"])} muhasebe fişi · '
+          f'{len(data["invoices"])} fatura · {len(data["cost-records"])} maliyet kaydı · '
+          f'{len(data["integration-rules"])} entegrasyon kuralı')
+    print(f'  ✓ Mizan: borç = alacak · {len(seen_clients)} benzersiz clientId · '
+          f'{len(data["warehouses"])} depo · {len(data["shifts"])} vardiya')
 
     print(f'  ✓ {len(data["machines"])} makine · {len(data["casting-paths"])} döküm yolu · '
           f'{len(data["events"])} olay · {len(data["inbox-queue"])} kuyruk kaydı · '
