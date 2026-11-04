@@ -1,0 +1,38 @@
+[
+  {
+    "id": "CL-001",
+    "code": "SGT-2026-0041",
+    "batchId": "HMB-003",
+    "plantId": "P1",
+    "method": "Hava + su spreyi",
+    "targetTempC": 40,
+    "startedAt": "2026-11-01T15:10:00+03:00",
+    "endedAt": "2026-11-01T19:00:00+03:00",
+    "status": "Tamamlandı",
+    "operator": "U09"
+  },
+  {
+    "id": "CL-002",
+    "code": "SGT-2026-0042",
+    "batchId": "HMB-001",
+    "plantId": "P1",
+    "method": "Hava",
+    "targetTempC": 45,
+    "startedAt": "2026-11-02T07:10:00+03:00",
+    "endedAt": null,
+    "status": "Devam ediyor",
+    "operator": "U09"
+  },
+  {
+    "id": "CL-003",
+    "code": "SGT-2026-0043",
+    "batchId": "HMB-004",
+    "plantId": "P2",
+    "method": "Doğal soğutma",
+    "targetTempC": 50,
+    "startedAt": "2026-10-31T15:10:00+03:00",
+    "endedAt": "2026-10-31T21:00:00+03:00",
+    "status": "Tamamlandı",
+    "operator": "Operatör"
+  }
+]

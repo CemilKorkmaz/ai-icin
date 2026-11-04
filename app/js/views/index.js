@@ -5,6 +5,10 @@ import { productionView, recipesView } from './production.js';
 import { shipmentsView, archiveView } from './shipping.js';
 import { reportsView } from './reports.js';
 import { notificationsView, settingsView } from './system.js';
+import {
+  machinesView, pathsView, cuttingView, maintenanceView,
+  batchesView, eventsView, plcView, vendorView
+} from './engineering.js';
 
 export const VIEWS = {
   dashboard,
@@ -18,9 +22,17 @@ export const VIEWS = {
   movements: movementsView,
   production: productionView,
   recipes: recipesView,
+  batches: batchesView,
+  events: eventsView,
   shipments: shipmentsView,
   archive: archiveView,
   reports: reportsView,
+  machines: machinesView,
+  paths: pathsView,
+  cutting: cuttingView,
+  maintenance: maintenanceView,
+  plc: plcView,
+  vendor: vendorView,
   notifications: notificationsView,
   settings: settingsView
 };
@@ -41,13 +53,23 @@ export const NAV = [
   ] },
   { group: 'ÜRETİM', items: [
     { id: 'production', label: 'Üretim Akışı', icon: 'flame' },
-    { id: 'recipes', label: 'Reçeteler', icon: 'sliders' }
+    { id: 'recipes', label: 'Reçeteler', icon: 'sliders' },
+    { id: 'batches', label: 'Homojenizasyon Partisi', icon: 'clock' },
+    { id: 'events', label: 'Olay & Arşiv', icon: 'archive' }
+  ] },
+  { group: 'MAKİNE & KURULUM', items: [
+    { id: 'machines', label: 'Makine Parkı', icon: 'cpu' },
+    { id: 'paths', label: 'Döküm Yolları', icon: 'layers' },
+    { id: 'cutting', label: 'Kesim Hesap Motoru', icon: 'scissors' },
+    { id: 'maintenance', label: 'Yağ & Bakım', icon: 'gauge' },
+    { id: 'plc', label: 'PLC Durum', icon: 'activity' }
   ] },
   { group: 'SEVKİYAT', items: [
     { id: 'shipments', label: 'Sevkiyat & Onaylar', icon: 'truck' },
     { id: 'archive', label: 'Arşiv', icon: 'archive' }
   ] },
   { group: 'RAPORLAMA', items: [{ id: 'reports', label: 'Raporlar & İstatistik', icon: 'chart' }] },
+  { group: 'YÖNETİM', items: [{ id: 'vendor', label: 'Merkezi Yönetim', icon: 'shield' }] },
   { group: 'SİSTEM', items: [
     { id: 'notifications', label: 'Bildirimler & Kuyruk', icon: 'bell' },
     { id: 'settings', label: 'Ayarlar', icon: 'settings' }

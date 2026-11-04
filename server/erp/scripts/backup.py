@@ -117,7 +117,16 @@ def main() -> int:
     shutil.copytree(DATA, os.path.join(dest, 'data'), dirs_exist_ok=True)
     if os.path.isdir(DB):
         shutil.copytree(DB, os.path.join(dest, 'db'), dirs_exist_ok=True)
-    log(f'Anlık görüntü alındı: {dest}')
+    # Saha görüşmesi sonrası: olay günlüğü ve işlenmiş kuyruk da yedek kapsamında (docs/09 Bölüm 7)
+    for name in ('archive', 'inbox/processed', 'inbox/dead-letter'):
+        src = os.path.join(ROOT, name)
+        if os.path.isdir(src):
+            shutil.copytree(src, os.path.join(dest, name), dirs_exist_ok=True)
+    processed_clients = os.path.join(ROOT, 'archive', 'processed-clients.json')
+    if os.path.isfile(processed_clients):
+        os.makedirs(os.path.join(dest, 'archive'), exist_ok=True)
+        shutil.copy2(processed_clients, os.path.join(dest, 'archive', 'processed-clients.json'))
+    log(f'Anlık görüntü alındı: {dest} (data + archive + işlenmiş kuyruk)')
 
     n = checksums(dest)
     log(f'Şifreli olmayan sağlama toplamı üretildi: {n} dosya')

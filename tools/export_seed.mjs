@@ -30,7 +30,7 @@ fs.writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify({
   schema_version: SEED.schemaVersion,
   generated_at: generatedAt,
   source: 'app/js/seed.js (node tools/export_seed.mjs)',
-  note: 'Koleksiyon dosyaları doğrudan kayıt dizisidir (settings.json tek nesnedir). Tam sistem snapshot\'ı Ayarlar ekranından tek JSON olarak alınır.',
+  note: 'Koleksiyon dosyaları doğrudan kayıt dizisidir (settings.json tek nesnedir). schemaVersion 2: saha görüşmesiyle gelen makine parkı, döküm yolları, PLC, homojenizasyon, bakım ve olay günlüğü koleksiyonları eklendi. Olayların kalıcı hâli server/erp/archive/ altındadır.',
   stages: STAGES,
   categories: CATEGORY_ORDER,
   files

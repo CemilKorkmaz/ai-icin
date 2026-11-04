@@ -1,0 +1,47 @@
+[
+  {
+    "id": "CP-1",
+    "plantId": "P1",
+    "fromMachineId": "MCH-01",
+    "tableId": "MCH-06",
+    "label": "Kısa yol",
+    "holdTon": 1,
+    "note": "A Fırını, Tabla 1"
+  },
+  {
+    "id": "CP-2",
+    "plantId": "P1",
+    "fromMachineId": "MCH-02",
+    "tableId": "MCH-06",
+    "label": "Uzun yol",
+    "holdTon": 2,
+    "note": "B Fırını, aynı tabla"
+  },
+  {
+    "id": "CP-3",
+    "plantId": "P1",
+    "fromMachineId": "MCH-02",
+    "tableId": "MCH-07",
+    "label": "Orta yol",
+    "holdTon": 1.5,
+    "note": "B Fırını, Tabla 2"
+  },
+  {
+    "id": "CP-4",
+    "plantId": "P2",
+    "fromMachineId": "MCH-15",
+    "tableId": "MCH-17",
+    "label": "Kısa yol",
+    "holdTon": 0.8,
+    "note": "PLC yok, operatör ölçer"
+  },
+  {
+    "id": "CP-5",
+    "plantId": "P2",
+    "fromMachineId": "MCH-16",
+    "tableId": "MCH-17",
+    "label": "Uzun yol",
+    "holdTon": 1.4,
+    "note": "PLC yok, operatör ölçer"
+  }
+]

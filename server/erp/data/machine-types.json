@@ -1,0 +1,73 @@
+[
+  {
+    "id": "MT1",
+    "code": "FURNACE",
+    "name": "Ergitme / Döküm Ocağı",
+    "icon": "flame",
+    "capacityUnit": "ton",
+    "signals": [
+      "door",
+      "casting",
+      "alarm",
+      "running"
+    ]
+  },
+  {
+    "id": "MT2",
+    "code": "CAST_TABLE",
+    "name": "Döküm Tablası",
+    "icon": "layers",
+    "capacityUnit": "hat",
+    "signals": [
+      "casting",
+      "alarm",
+      "running"
+    ]
+  },
+  {
+    "id": "MT3",
+    "code": "SAW",
+    "name": "Testere",
+    "icon": "scissors",
+    "capacityUnit": "kesim",
+    "signals": [
+      "alarm",
+      "running"
+    ]
+  },
+  {
+    "id": "MT4",
+    "code": "HOMO_FURNACE",
+    "name": "Homojenizasyon Fırını",
+    "icon": "flame",
+    "capacityUnit": "ton",
+    "signals": [
+      "door",
+      "alarm",
+      "running"
+    ]
+  },
+  {
+    "id": "MT5",
+    "code": "CONT_HOMO",
+    "name": "Sürekli Homojenizasyon Hattı",
+    "icon": "refresh",
+    "capacityUnit": "ton/saat",
+    "signals": [
+      "alarm",
+      "running"
+    ]
+  },
+  {
+    "id": "MT6",
+    "code": "ROTARY",
+    "name": "Döner Ocak",
+    "icon": "recycle",
+    "capacityUnit": "ton",
+    "signals": [
+      "door",
+      "alarm",
+      "running"
+    ]
+  }
+]

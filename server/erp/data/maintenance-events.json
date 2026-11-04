@@ -1,0 +1,38 @@
+[
+  {
+    "id": "ME-001",
+    "kind": "Yağ Dolumu",
+    "machineId": "MCH-08",
+    "at": "2026-11-01T08:00:00+03:00",
+    "cutsAt": 100,
+    "user": "U08",
+    "notes": "Bir tank dolumu, sayaç sıfırlandı"
+  },
+  {
+    "id": "ME-002",
+    "kind": "Bıçak Değişimi",
+    "machineId": "MCH-08",
+    "at": "2026-10-24T07:30:00+03:00",
+    "cutsAt": 1200,
+    "user": "U08",
+    "notes": "B-2026-0087 söküldü, B-2026-0088 takıldı"
+  },
+  {
+    "id": "ME-003",
+    "kind": "Bakıma Gönderildi",
+    "machineId": "MCH-08",
+    "at": "2026-11-02T14:30:00+03:00",
+    "cutsAt": 1140,
+    "user": "U08",
+    "notes": "Arıza lambası yandı, ekip çağrıldı"
+  },
+  {
+    "id": "ME-004",
+    "kind": "Yağ Dolumu",
+    "machineId": "MCH-09",
+    "at": "2026-11-02T06:00:00+03:00",
+    "cutsAt": 150,
+    "user": "U08",
+    "notes": "Firma 2 eşiği farklı: 150 kesim"
+  }
+]

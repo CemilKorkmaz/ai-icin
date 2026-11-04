@@ -1,0 +1,25 @@
+{
+  "clientId": "CL-2001",
+  "type": "CUT_BATCH",
+  "lotId": "DK-2026-0139",
+  "plantId": "P1",
+  "machineId": "MCH-08",
+  "ref": "",
+  "createdAt": "2026-11-02T14:40:00+03:00",
+  "source": "HTML",
+  "actor": "U08",
+  "schemaVersion": 2,
+  "note": "Örnek: 6300/6000/300/3 mm kesim, hesap motoru üç olay üretir",
+  "payload": {
+    "diameterMm": 178,
+    "castLengthMm": 6300,
+    "productLengthMm": 6000,
+    "headMm": 300,
+    "bladeMm": 3,
+    "density": 2700,
+    "count": 35,
+    "headPerBillet": 2,
+    "cutsPerBillet": 2,
+    "scrapBilletKg": 115
+  }
+}

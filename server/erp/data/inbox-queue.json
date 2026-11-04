@@ -1,0 +1,62 @@
+[
+  {
+    "id": "IQ-0001",
+    "clientId": "CL-1001",
+    "fileName": "2026-11-02_CL-1001.json",
+    "lotId": "DK-2026-0139",
+    "type": "NET_BILLET",
+    "status": "archived",
+    "createdAt": "2026-11-02T14:00:00+03:00",
+    "processedAt": "2026-11-02T14:00:02+03:00",
+    "retryCount": 0,
+    "lastError": ""
+  },
+  {
+    "id": "IQ-0002",
+    "clientId": "CL-1002",
+    "fileName": "2026-11-02_CL-1002.json",
+    "lotId": "DK-2026-0138",
+    "type": "CAST_START",
+    "status": "pending",
+    "createdAt": "2026-11-02T14:34:00+03:00",
+    "processedAt": null,
+    "retryCount": 0,
+    "lastError": ""
+  },
+  {
+    "id": "IQ-0003",
+    "clientId": "CL-1003",
+    "fileName": "2026-11-02_CL-1003.json",
+    "lotId": "DK-2026-0137",
+    "type": "PATH_HOLD",
+    "status": "processing",
+    "createdAt": "2026-11-02T14:35:00+03:00",
+    "processedAt": null,
+    "retryCount": 0,
+    "lastError": ""
+  },
+  {
+    "id": "IQ-0004",
+    "clientId": "CL-1004",
+    "fileName": "2026-11-02_CL-1004.json",
+    "lotId": "DK-2026-0136",
+    "type": "HEAD_CUT",
+    "status": "archived",
+    "createdAt": "2026-11-02T14:20:00+03:00",
+    "processedAt": "2026-11-02T14:20:01+03:00",
+    "retryCount": 0,
+    "lastError": ""
+  },
+  {
+    "id": "IQ-0005",
+    "clientId": "CL-1005",
+    "fileName": "2026-11-02_CL-1005.json",
+    "lotId": "DK-2026-0135",
+    "type": "HOMOGEN_END",
+    "status": "dead",
+    "createdAt": "2026-11-02T13:10:00+03:00",
+    "processedAt": null,
+    "retryCount": 3,
+    "lastError": "endedAt alanı eksik"
+  }
+]

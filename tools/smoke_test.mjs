@@ -14,6 +14,7 @@ globalThis.CustomEvent = class { constructor(type) { this.type = type; } };
 const { VIEWS, NAV, GROUP_OF } = await import('../app/js/views/index.js');
 const { D, stockState, orderTotal } = await import('../app/js/store.js');
 const { SEED, STAGES } = await import('../app/js/seed.js');
+const { cuttingReport, geometryCheck, maintenanceStatus, durationCheck, cylinderMassKg } = await import('../app/js/calc.js');
 
 let failures = 0;
 const check = (cond, msg) => { if (!cond) { console.error('  ✗', msg); failures++; } };
@@ -61,6 +62,46 @@ check(Array.isArray(SEED.categories) && SEED.categories.length >= 4, 'Kategori t
 check(typeof d.settings.online === 'boolean', 'Çevrimiçi/çevrimdışı ayarı eksik');
 check(d.outbox.some((o) => o.status === 'queued'), 'Kuyrukta kayıt yok (kapalı çevrim demosu)');
 console.log('✓ Değişken tanımlar ve giden kutu alanları mevcut');
+
+// 5) Hesap motoru (docs/07)
+check(Math.abs(cylinderMassKg(178, 3, 2700, 1) - 0.2016) < 0.001, '3 mm talaş formülü hatalı');
+check(Math.abs(cylinderMassKg(178, 300, 2700, 1) - 20.1565) < 0.01, '300 mm kafa formülü hatalı');
+const cut = cuttingReport({ count: 35, headPerBillet: 2, cutsPerBillet: 2 });
+check(cut.effectiveHeadMm === 297, 'Bıçak payı döküm boyuna dâhil edilmedi (297 mm beklenir)');
+check(cut.deviationMm === 0, 'Uzunluk sapması sıfır olmalı');
+check(cut.headKg > cut.sawdustKg, 'Kafa kesimi talaştan büyük olmalı');
+check(cut.headPieces === 70 && cut.kerfCuts === 70, 'Kafa/kesim adedi yanlış');
+const cutOut = cuttingReport({ count: 35, bladeInsideCastLength: false });
+check(cutOut.deviationMm === -3, 'Bıçak payı ayrı ölçüldüğünde 3 mm sapma beklenir');
+const geo = geometryCheck({ recordedTon: d.lots.find((l) => l.id === 'DK-2026-0139').weightTon, count: 35, diameterMm: 178, productLengthMm: 6000 });
+check(geo.ok, `Geometri doğrulaması %${geo.deviationPct} sapma ile geçemedi`);
+const oil = maintenanceStatus({ used: 90, limit: 100, warnAt: 90 });
+check(oil.level === 'warn', 'Yağ uyarı eşiği çalışmıyor');
+check(maintenanceStatus({ used: 100, limit: 100 }).level === 'danger', 'Yağ eşik dolumu algılanmadı');
+const dur = durationCheck({ startedAt: '2026-11-01T22:00:00+03:00', endedAt: '2026-11-02T07:00:00+03:00', plannedMinutes: 480 });
+check(dur.overrunMinutes === 60 && dur.status === 'Süre Aşımı', '8/9 saat homojenizasyon sapması yanlış');
+console.log(`✓ Hesap motoru: talaş ${cut.unitSawdustKg} kg/kesim · kafa ${cut.unitHeadKg} kg · net ${cut.netBilletTon} t`);
+
+// 6) Saha görüşmesi koleksiyonları (docs/05, schemaVersion 2)
+check(SEED.schemaVersion === 2, 'Şema sürümü 2 olmalı');
+for (const key of ['plants', 'machineTypes', 'machines', 'castingPaths', 'plcConnections', 'plcTags',
+  'signalStates', 'homogenizationRecipes', 'homogenizationBatches', 'coolingBatches',
+  'oilRules', 'bladeRules', 'maintenanceEvents', 'byProductFates', 'events', 'inboxQueue', 'vendorUpdates']) {
+  check(Array.isArray(d[key]) && d[key].length > 0, `${key} koleksiyonu eksik/boş`);
+}
+check(d.machines.every((m) => m.mode === 'MANUAL' || m.mode === 'PLC'), 'Makine modu geçersiz');
+check(new Set(d.plcTags.map((t) => t.signal)).size === 4, 'Dört sinyal kuralı ihlal edildi');
+check(d.castingPaths.some((p) => p.holdTon === 1) && d.castingPaths.some((p) => p.holdTon === 2), '1 / 2 ton yol parametreleri yok');
+check(d.homogenizationBatches.some((b) => b.lots.length > 1), 'Karışık homojenizasyon partisi yok');
+check(d.homogenizationBatches.some((b) => b.status === 'Süre Aşımı'), 'Süre aşımı partisi yok');
+check(d.byProductFates.some((f) => f.fate === 'sale') && d.byProductFates.some((f) => f.fate === 'remelt'), 'Kafa/talaş akıbeti ayrılmadı');
+const chain = d.events.filter((e) => e.lotId === 'DK-2026-0139').sort((a, b) => a.seq - b.seq);
+check(chain.length >= 8, 'Kütle dengesi zinciri eksik');
+check(chain[0].balanceTon === 21 && chain.find((e) => e.type === 'NET_BILLET').balanceTon === 14, '21 → 14 ton zinciri kapanmadı');
+let bal = 0; let ok = true;
+chain.forEach((e) => { bal = Math.round((bal + e.deltaTon) * 10000) / 10000; if (Math.abs(bal - e.balanceTon) > 0.001) ok = false; });
+check(ok, 'Olay bakiyeleri ardışık değil');
+console.log(`✓ ${d.machines.length} makine · ${d.castingPaths.length} yol · ${d.events.length} olay · ${d.plcTags.length} PLC tag`);
 
 console.log(`\nSonuç: ${failures ? failures + ' HATA' : 'TÜM TESTLER GEÇTİ'}`);
 process.exit(failures ? 1 : 0);

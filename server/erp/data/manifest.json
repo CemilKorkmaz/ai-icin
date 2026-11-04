@@ -1,8 +1,8 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-11-02T19:37:52.583Z",
+  "schema_version": 2,
+  "generated_at": "2026-11-04T12:23:14.449Z",
   "source": "app/js/seed.js (node tools/export_seed.mjs)",
-  "note": "Koleksiyon dosyaları doğrudan kayıt dizisidir (settings.json tek nesnedir). Tam sistem snapshot'ı Ayarlar ekranından tek JSON olarak alınır.",
+  "note": "Koleksiyon dosyaları doğrudan kayıt dizisidir (settings.json tek nesnedir). schemaVersion 2: saha görüşmesiyle gelen makine parkı, döküm yolları, PLC, homojenizasyon, bakım ve olay günlüğü koleksiyonları eklendi. Olayların kalıcı hâli server/erp/archive/ altındadır.",
   "stages": [
     "Ergitme",
     "Döküm",
@@ -84,7 +84,7 @@
     {
       "file": "lots.json",
       "collection": "lots",
-      "records": 8
+      "records": 9
     },
     {
       "file": "shipments.json",
@@ -105,6 +105,91 @@
       "file": "users.json",
       "collection": "users",
       "records": 11
+    },
+    {
+      "file": "plants.json",
+      "collection": "plants",
+      "records": 3
+    },
+    {
+      "file": "machine-types.json",
+      "collection": "machineTypes",
+      "records": 6
+    },
+    {
+      "file": "machines.json",
+      "collection": "machines",
+      "records": 20
+    },
+    {
+      "file": "casting-paths.json",
+      "collection": "castingPaths",
+      "records": 5
+    },
+    {
+      "file": "plc-connections.json",
+      "collection": "plcConnections",
+      "records": 2
+    },
+    {
+      "file": "plc-tags.json",
+      "collection": "plcTags",
+      "records": 10
+    },
+    {
+      "file": "signal-states.json",
+      "collection": "signalStates",
+      "records": 14
+    },
+    {
+      "file": "homogenization-recipes.json",
+      "collection": "homogenizationRecipes",
+      "records": 3
+    },
+    {
+      "file": "homogenization-batches.json",
+      "collection": "homogenizationBatches",
+      "records": 4
+    },
+    {
+      "file": "cooling-batches.json",
+      "collection": "coolingBatches",
+      "records": 3
+    },
+    {
+      "file": "oil-rules.json",
+      "collection": "oilRules",
+      "records": 2
+    },
+    {
+      "file": "blade-rules.json",
+      "collection": "bladeRules",
+      "records": 2
+    },
+    {
+      "file": "maintenance-events.json",
+      "collection": "maintenanceEvents",
+      "records": 4
+    },
+    {
+      "file": "by-product-fates.json",
+      "collection": "byProductFates",
+      "records": 6
+    },
+    {
+      "file": "events.json",
+      "collection": "events",
+      "records": 14
+    },
+    {
+      "file": "inbox-queue.json",
+      "collection": "inboxQueue",
+      "records": 5
+    },
+    {
+      "file": "vendor-updates.json",
+      "collection": "vendorUpdates",
+      "records": 5
     },
     {
       "file": "activity.json",

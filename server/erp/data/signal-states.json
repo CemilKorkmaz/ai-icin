@@ -1,0 +1,114 @@
+[
+  {
+    "id": "SIG-01",
+    "machineId": "MCH-01",
+    "signal": "door",
+    "value": "closed",
+    "at": "2026-11-02T14:32:00+03:00",
+    "source": "PLC"
+  },
+  {
+    "id": "SIG-02",
+    "machineId": "MCH-01",
+    "signal": "casting",
+    "value": "pouring",
+    "at": "2026-11-02T14:32:00+03:00",
+    "source": "PLC"
+  },
+  {
+    "id": "SIG-03",
+    "machineId": "MCH-01",
+    "signal": "alarm",
+    "value": "ok",
+    "at": "2026-11-02T14:32:00+03:00",
+    "source": "PLC"
+  },
+  {
+    "id": "SIG-04",
+    "machineId": "MCH-01",
+    "signal": "running",
+    "value": "running",
+    "at": "2026-11-02T14:32:00+03:00",
+    "source": "PLC"
+  },
+  {
+    "id": "SIG-05",
+    "machineId": "MCH-08",
+    "signal": "door",
+    "value": "closed",
+    "at": "2026-11-02T14:32:00+03:00",
+    "source": "PLC"
+  },
+  {
+    "id": "SIG-06",
+    "machineId": "MCH-08",
+    "signal": "casting",
+    "value": "idle",
+    "at": "2026-11-02T14:32:00+03:00",
+    "source": "PLC"
+  },
+  {
+    "id": "SIG-07",
+    "machineId": "MCH-08",
+    "signal": "alarm",
+    "value": "fault",
+    "at": "2026-11-02T14:30:00+03:00",
+    "source": "PLC"
+  },
+  {
+    "id": "SIG-08",
+    "machineId": "MCH-08",
+    "signal": "running",
+    "value": "stopped",
+    "at": "2026-11-02T14:32:00+03:00",
+    "source": "PLC"
+  },
+  {
+    "id": "SIG-09",
+    "machineId": "MCH-10",
+    "signal": "alarm",
+    "value": "ok",
+    "at": "2026-11-02T14:32:00+03:00",
+    "source": "PLC"
+  },
+  {
+    "id": "SIG-10",
+    "machineId": "MCH-10",
+    "signal": "running",
+    "value": "running",
+    "at": "2026-11-02T14:32:00+03:00",
+    "source": "PLC"
+  },
+  {
+    "id": "SIG-11",
+    "machineId": "MCH-15",
+    "signal": "door",
+    "value": "open",
+    "at": "2026-11-02T14:20:00+03:00",
+    "source": "MANUAL"
+  },
+  {
+    "id": "SIG-12",
+    "machineId": "MCH-15",
+    "signal": "casting",
+    "value": "tilting",
+    "at": "2026-11-02T14:20:00+03:00",
+    "source": "MANUAL"
+  },
+  {
+    "id": "SIG-13",
+    "machineId": "MCH-15",
+    "signal": "alarm",
+    "value": "ok",
+    "at": "2026-11-02T14:20:00+03:00",
+    "source": "MANUAL"
+  },
+  {
+    "id": "SIG-14",
+    "machineId": "MCH-15",
+    "signal": "running",
+    "value": "running",
+    "at": "2026-11-02T14:20:00+03:00",
+    "source": "MANUAL"
+  }
+]

@@ -237,4 +237,44 @@ Acil durumlar için alternatif: ters tünel / relay (Tailscale Funnel benzeri) v
 | Kısayol ikonu? | PWA yükle / `.url` / kiosk; tek adres |
 | Tablet? | Aynı uygulama, responsive + dokunmatik + sürükle-bırak |
 
+
+
+---
+
+## 12. Saha Görüşmesi Sonrası Ek Kararlar
+
+İlk sohbetteki mimari soruların cevapları korunur; aşağıdaki kararlar mühendis görüşmesinden (`docs/06`) doğmuştur.
+
+### 12.1 İki çalışma modu
+
+Yazılım `MANUAL` ve `PLC` olmak üzere iki modda çalışır. `MANUAL` modda makinelerden hiç veri alınmaz, operatör bütün üretim verilerini kendisi girer; bu eksik bir sürüm değil, birinci sınıf bir çalışma biçimidir. `PLC` modda dört temel sinyal otomatik okunur. İki mod arasında yalnızca veri kaynağı değişir; hesap motoru, olay günlüğü, arşiv ve raporlar aynıdır.
+
+### 12.2 Dört sinyal kuralı
+
+HMI panelindeki onlarca sinyalin tamamı okunmaz. İlk fazda yalnızca kapı durumu, döküm modu ve devrilme durumu, alarm durumu ve çalışma durumu alınır. Alarm yalnızca "arıza var" bilgisini taşır; ateşleyici arızası gibi ayrıntılar ilk faza alınmaz. Amaç hem ekranı kalabalıklaştırmamak hem geliştirme yükünü artırmamaktır. Ayrıntılar `docs/08` içindedir.
+
+### 12.3 İki ayrı arayüz
+
+Fabrika operatörünün gördüğü ekran ile yazılımı geliştiren ekibin merkezi yönetim ekranı birbirinden ayrıdır. Merkezi ekranda fabrika ekleme, makine tanımlama, PLC IP adresi, protokol, veri adresi eşleştirmesi, modül yapılandırması ve uzaktan güncelleme yapılır; bu adresler operatör ekranında görünmez. Ekip yalnızca aletleri eşleştirir, sistem kendiliğinden çalışır.
+
+### 12.4 Modülerlik kime hizmet ediyor
+
+Program ilk açıldığında hiçbir makine tanımlı değildir. Ancak makineleri **fabrika çalışanı değil, geliştirici ekip** tanımlar. Yeni ocak alındığında uzaktan bağlanılır veya imzalı güncelleme gönderilir. Bu aynı zamanda sunulacak bakım hizmetidir. Her fabrikaya özel kod yazılmaz; fabrika profili `plantId` ile ayrılır.
+
+### 12.5 Olay tabanlı JSON arşivi ve kuyruk
+
+Konuşmada tarif edilen "tuşa basınca JSON'a kayıt düşer, merkezi yazılım 1 ilâ 3 saniyede tarar, hesaplar ve kaydı siler" akışı korunur; yalnızca son adım düzeltilir. Kayıt silinmez, önce kalıcı arşive yazılıp SHA-256 ile doğrulanır, sonra `archived` durumuna alınır. Kuyruk `ERP/inbox/`, arşiv `ERP/archive/YYYY/MM/{döküm kodu}/events.jsonl` altında ayrı tutulur. Her aşamadan bir olay satırı düşer; döküm kodu üzerinden bütün zincir geriye dönük okunur. Ayrıntılar `docs/09` içindedir.
+
+### 12.6 Merkezi bilgisayar
+
+İlk kurulum bir mini PC veya laptop üzerinde yapılır; Nginx, Docker veya bulut hesabı gerekmez. Önce merkezi yönetim altyapısı kurulur, sonra fabrika/makine tanımlama, JSON veri alışverişi ve üretim modülleri, en son gerçek PLC bağlantıları gelir. Kurulum sırası `docs/10` içindedir.
+
+| Karar | Önceki durum | Yeni durum |
+| --- | --- | --- |
+| PLC verisi | Telemetri + eşik + bakım SMS | İki mod, dört sinyal, merkezi tag eşleştirme |
+| Makine tanımları | Sabit ocak listesi (`furnaces.json`) | Boş başlangıç, modüler tipler, fabrika profili |
+| Arayüz | Tek operatör arayüzü | Operatör + merkezi yönetim |
+| JSON | Arşiv / aktarım / yedek | Arşiv + **olay günlüğü** + işlem kuyruğu |
+| Kurulum | On-premise sunucu | Mini PC ile başlangıç, aşamalı büyüme |
+
 Bu doküman, `docs/Dokumhane-ERP-Plan.docx` içinde de yer alır ve "yapay zekâya verilip genel yazılım altyapı şemasının oluşturulması" için gereken teknik girdiyi sağlar.

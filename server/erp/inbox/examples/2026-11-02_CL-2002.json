@@ -1,0 +1,23 @@
+{
+  "clientId": "CL-2002",
+  "type": "HOMOGEN_START",
+  "lotId": "DK-2026-0139",
+  "plantId": "P1",
+  "machineId": "MCH-10",
+  "ref": "HMB-2026-0041",
+  "createdAt": "2026-11-02T14:45:00+03:00",
+  "source": "HTML",
+  "actor": "U09",
+  "schemaVersion": 2,
+  "note": "Örnek: karışık parti start, planlanan 480 dk",
+  "payload": {
+    "batchId": "HMB-2026-0041",
+    "recipeId": "HR-01",
+    "plannedMinutes": 480,
+    "lots": [
+      { "lotId": "DK-2026-0131", "count": 20 },
+      { "lotId": "DK-2026-0132", "count": 15 },
+      { "lotId": "DK-2026-0133", "count": 10 }
+    ]
+  }
+}

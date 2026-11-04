@@ -1,0 +1,22 @@
+[
+  {
+    "id": "PLC-1",
+    "plantId": "P1",
+    "name": "Fırın hattı PLC",
+    "ip": "192.168.1.50",
+    "protocol": "OPC UA",
+    "port": 4840,
+    "pollSeconds": 3,
+    "active": true
+  },
+  {
+    "id": "PLC-2",
+    "plantId": "P3",
+    "name": "Ege hat PLC",
+    "ip": "192.168.2.50",
+    "protocol": "Modbus TCP",
+    "port": 502,
+    "pollSeconds": 3,
+    "active": false
+  }
+]

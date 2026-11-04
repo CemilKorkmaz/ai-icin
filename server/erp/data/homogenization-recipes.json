@@ -1,0 +1,29 @@
+[
+  {
+    "id": "HR-01",
+    "name": "6063 Standart",
+    "alloy": "6063",
+    "tempC": 575,
+    "plannedMinutes": 480,
+    "toleranceMin": 15,
+    "active": true
+  },
+  {
+    "id": "HR-02",
+    "name": "6061 Uzun",
+    "alloy": "6061",
+    "tempC": 585,
+    "plannedMinutes": 540,
+    "toleranceMin": 20,
+    "active": true
+  },
+  {
+    "id": "HR-03",
+    "name": "6063 Hızlı",
+    "alloy": "6063",
+    "tempC": 570,
+    "plannedMinutes": 420,
+    "toleranceMin": 10,
+    "active": true
+  }
+]

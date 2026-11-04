@@ -15,5 +15,9 @@
   "smsNumbers": "+9053x xxx xx 01, +9053x xxx xx 02",
   "reportMail": "yonetim@anadolu-aluminyum.local",
   "developerMail": "gelistirici@anadolu-aluminyum.local",
-  "lastBackup": "2026-11-02T03:00:00+03:00"
+  "lastBackup": "2026-11-02T03:00:00+03:00",
+  "activePlantId": "P1",
+  "pollSeconds": 3,
+  "geometryTolerancePct": 2,
+  "version": "1.0"
 }

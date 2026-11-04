@@ -1,0 +1,92 @@
+[
+  {
+    "id": "TAG-01",
+    "plcId": "PLC-1",
+    "machineId": "MCH-01",
+    "signal": "door",
+    "address": "ns=2;s=F1.DoorOpen",
+    "invert": false,
+    "label": "A Fırını Kapı"
+  },
+  {
+    "id": "TAG-02",
+    "plcId": "PLC-1",
+    "machineId": "MCH-01",
+    "signal": "casting",
+    "address": "ns=2;s=F1.Pouring",
+    "invert": false,
+    "label": "A Fırını Döküm Modu"
+  },
+  {
+    "id": "TAG-03",
+    "plcId": "PLC-1",
+    "machineId": "MCH-01",
+    "signal": "alarm",
+    "address": "ns=2;s=F1.FaultLamp",
+    "invert": false,
+    "label": "A Fırını Arıza Lambası"
+  },
+  {
+    "id": "TAG-04",
+    "plcId": "PLC-1",
+    "machineId": "MCH-01",
+    "signal": "running",
+    "address": "ns=2;s=F1.Running",
+    "invert": false,
+    "label": "A Fırını Çalışıyor"
+  },
+  {
+    "id": "TAG-05",
+    "plcId": "PLC-1",
+    "machineId": "MCH-08",
+    "signal": "door",
+    "address": "ns=2;s=SAW1.Guard",
+    "invert": false,
+    "label": "Testere 1 Koruma"
+  },
+  {
+    "id": "TAG-06",
+    "plcId": "PLC-1",
+    "machineId": "MCH-08",
+    "signal": "casting",
+    "address": "ns=2;s=SAW1.CutActive",
+    "invert": false,
+    "label": "Testere 1 Kesim"
+  },
+  {
+    "id": "TAG-07",
+    "plcId": "PLC-1",
+    "machineId": "MCH-08",
+    "signal": "alarm",
+    "address": "ns=2;s=SAW1.FaultLamp",
+    "invert": false,
+    "label": "Testere 1 Arıza Lambası"
+  },
+  {
+    "id": "TAG-08",
+    "plcId": "PLC-1",
+    "machineId": "MCH-08",
+    "signal": "running",
+    "address": "ns=2;s=SAW1.Running",
+    "invert": false,
+    "label": "Testere 1 Çalışıyor"
+  },
+  {
+    "id": "TAG-09",
+    "plcId": "PLC-1",
+    "machineId": "MCH-10",
+    "signal": "alarm",
+    "address": "ns=2;s=H1.FaultLamp",
+    "invert": false,
+    "label": "Homojen 1 Arıza Lambası"
+  },
+  {
+    "id": "TAG-10",
+    "plcId": "PLC-1",
+    "machineId": "MCH-10",
+    "signal": "running",
+    "address": "ns=2;s=H1.Running",
+    "invert": false,
+    "label": "Homojen 1 Çalışıyor"
+  }
+]

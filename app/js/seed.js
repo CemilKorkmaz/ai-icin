@@ -8,7 +8,7 @@ export const STAGES = [
 export const CATEGORY_ORDER = ['Hammadde', 'Sarf Malzeme', 'Yardımcı Malzeme', 'Yan Ürün', 'Mamul'];
 
 export const SEED = {
-  schemaVersion: 1,
+  schemaVersion: 2,
 
   settings: {
     company: 'Anadolu Alüminyum Dökümhane',
@@ -27,7 +27,11 @@ export const SEED = {
     smsNumbers: '+9053x xxx xx 01, +9053x xxx xx 02',
     reportMail: 'yonetim@anadolu-aluminyum.local',
     developerMail: 'gelistirici@anadolu-aluminyum.local',
-    lastBackup: '2026-11-02T03:00:00+03:00'
+    lastBackup: '2026-11-02T03:00:00+03:00',
+    activePlantId: 'P1',
+    pollSeconds: 3,
+    geometryTolerancePct: 2,
+    version: '1.0'
   },
 
   units: ['kg', 'ton', 'adet', 'litre', 'metre', 'paket', 'tüp', 'm³'],
@@ -258,14 +262,15 @@ export const SEED = {
   ],
 
   lots: [
-    { id: 'DK-2026-0131', code: 'DK-2026-0131', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 92, weightTon: 18.4, furnaceId: 'F20', recipeId: 'RCP-01', stage: 'Mamul Stok', status: 'Sevke Hazır', startedAt: '2026-10-30T05:40:00+03:00', stageStartedAt: '2026-10-31T12:20:00+03:00', paused: false, scrapTon: 0.22, remainingMetalTon: 1.6, remainingDecision: 'Ocakta bırakıldı', alerts: [], history: [{ stage: 'Ergitme', at: '2026-10-30T05:40:00+03:00' }, { stage: 'Döküm', at: '2026-10-30T07:55:00+03:00' }, { stage: 'Testere', at: '2026-10-30T10:10:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-10-30T13:00:00+03:00' }, { stage: 'Soğutma', at: '2026-10-30T19:00:00+03:00' }, { stage: 'Paketleme', at: '2026-10-31T10:00:00+03:00' }, { stage: 'Mamul Stok', at: '2026-10-31T12:20:00+03:00' }] },
-    { id: 'DK-2026-0132', code: 'DK-2026-0132', alloy: '6061', diameterMm: 152, lengthM: 6.0, billetCount: 88, weightTon: 14.6, furnaceId: 'F35', recipeId: 'RCP-03', stage: 'Mamul Stok', status: 'Sevke Hazır', startedAt: '2026-10-31T06:10:00+03:00', stageStartedAt: '2026-11-01T09:15:00+03:00', paused: false, scrapTon: 0.31, remainingMetalTon: 0, remainingDecision: 'Boş dökülüp hammaddeye', alerts: [], history: [{ stage: 'Ergitme', at: '2026-10-31T06:10:00+03:00' }, { stage: 'Döküm', at: '2026-10-31T08:30:00+03:00' }, { stage: 'Testere', at: '2026-10-31T11:00:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-10-31T14:00:00+03:00' }, { stage: 'Soğutma', at: '2026-10-31T21:00:00+03:00' }, { stage: 'Paketleme', at: '2026-11-01T08:00:00+03:00' }, { stage: 'Mamul Stok', at: '2026-11-01T09:15:00+03:00' }] },
-    { id: 'DK-2026-0133', code: 'DK-2026-0133', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 90, weightTon: 18.0, furnaceId: 'F20', recipeId: 'RCP-01', stage: 'Paketleme', status: 'Devam ediyor', startedAt: '2026-11-01T05:30:00+03:00', stageStartedAt: '2026-11-02T08:10:00+03:00', paused: false, scrapTon: 0.18, remainingMetalTon: 2.0, remainingDecision: 'Ocakta bırakıldı', alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-01T05:30:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T07:45:00+03:00' }, { stage: 'Testere', at: '2026-11-01T10:20:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T13:00:00+03:00' }, { stage: 'Soğutma', at: '2026-11-01T19:00:00+03:00' }, { stage: 'Paketleme', at: '2026-11-02T08:10:00+03:00' }] },
-    { id: 'DK-2026-0134', code: 'DK-2026-0134', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 86, weightTon: 17.2, furnaceId: 'F20', recipeId: 'RCP-01', stage: 'Soğutma', status: 'Devam ediyor', startedAt: '2026-11-01T12:00:00+03:00', stageStartedAt: '2026-11-02T07:20:00+03:00', paused: false, scrapTon: 0.27, remainingMetalTon: 0, remainingDecision: 'Başka ocağa aktarıldı', alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-01T12:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T14:30:00+03:00' }, { stage: 'Testere', at: '2026-11-01T17:00:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T20:00:00+03:00' }, { stage: 'Soğutma', at: '2026-11-02T07:20:00+03:00' }] },
-    { id: 'DK-2026-0135', code: 'DK-2026-0135', alloy: '6061', diameterMm: 152, lengthM: 6.0, billetCount: 80, weightTon: 13.5, furnaceId: 'F35', recipeId: 'RCP-03', stage: 'Homojenizasyon', status: 'Süre Aşımı', startedAt: '2026-11-01T18:00:00+03:00', stageStartedAt: '2026-11-01T22:00:00+03:00', paused: false, scrapTon: 0.44, remainingMetalTon: 3.2, remainingDecision: null, alerts: ['Homojenizasyon reçete süresi aşıldı'], history: [{ stage: 'Ergitme', at: '2026-11-01T18:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T20:10:00+03:00' }, { stage: 'Testere', at: '2026-11-01T21:20:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T22:00:00+03:00' }] },
-    { id: 'DK-2026-0136', code: 'DK-2026-0136', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 84, weightTon: 16.9, furnaceId: 'F20', recipeId: 'RCP-01', stage: 'Testere', status: 'Devam ediyor', startedAt: '2026-11-02T00:30:00+03:00', stageStartedAt: '2026-11-02T09:40:00+03:00', paused: false, scrapTon: 0.35, remainingMetalTon: 1.1, remainingDecision: null, alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-02T00:30:00+03:00' }, { stage: 'Döküm', at: '2026-11-02T03:00:00+03:00' }, { stage: 'Testere', at: '2026-11-02T09:40:00+03:00' }] },
-    { id: 'DK-2026-0137', code: 'DK-2026-0137', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 0, weightTon: 17.6, furnaceId: 'F35', recipeId: 'RCP-02', stage: 'Döküm', status: 'Devam ediyor', startedAt: '2026-11-02T04:00:00+03:00', stageStartedAt: '2026-11-02T08:05:00+03:00', paused: false, scrapTon: 0.12, remainingMetalTon: null, remainingDecision: null, alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-02T04:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-02T08:05:00+03:00' }] },
-    { id: 'DK-2026-0138', code: 'DK-2026-0138', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 0, weightTon: 20.0, furnaceId: 'F20', recipeId: 'RCP-01', stage: 'Ergitme', status: 'Devam ediyor', startedAt: '2026-11-02T06:10:00+03:00', stageStartedAt: '2026-11-02T06:10:00+03:00', paused: false, scrapTon: 0, remainingMetalTon: 3.0, remainingDecision: null, alerts: ['2. saatte karıştırma uyarısı'], history: [{ stage: 'Ergitme', at: '2026-11-02T06:10:00+03:00' }] }
+    { id: 'DK-2026-0131', code: 'DK-2026-0131', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 46, castLengthMm: 6300, netTon: 18.4, weightTon: 18.4, furnaceId: 'F20', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Mamul Stok', status: 'Sevke Hazır', startedAt: '2026-10-30T05:40:00+03:00', stageStartedAt: '2026-10-31T12:20:00+03:00', paused: false, scrapTon: 0.22, remainingMetalTon: 1.6, remainingDecision: 'Ocakta bırakıldı', alerts: [], history: [{ stage: 'Ergitme', at: '2026-10-30T05:40:00+03:00' }, { stage: 'Döküm', at: '2026-10-30T07:55:00+03:00' }, { stage: 'Testere', at: '2026-10-30T10:10:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-10-30T13:00:00+03:00' }, { stage: 'Soğutma', at: '2026-10-30T19:00:00+03:00' }, { stage: 'Paketleme', at: '2026-10-31T10:00:00+03:00' }, { stage: 'Mamul Stok', at: '2026-10-31T12:20:00+03:00' }] },
+    { id: 'DK-2026-0132', code: 'DK-2026-0132', alloy: '6061', diameterMm: 152, lengthM: 6.0, billetCount: 50, castLengthMm: 6300, netTon: 14.6, weightTon: 14.6, furnaceId: 'F35', pathId: 'CP-2', recipeId: 'RCP-03', stage: 'Mamul Stok', status: 'Sevke Hazır', startedAt: '2026-10-31T06:10:00+03:00', stageStartedAt: '2026-11-01T09:15:00+03:00', paused: false, scrapTon: 0.31, remainingMetalTon: 0, remainingDecision: 'Boş dökülüp hammaddeye', alerts: [], history: [{ stage: 'Ergitme', at: '2026-10-31T06:10:00+03:00' }, { stage: 'Döküm', at: '2026-10-31T08:30:00+03:00' }, { stage: 'Testere', at: '2026-10-31T11:00:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-10-31T14:00:00+03:00' }, { stage: 'Soğutma', at: '2026-10-31T21:00:00+03:00' }, { stage: 'Paketleme', at: '2026-11-01T08:00:00+03:00' }, { stage: 'Mamul Stok', at: '2026-11-01T09:15:00+03:00' }] },
+    { id: 'DK-2026-0133', code: 'DK-2026-0133', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 45, castLengthMm: 6300, netTon: 18.0, weightTon: 18.0, furnaceId: 'F20', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Paketleme', status: 'Devam ediyor', startedAt: '2026-11-01T05:30:00+03:00', stageStartedAt: '2026-11-02T08:10:00+03:00', paused: false, scrapTon: 0.18, remainingMetalTon: 2.0, remainingDecision: 'Ocakta bırakıldı', alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-01T05:30:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T07:45:00+03:00' }, { stage: 'Testere', at: '2026-11-01T10:20:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T13:00:00+03:00' }, { stage: 'Soğutma', at: '2026-11-01T19:00:00+03:00' }, { stage: 'Paketleme', at: '2026-11-02T08:10:00+03:00' }] },
+    { id: 'DK-2026-0134', code: 'DK-2026-0134', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 43, castLengthMm: 6300, netTon: 17.2, weightTon: 17.2, furnaceId: 'F20', pathId: 'CP-3', recipeId: 'RCP-01', stage: 'Soğutma', status: 'Devam ediyor', startedAt: '2026-11-01T12:00:00+03:00', stageStartedAt: '2026-11-02T07:20:00+03:00', paused: false, scrapTon: 0.27, remainingMetalTon: 0, remainingDecision: 'Başka ocağa aktarıldı', alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-01T12:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T14:30:00+03:00' }, { stage: 'Testere', at: '2026-11-01T17:00:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T20:00:00+03:00' }, { stage: 'Soğutma', at: '2026-11-02T07:20:00+03:00' }] },
+    { id: 'DK-2026-0135', code: 'DK-2026-0135', alloy: '6061', diameterMm: 152, lengthM: 6.0, billetCount: 46, castLengthMm: 6300, netTon: 13.5, weightTon: 13.5, furnaceId: 'F35', pathId: 'CP-2', recipeId: 'RCP-03', stage: 'Homojenizasyon', status: 'Süre Aşımı', startedAt: '2026-11-01T18:00:00+03:00', stageStartedAt: '2026-11-01T22:00:00+03:00', paused: false, scrapTon: 0.44, remainingMetalTon: 3.2, remainingDecision: null, alerts: ['Homojenizasyon reçete süresi aşıldı'], history: [{ stage: 'Ergitme', at: '2026-11-01T18:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T20:10:00+03:00' }, { stage: 'Testere', at: '2026-11-01T21:20:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T22:00:00+03:00' }] },
+    { id: 'DK-2026-0136', code: 'DK-2026-0136', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 42, castLengthMm: 6300, netTon: 16.9, weightTon: 16.9, furnaceId: 'F20', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Testere', status: 'Devam ediyor', startedAt: '2026-11-02T00:30:00+03:00', stageStartedAt: '2026-11-02T09:40:00+03:00', paused: false, scrapTon: 0.35, remainingMetalTon: 1.1, remainingDecision: null, alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-02T00:30:00+03:00' }, { stage: 'Döküm', at: '2026-11-02T03:00:00+03:00' }, { stage: 'Testere', at: '2026-11-02T09:40:00+03:00' }] },
+    { id: 'DK-2026-0137', code: 'DK-2026-0137', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 0, weightTon: 17.6, furnaceId: 'F35', pathId: 'CP-1', recipeId: 'RCP-02', stage: 'Döküm', status: 'Devam ediyor', startedAt: '2026-11-02T04:00:00+03:00', stageStartedAt: '2026-11-02T08:05:00+03:00', paused: false, scrapTon: 0.12, remainingMetalTon: null, remainingDecision: null, alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-02T04:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-02T08:05:00+03:00' }] },
+    { id: 'DK-2026-0139', code: 'DK-2026-0139', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 35, weightTon: 14.0, castLengthMm: 6300, netTon: 14.0, furnaceId: 'F20', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Mamul Stok', status: 'Sevke Hazır', startedAt: '2026-11-01T06:00:00+03:00', stageStartedAt: '2026-11-02T10:00:00+03:00', paused: false, scrapTon: 0.115, remainingMetalTon: 1.0, remainingDecision: 'Yollukta kaldı', alerts: [], note: 'Saha görüşmesi örneği: 21 t → 3 t aktarım → 1 t yolluk → 17 t döküm → 14 t net biyet', history: [{ stage: 'Ergitme', at: '2026-11-01T06:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T08:20:00+03:00' }, { stage: 'Testere', at: '2026-11-01T11:30:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T14:00:00+03:00' }, { stage: 'Soğutma', at: '2026-11-01T23:10:00+03:00' }, { stage: 'Paketleme', at: '2026-11-02T08:00:00+03:00' }, { stage: 'Mamul Stok', at: '2026-11-02T10:00:00+03:00' }] },
+    { id: 'DK-2026-0138', code: 'DK-2026-0138', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 0, weightTon: 20.0, furnaceId: 'F20', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Ergitme', status: 'Devam ediyor', startedAt: '2026-11-02T06:10:00+03:00', stageStartedAt: '2026-11-02T06:10:00+03:00', paused: false, scrapTon: 0, remainingMetalTon: 3.0, remainingDecision: null, alerts: ['2. saatte karıştırma uyarısı'], history: [{ stage: 'Ergitme', at: '2026-11-02T06:10:00+03:00' }] }
   ],
 
   shipments: [
@@ -305,6 +310,165 @@ export const SEED = {
     { id: 'U10', name: 'Burak Öz', username: 'b.oz', role: 'Sevkiyat Sorumlusu', department: 'Sevkiyat', active: true },
     { id: 'U11', name: 'Elif Arslan', username: 'e.arslan', role: 'Muhasebe / Fatura', department: 'Muhasebe', active: true },
     { id: 'U12', name: 'Geliştirici (VPN)', username: 'dev.readonly', role: 'Görüntüleyici', department: 'Dış Erişim', active: true }
+  ],
+
+  plants: [
+    { id: 'P1', code: 'FIRM1', name: 'Anadolu Alüminyum', city: 'Kocaeli', mode: 'PLC', active: true, note: '5 fırın, 2 döküm tablası, 4 homojen fırın, 2 testere, 1 sürekli homojenizasyon' },
+    { id: 'P2', code: 'FIRM2', name: 'Marmara Alüminyum', city: 'Bursa', mode: 'MANUAL', active: true, note: 'Döner ocak var; PLC bağlantısı istenmiyor, operatör veri giriyor' },
+    { id: 'P3', code: 'FIRM3', name: 'Ege Ekstrüzyon', city: 'İzmir', mode: 'PLC', active: false, note: 'Pasif demo profili' }
+  ],
+
+  machineTypes: [
+    { id: 'MT1', code: 'FURNACE', name: 'Ergitme / Döküm Ocağı', icon: 'flame', capacityUnit: 'ton', signals: ['door', 'casting', 'alarm', 'running'] },
+    { id: 'MT2', code: 'CAST_TABLE', name: 'Döküm Tablası', icon: 'layers', capacityUnit: 'hat', signals: ['casting', 'alarm', 'running'] },
+    { id: 'MT3', code: 'SAW', name: 'Testere', icon: 'scissors', capacityUnit: 'kesim', signals: ['alarm', 'running'] },
+    { id: 'MT4', code: 'HOMO_FURNACE', name: 'Homojenizasyon Fırını', icon: 'flame', capacityUnit: 'ton', signals: ['door', 'alarm', 'running'] },
+    { id: 'MT5', code: 'CONT_HOMO', name: 'Sürekli Homojenizasyon Hattı', icon: 'refresh', capacityUnit: 'ton/saat', signals: ['alarm', 'running'] },
+    { id: 'MT6', code: 'ROTARY', name: 'Döner Ocak', icon: 'recycle', capacityUnit: 'ton', signals: ['door', 'alarm', 'running'] }
+  ],
+
+  machines: [
+    { id: 'MCH-01', plantId: 'P1', type: 'FURNACE', name: 'A Fırını', capacityTon: 20, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
+    { id: 'MCH-02', plantId: 'P1', type: 'FURNACE', name: 'B Fırını', capacityTon: 35, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
+    { id: 'MCH-03', plantId: 'P1', type: 'FURNACE', name: 'C Fırını', capacityTon: 20, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2022-08-03' },
+    { id: 'MCH-04', plantId: 'P1', type: 'FURNACE', name: 'D Fırını', capacityTon: 35, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2023-02-19' },
+    { id: 'MCH-05', plantId: 'P1', type: 'FURNACE', name: 'E Fırını', capacityTon: 20, mode: 'PLC', plcId: 'PLC-1', active: false, installedAt: '2025-06-11' },
+    { id: 'MCH-06', plantId: 'P1', type: 'CAST_TABLE', name: 'Tabla 1', capacityTon: 1, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
+    { id: 'MCH-07', plantId: 'P1', type: 'CAST_TABLE', name: 'Tabla 2', capacityTon: 1, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2022-08-03' },
+    { id: 'MCH-08', plantId: 'P1', type: 'SAW', name: 'Testere 1', capacityTon: 0, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-05-02' },
+    { id: 'MCH-09', plantId: 'P1', type: 'SAW', name: 'Testere 2', capacityTon: 0, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2023-01-18' },
+    { id: 'MCH-10', plantId: 'P1', type: 'HOMO_FURNACE', name: 'Homojen 1', capacityTon: 25, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
+    { id: 'MCH-11', plantId: 'P1', type: 'HOMO_FURNACE', name: 'Homojen 2', capacityTon: 25, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
+    { id: 'MCH-12', plantId: 'P1', type: 'HOMO_FURNACE', name: 'Homojen 3', capacityTon: 25, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2022-09-14' },
+    { id: 'MCH-13', plantId: 'P1', type: 'HOMO_FURNACE', name: 'Homojen 4', capacityTon: 25, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2024-03-07' },
+    { id: 'MCH-14', plantId: 'P1', type: 'CONT_HOMO', name: 'Continue Homojen 1', capacityTon: 12, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2024-11-20' },
+    { id: 'MCH-15', plantId: 'P2', type: 'FURNACE', name: '1. Ocak', capacityTon: 20, mode: 'MANUAL', plcId: null, active: true, installedAt: '2019-03-05' },
+    { id: 'MCH-16', plantId: 'P2', type: 'FURNACE', name: '2. Ocak', capacityTon: 35, mode: 'MANUAL', plcId: null, active: true, installedAt: '2019-03-05' },
+    { id: 'MCH-17', plantId: 'P2', type: 'CAST_TABLE', name: 'Tabla 1', capacityTon: 1, mode: 'MANUAL', plcId: null, active: true, installedAt: '2019-03-05' },
+    { id: 'MCH-18', plantId: 'P2', type: 'SAW', name: 'Testere 1', capacityTon: 0, mode: 'MANUAL', plcId: null, active: true, installedAt: '2020-07-22' },
+    { id: 'MCH-19', plantId: 'P2', type: 'HOMO_FURNACE', name: 'Homojen 1', capacityTon: 25, mode: 'MANUAL', plcId: null, active: true, installedAt: '2020-07-22' },
+    { id: 'MCH-20', plantId: 'P2', type: 'ROTARY', name: 'Döner Ocak', capacityTon: 8, mode: 'MANUAL', plcId: null, active: true, installedAt: '2018-01-15' }
+  ],
+
+  castingPaths: [
+    { id: 'CP-1', plantId: 'P1', fromMachineId: 'MCH-01', tableId: 'MCH-06', label: 'Kısa yol', holdTon: 1.0, note: 'A Fırını, Tabla 1' },
+    { id: 'CP-2', plantId: 'P1', fromMachineId: 'MCH-02', tableId: 'MCH-06', label: 'Uzun yol', holdTon: 2.0, note: 'B Fırını, aynı tabla' },
+    { id: 'CP-3', plantId: 'P1', fromMachineId: 'MCH-02', tableId: 'MCH-07', label: 'Orta yol', holdTon: 1.5, note: 'B Fırını, Tabla 2' },
+    { id: 'CP-4', plantId: 'P2', fromMachineId: 'MCH-15', tableId: 'MCH-17', label: 'Kısa yol', holdTon: 0.8, note: 'PLC yok, operatör ölçer' },
+    { id: 'CP-5', plantId: 'P2', fromMachineId: 'MCH-16', tableId: 'MCH-17', label: 'Uzun yol', holdTon: 1.4, note: 'PLC yok, operatör ölçer' }
+  ],
+
+  plcConnections: [
+    { id: 'PLC-1', plantId: 'P1', name: 'Fırın hattı PLC', ip: '192.168.1.50', protocol: 'OPC UA', port: 4840, pollSeconds: 3, active: true },
+    { id: 'PLC-2', plantId: 'P3', name: 'Ege hat PLC', ip: '192.168.2.50', protocol: 'Modbus TCP', port: 502, pollSeconds: 3, active: false }
+  ],
+
+  plcTags: [
+    { id: 'TAG-01', plcId: 'PLC-1', machineId: 'MCH-01', signal: 'door', address: 'ns=2;s=F1.DoorOpen', invert: false, label: 'A Fırını Kapı' },
+    { id: 'TAG-02', plcId: 'PLC-1', machineId: 'MCH-01', signal: 'casting', address: 'ns=2;s=F1.Pouring', invert: false, label: 'A Fırını Döküm Modu' },
+    { id: 'TAG-03', plcId: 'PLC-1', machineId: 'MCH-01', signal: 'alarm', address: 'ns=2;s=F1.FaultLamp', invert: false, label: 'A Fırını Arıza Lambası' },
+    { id: 'TAG-04', plcId: 'PLC-1', machineId: 'MCH-01', signal: 'running', address: 'ns=2;s=F1.Running', invert: false, label: 'A Fırını Çalışıyor' },
+    { id: 'TAG-05', plcId: 'PLC-1', machineId: 'MCH-08', signal: 'door', address: 'ns=2;s=SAW1.Guard', invert: false, label: 'Testere 1 Koruma' },
+    { id: 'TAG-06', plcId: 'PLC-1', machineId: 'MCH-08', signal: 'casting', address: 'ns=2;s=SAW1.CutActive', invert: false, label: 'Testere 1 Kesim' },
+    { id: 'TAG-07', plcId: 'PLC-1', machineId: 'MCH-08', signal: 'alarm', address: 'ns=2;s=SAW1.FaultLamp', invert: false, label: 'Testere 1 Arıza Lambası' },
+    { id: 'TAG-08', plcId: 'PLC-1', machineId: 'MCH-08', signal: 'running', address: 'ns=2;s=SAW1.Running', invert: false, label: 'Testere 1 Çalışıyor' },
+    { id: 'TAG-09', plcId: 'PLC-1', machineId: 'MCH-10', signal: 'alarm', address: 'ns=2;s=H1.FaultLamp', invert: false, label: 'Homojen 1 Arıza Lambası' },
+    { id: 'TAG-10', plcId: 'PLC-1', machineId: 'MCH-10', signal: 'running', address: 'ns=2;s=H1.Running', invert: false, label: 'Homojen 1 Çalışıyor' }
+  ],
+
+  signalStates: [
+    { id: 'SIG-01', machineId: 'MCH-01', signal: 'door', value: 'closed', at: '2026-11-02T14:32:00+03:00', source: 'PLC' },
+    { id: 'SIG-02', machineId: 'MCH-01', signal: 'casting', value: 'pouring', at: '2026-11-02T14:32:00+03:00', source: 'PLC' },
+    { id: 'SIG-03', machineId: 'MCH-01', signal: 'alarm', value: 'ok', at: '2026-11-02T14:32:00+03:00', source: 'PLC' },
+    { id: 'SIG-04', machineId: 'MCH-01', signal: 'running', value: 'running', at: '2026-11-02T14:32:00+03:00', source: 'PLC' },
+    { id: 'SIG-05', machineId: 'MCH-08', signal: 'door', value: 'closed', at: '2026-11-02T14:32:00+03:00', source: 'PLC' },
+    { id: 'SIG-06', machineId: 'MCH-08', signal: 'casting', value: 'idle', at: '2026-11-02T14:32:00+03:00', source: 'PLC' },
+    { id: 'SIG-07', machineId: 'MCH-08', signal: 'alarm', value: 'fault', at: '2026-11-02T14:30:00+03:00', source: 'PLC' },
+    { id: 'SIG-08', machineId: 'MCH-08', signal: 'running', value: 'stopped', at: '2026-11-02T14:32:00+03:00', source: 'PLC' },
+    { id: 'SIG-09', machineId: 'MCH-10', signal: 'alarm', value: 'ok', at: '2026-11-02T14:32:00+03:00', source: 'PLC' },
+    { id: 'SIG-10', machineId: 'MCH-10', signal: 'running', value: 'running', at: '2026-11-02T14:32:00+03:00', source: 'PLC' },
+    { id: 'SIG-11', machineId: 'MCH-15', signal: 'door', value: 'open', at: '2026-11-02T14:20:00+03:00', source: 'MANUAL' },
+    { id: 'SIG-12', machineId: 'MCH-15', signal: 'casting', value: 'tilting', at: '2026-11-02T14:20:00+03:00', source: 'MANUAL' },
+    { id: 'SIG-13', machineId: 'MCH-15', signal: 'alarm', value: 'ok', at: '2026-11-02T14:20:00+03:00', source: 'MANUAL' },
+    { id: 'SIG-14', machineId: 'MCH-15', signal: 'running', value: 'running', at: '2026-11-02T14:20:00+03:00', source: 'MANUAL' }
+  ],
+
+  homogenizationRecipes: [
+    { id: 'HR-01', name: '6063 Standart', alloy: '6063', tempC: 575, plannedMinutes: 480, toleranceMin: 15, active: true },
+    { id: 'HR-02', name: '6061 Uzun', alloy: '6061', tempC: 585, plannedMinutes: 540, toleranceMin: 20, active: true },
+    { id: 'HR-03', name: '6063 Hızlı', alloy: '6063', tempC: 570, plannedMinutes: 420, toleranceMin: 10, active: true }
+  ],
+
+  homogenizationBatches: [
+    { id: 'HMB-001', code: 'HMB-2026-0041', plantId: 'P1', machineId: 'MCH-10', recipeId: 'HR-01', status: 'Süre Aşımı', startedAt: '2026-11-01T22:00:00+03:00', endedAt: '2026-11-02T07:00:00+03:00', plannedMinutes: 480, actualMinutes: 540, lots: [{ lotId: 'DK-2026-0135', count: 20 }], totalCount: 20, operator: 'U09', note: '8 saat doldu, fırın 1 saat daha çalıştı' },
+    { id: 'HMB-002', code: 'HMB-2026-0042', plantId: 'P1', machineId: 'MCH-11', recipeId: 'HR-01', status: 'Devam ediyor', startedAt: '2026-11-02T09:00:00+03:00', endedAt: null, plannedMinutes: 480, actualMinutes: null, lots: [{ lotId: 'DK-2026-0131', count: 20 }, { lotId: 'DK-2026-0132', count: 15 }, { lotId: 'DK-2026-0133', count: 10 }], totalCount: 45, operator: 'U09', note: 'Karışık parti: üç farklı döküm kodu' },
+    { id: 'HMB-003', code: 'HMB-2026-0043', plantId: 'P1', machineId: 'MCH-12', recipeId: 'HR-02', status: 'Tamamlandı', startedAt: '2026-11-01T06:00:00+03:00', endedAt: '2026-11-01T15:00:00+03:00', plannedMinutes: 540, actualMinutes: 540, lots: [{ lotId: 'DK-2026-0134', count: 30 }], totalCount: 30, operator: 'U09', note: 'Planlanan sürede tamamlandı' },
+    { id: 'HMB-004', code: 'HMB-2026-0044', plantId: 'P2', machineId: 'MCH-19', recipeId: 'HR-03', status: 'Tamamlandı', startedAt: '2026-10-31T08:00:00+03:00', endedAt: '2026-10-31T15:00:00+03:00', plannedMinutes: 420, actualMinutes: 420, lots: [{ lotId: 'DK-2026-0136', count: 25 }], totalCount: 25, operator: 'Operatör', note: 'PLC yok, süre operatör tarafından girildi' }
+  ],
+
+  coolingBatches: [
+    { id: 'CL-001', code: 'SGT-2026-0041', batchId: 'HMB-003', plantId: 'P1', method: 'Hava + su spreyi', targetTempC: 40, startedAt: '2026-11-01T15:10:00+03:00', endedAt: '2026-11-01T19:00:00+03:00', status: 'Tamamlandı', operator: 'U09' },
+    { id: 'CL-002', code: 'SGT-2026-0042', batchId: 'HMB-001', plantId: 'P1', method: 'Hava', targetTempC: 45, startedAt: '2026-11-02T07:10:00+03:00', endedAt: null, status: 'Devam ediyor', operator: 'U09' },
+    { id: 'CL-003', code: 'SGT-2026-0043', batchId: 'HMB-004', plantId: 'P2', method: 'Doğal soğutma', targetTempC: 50, startedAt: '2026-10-31T15:10:00+03:00', endedAt: '2026-10-31T21:00:00+03:00', status: 'Tamamlandı', operator: 'Operatör' }
+  ],
+
+  oilRules: [
+    { id: 'OIL-1', machineId: 'MCH-08', tankLitres: 120, cutsPerTank: 100, warnAt: 90, cutsSinceFill: 86, cutBasis: 'count', lastFillAt: '2026-11-01T08:00:00+03:00', active: true },
+    { id: 'OIL-2', machineId: 'MCH-09', tankLitres: 120, cutsPerTank: 150, warnAt: 140, cutsSinceFill: 42, cutBasis: 'count', lastFillAt: '2026-11-02T06:00:00+03:00', active: true }
+  ],
+
+  bladeRules: [
+    { id: 'BLD-1', machineId: 'MCH-08', maxCuts: 1200, warnAt: 1100, cutsSinceChange: 1140, bladeNo: 'B-2026-0088', bladeMm: 3, lastChangeAt: '2026-10-24T07:30:00+03:00', active: true },
+    { id: 'BLD-2', machineId: 'MCH-09', maxCuts: 1500, warnAt: 1400, cutsSinceChange: 310, bladeNo: 'B-2026-0091', bladeMm: 3, lastChangeAt: '2026-11-01T07:30:00+03:00', active: true }
+  ],
+
+  maintenanceEvents: [
+    { id: 'ME-001', kind: 'Yağ Dolumu', machineId: 'MCH-08', at: '2026-11-01T08:00:00+03:00', cutsAt: 100, user: 'U08', notes: 'Bir tank dolumu, sayaç sıfırlandı' },
+    { id: 'ME-002', kind: 'Bıçak Değişimi', machineId: 'MCH-08', at: '2026-10-24T07:30:00+03:00', cutsAt: 1200, user: 'U08', notes: 'B-2026-0087 söküldü, B-2026-0088 takıldı' },
+    { id: 'ME-003', kind: 'Bakıma Gönderildi', machineId: 'MCH-08', at: '2026-11-02T14:30:00+03:00', cutsAt: 1140, user: 'U08', notes: 'Arıza lambası yandı, ekip çağrıldı' },
+    { id: 'ME-004', kind: 'Yağ Dolumu', machineId: 'MCH-09', at: '2026-11-02T06:00:00+03:00', cutsAt: 150, user: 'U08', notes: 'Firma 2 eşiği farklı: 150 kesim' }
+  ],
+
+  byProductFates: [
+    { id: 'BF-1', materialId: 'B01', fate: 'recycle', destination: 'Döner ocak', note: 'Cüruf geri kazanımı' },
+    { id: 'BF-2', materialId: 'B02', fate: 'sale', destination: 'Stone (doğrulanacak)', note: 'Talaş eritilemez, dışarı satılır' },
+    { id: 'BF-3', materialId: 'B03', fate: 'remelt', destination: 'A Fırını', note: 'Kafa kesimi tekrar fırına' },
+    { id: 'BF-4', materialId: 'B04', fate: 'recycle', destination: 'Döküm yolluğu', note: 'Döngüsel artık' },
+    { id: 'BF-5', materialId: 'B05', fate: 'remelt', destination: 'Ergitme', note: 'Fire biyet' },
+    { id: 'BF-6', materialId: 'B06', fate: 'waste', destination: 'Atık sahası', note: 'Nem / yabancı madde' }
+  ],
+
+  events: [
+    { id: 'EV-0001', seq: 1, lotId: 'DK-2026-0139', plantId: 'P1', machineId: 'MCH-01', type: 'CAST_START', at: '2026-11-01T06:00:00+03:00', actor: 'U06', source: 'MANUAL', grossTon: 21, deltaTon: 21, balanceTon: 21, materialId: null, fate: 'product', ref: '', payload: { alloy: '6063', grossTon: 21 }, note: 'Şarj başlangıcı', clientId: 'CL-0001' },
+    { id: 'EV-0002', seq: 2, lotId: 'DK-2026-0139', plantId: 'P1', machineId: 'MCH-01', type: 'TRANSFER', at: '2026-11-01T07:10:00+03:00', actor: 'U06', source: 'MANUAL', grossTon: 21, deltaTon: -3, balanceTon: 18, materialId: null, fate: 'remelt', ref: '', payload: { toMachineId: 'MCH-02' }, note: '3 ton başka ocağa aktarıldı', clientId: 'CL-0002' },
+    { id: 'EV-0003', seq: 3, lotId: 'DK-2026-0139', plantId: 'P1', machineId: 'MCH-06', type: 'PATH_HOLD', at: '2026-11-01T08:20:00+03:00', actor: 'U07', source: 'MANUAL', grossTon: 18, deltaTon: -1, balanceTon: 17, materialId: 'B04', fate: 'recycle', ref: 'CP-1', payload: { pathId: 'CP-1', holdTon: 1 }, note: 'Kısa yol, yollukta 1 ton', clientId: 'CL-0003' },
+    { id: 'EV-0004', seq: 4, lotId: 'DK-2026-0139', plantId: 'P1', machineId: 'MCH-06', type: 'CAST_NET', at: '2026-11-01T08:25:00+03:00', actor: 'U07', source: 'MANUAL', grossTon: 17, deltaTon: 0, balanceTon: 17, materialId: null, fate: 'product', ref: '', payload: { diameterMm: 178, castLengthMm: 6300, count: 40 }, note: 'Fiilen dökülen 17 ton', clientId: 'CL-0004' },
+    { id: 'EV-0005', seq: 5, lotId: 'DK-2026-0139', plantId: 'P1', machineId: 'MCH-08', type: 'HEAD_CUT', at: '2026-11-01T11:30:00+03:00', actor: 'U08', source: 'MANUAL', grossTon: 17, deltaTon: -2.85, balanceTon: 14.15, materialId: 'B03', fate: 'remelt', ref: '', payload: { headMm: 300, headPerBillet: 2, headKg: 2850 }, note: 'Kafalar tekrar fırına', clientId: 'CL-0005' },
+    { id: 'EV-0006', seq: 6, lotId: 'DK-2026-0139', plantId: 'P1', machineId: 'MCH-08', type: 'SAWDUST', at: '2026-11-01T11:35:00+03:00', actor: 'U08', source: 'MANUAL', grossTon: 14.15, deltaTon: -0.035, balanceTon: 14.115, materialId: 'B02', fate: 'sale', ref: '', payload: { bladeMm: 3, cuts: 172, sawdustKg: 34.7 }, note: '3 mm bıçak talaşı, satışa', clientId: 'CL-0006' },
+    { id: 'EV-0007', seq: 7, lotId: 'DK-2026-0139', plantId: 'P1', machineId: 'MCH-08', type: 'SCRAP_BILLET', at: '2026-11-01T11:40:00+03:00', actor: 'U08', source: 'MANUAL', grossTon: 14.115, deltaTon: -0.115, balanceTon: 14, materialId: 'B05', fate: 'remelt', ref: '', payload: { scrapKg: 115, reason: 'Boy ölçüm hatası' }, note: 'Fire biyet', clientId: 'CL-0007' },
+    { id: 'EV-0008', seq: 8, lotId: 'DK-2026-0139', plantId: 'P1', machineId: 'MCH-08', type: 'NET_BILLET', at: '2026-11-01T11:45:00+03:00', actor: 'U08', source: 'MANUAL', grossTon: 14, deltaTon: 0, balanceTon: 14, materialId: 'M01', fate: 'product', ref: '', payload: { count: 35, productLengthMm: 6000, netTon: 14 }, note: '14 ton net biyet', clientId: 'CL-0008' },
+    { id: 'EV-0009', seq: 9, lotId: 'DK-2026-0139', plantId: 'P1', machineId: 'MCH-10', type: 'HOMOGEN_START', at: '2026-11-01T14:00:00+03:00', actor: 'U09', source: 'MANUAL', grossTon: 14, deltaTon: 0, balanceTon: 14, materialId: null, fate: 'product', ref: 'HMB-2026-0041', payload: { recipeId: 'HR-01', plannedMinutes: 480 }, note: 'Homojenizasyon start', clientId: 'CL-0009' },
+    { id: 'EV-0010', seq: 10, lotId: 'DK-2026-0139', plantId: 'P1', machineId: 'MCH-10', type: 'HOMOGEN_OVERRUN', at: '2026-11-01T22:00:00+03:00', actor: 'system', source: 'WORKER', grossTon: 14, deltaTon: 0, balanceTon: 14, materialId: null, fate: 'product', ref: 'HMB-2026-0041', payload: { elapsedMinutes: 480, plannedMinutes: 480 }, note: '8 saat doldu, fırın hâlâ çalışıyor', clientId: 'CL-0010' },
+    { id: 'EV-0011', seq: 11, lotId: 'DK-2026-0139', plantId: 'P1', machineId: 'MCH-10', type: 'HOMOGEN_END', at: '2026-11-01T23:00:00+03:00', actor: 'U09', source: 'MANUAL', grossTon: 14, deltaTon: 0, balanceTon: 14, materialId: null, fate: 'product', ref: 'HMB-2026-0041', payload: { actualMinutes: 540, overrunMinutes: 60 }, note: '9 saatte tamamlandı', clientId: 'CL-0011' },
+    { id: 'EV-0012', seq: 12, lotId: 'DK-2026-0139', plantId: 'P1', machineId: null, type: 'COOLING_END', at: '2026-11-01T23:10:00+03:00', actor: 'U09', source: 'MANUAL', grossTon: 14, deltaTon: 0, balanceTon: 14, materialId: null, fate: 'product', ref: 'SGT-2026-0041', payload: { method: 'Hava + su spreyi', targetTempC: 40 }, note: 'Soğutma tamamlandı', clientId: 'CL-0012' },
+    { id: 'EV-0013', seq: 13, lotId: 'DK-2026-0139', plantId: 'P1', machineId: 'MCH-08', type: 'OIL_WARNING', at: '2026-11-02T09:00:00+03:00', actor: 'system', source: 'WORKER', grossTon: 14, deltaTon: 0, balanceTon: 14, materialId: null, fate: null, ref: 'OIL-1', payload: { cutsSinceFill: 90, cutsPerTank: 100 }, note: 'Bakımcılara yağ dolum uyarısı', clientId: 'CL-0013' },
+    { id: 'EV-0014', seq: 14, lotId: 'DK-2026-0139', plantId: 'P1', machineId: 'MCH-08', type: 'SIGNAL_ALARM', at: '2026-11-02T14:30:00+03:00', actor: 'plc', source: 'PLC', grossTon: 14, deltaTon: 0, balanceTon: 14, materialId: null, fate: null, ref: 'TAG-07', payload: { value: 'fault' }, note: 'Testere 1 arıza lambası yandı', clientId: 'CL-0014' }
+  ],
+
+  inboxQueue: [
+    { id: 'IQ-0001', clientId: 'CL-1001', fileName: '2026-11-02_CL-1001.json', lotId: 'DK-2026-0139', type: 'NET_BILLET', status: 'archived', createdAt: '2026-11-02T14:00:00+03:00', processedAt: '2026-11-02T14:00:02+03:00', retryCount: 0, lastError: '' },
+    { id: 'IQ-0002', clientId: 'CL-1002', fileName: '2026-11-02_CL-1002.json', lotId: 'DK-2026-0138', type: 'CAST_START', status: 'pending', createdAt: '2026-11-02T14:34:00+03:00', processedAt: null, retryCount: 0, lastError: '' },
+    { id: 'IQ-0003', clientId: 'CL-1003', fileName: '2026-11-02_CL-1003.json', lotId: 'DK-2026-0137', type: 'PATH_HOLD', status: 'processing', createdAt: '2026-11-02T14:35:00+03:00', processedAt: null, retryCount: 0, lastError: '' },
+    { id: 'IQ-0004', clientId: 'CL-1004', fileName: '2026-11-02_CL-1004.json', lotId: 'DK-2026-0136', type: 'HEAD_CUT', status: 'archived', createdAt: '2026-11-02T14:20:00+03:00', processedAt: '2026-11-02T14:20:01+03:00', retryCount: 0, lastError: '' },
+    { id: 'IQ-0005', clientId: 'CL-1005', fileName: '2026-11-02_CL-1005.json', lotId: 'DK-2026-0135', type: 'HOMOGEN_END', status: 'dead', createdAt: '2026-11-02T13:10:00+03:00', processedAt: null, retryCount: 3, lastError: 'endedAt alanı eksik' }
+  ],
+
+  vendorUpdates: [
+    { id: 'VU-001', plantId: 'P1', version: '0.9.0', kind: 'Kurulum', note: 'Firma 1 profili ve 14 makine tanımlandı', appliedBy: 'Max', at: '2026-10-01T09:00:00+03:00' },
+    { id: 'VU-002', plantId: 'P1', version: '0.9.1', kind: 'Tag Eşlemesi', note: 'A Fırını dört PLC sinyali eşleştirildi', appliedBy: 'Max', at: '2026-10-03T11:20:00+03:00' },
+    { id: 'VU-003', plantId: 'P2', version: '0.9.2', kind: 'Makine Eklendi', note: 'Döner ocak modülü, PLC olmadan', appliedBy: 'Max', at: '2026-10-18T15:45:00+03:00' },
+    { id: 'VU-004', plantId: 'P1', version: '1.0.0', kind: 'Parametre Değişikliği', note: 'Uzun yol tutma miktarı 2,0 tona güncellendi', appliedBy: 'Max', at: '2026-11-01T10:00:00+03:00' },
+    { id: 'VU-005', plantId: 'P1', version: '1.0.0', kind: 'Modül Güncellemesi', note: 'Olay tabanlı arşiv ve kesim hesap motoru', appliedBy: 'Max', at: '2026-11-02T08:30:00+03:00' }
   ],
 
   activity: [

@@ -24,8 +24,17 @@ DATA = os.path.join(ROOT, 'data')
 COLLECTIONS = [
     'units', 'categories', 'materials', 'suppliers', 'purchase-orders', 'price-history',
     'receipts', 'crusher', 'movements', 'furnaces', 'recipes', 'lots', 'shipments',
-    'notifications', 'outbox', 'users', 'activity'
+    'notifications', 'outbox', 'users', 'activity',
+    # Saha görüşmesiyle eklenen koleksiyonlar (docs/05 Bölüm 1, schemaVersion 2)
+    'plants', 'machine-types', 'machines', 'casting-paths', 'plc-connections', 'plc-tags',
+    'signal-states', 'homogenization-recipes', 'homogenization-batches', 'cooling-batches',
+    'oil-rules', 'blade-rules', 'maintenance-events', 'by-product-fates', 'events',
+    'inbox-queue', 'vendor-updates'
 ]
+
+SIGNALS = {'door', 'casting', 'alarm', 'running'}
+FATES = {'remelt', 'recycle', 'sale', 'waste', 'product'}
+QUEUE_STATES = {'pending', 'processing', 'archived', 'dead', 'duplicate'}
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -136,6 +145,121 @@ def main() -> int:
                 errors.append(f'shipments/{s.get("id")}: döküm kodu yok → {lid}')
         if s.get('materialId') and s['materialId'] not in mats:
             errors.append(f'shipments/{s.get("id")}: malzeme yok → {s.get("materialId")}')
+
+    # ---------- Saha görüşmesi koleksiyonları (schemaVersion 2) ----------
+    plants = ids(data['plants'])
+    types = {t.get('code') for t in data['machine-types']}
+    machines = ids(data['machines'])
+    paths = ids(data['casting-paths'])
+    plcs = ids(data['plc-connections'])
+    recipes_h = ids(data['homogenization-recipes'])
+    batches = ids(data['homogenization-batches'])
+
+    for pl in data['plants']:
+        if pl.get('mode') not in ('MANUAL', 'PLC'):
+            errors.append(f'plants/{pl.get("id")}: geçersiz çalışma modu → {pl.get("mode")}')
+    for m in data['machines']:
+        ref('machines', m, 'plantId', plants, 'fabrika')
+        ref('machines', m, 'plcId', plcs, 'PLC bağlantısı')
+        if m.get('type') not in types:
+            errors.append(f'machines/{m.get("id")}: makine tipi yok → {m.get("type")}')
+        if m.get('mode') not in ('MANUAL', 'PLC'):
+            errors.append(f'machines/{m.get("id")}: geçersiz mod → {m.get("mode")}')
+        if float(m.get('capacityTon') or 0) < 0:
+            errors.append(f'machines/{m.get("id")}: negatif kapasite')
+    for cp in data['casting-paths']:
+        ref('casting-paths', cp, 'plantId', plants, 'fabrika')
+        ref('casting-paths', cp, 'fromMachineId', machines, 'kaynak ocak')
+        ref('casting-paths', cp, 'tableId', machines, 'döküm tablası')
+        if float(cp.get('holdTon') or 0) < 0:
+            errors.append(f'casting-paths/{cp.get("id")}: negatif tutma miktarı')
+    for c in data['plc-connections']:
+        ref('plc-connections', c, 'plantId', plants, 'fabrika')
+        if not c.get('ip'):
+            errors.append(f'plc-connections/{c.get("id")}: IP adresi eksik')
+        if int(c.get('port') or 0) <= 0:
+            errors.append(f'plc-connections/{c.get("id")}: geçersiz port')
+    tag_signals = set()
+    for t in data['plc-tags']:
+        ref('plc-tags', t, 'plcId', plcs, 'PLC bağlantısı')
+        ref('plc-tags', t, 'machineId', machines, 'makine')
+        tag_signals.add(t.get('signal'))
+        if t.get('signal') not in SIGNALS:
+            errors.append(f'plc-tags/{t.get("id")}: dört sinyal kuralı dışında → {t.get("signal")}')
+        if not t.get('address'):
+            errors.append(f'plc-tags/{t.get("id")}: PLC adresi boş')
+    if tag_signals - SIGNALS:
+        warnings.append('Dört sinyal kuralı dışında tag var: ' + ', '.join(sorted(tag_signals - SIGNALS)))
+    for st in data['signal-states']:
+        ref('signal-states', st, 'machineId', machines, 'makine')
+        if st.get('signal') not in SIGNALS:
+            errors.append(f'signal-states/{st.get("id")}: geçersiz sinyal → {st.get("signal")}')
+    for hr in data['homogenization-recipes']:
+        if int(hr.get('plannedMinutes') or 0) <= 0:
+            errors.append(f'homogenization-recipes/{hr.get("id")}: planlanan süre sıfır')
+    for b in data['homogenization-batches']:
+        ref('homogenization-batches', b, 'machineId', machines, 'homojenizasyon fırını')
+        ref('homogenization-batches', b, 'recipeId', recipes_h, 'homojenizasyon reçetesi')
+        for l in b.get('lots', []):
+            if l.get('lotId') not in lots:
+                errors.append(f'homogenization-batches/{b.get("id")}: döküm kodu yok → {l.get("lotId")}')
+        total = sum(int(x.get('count') or 0) for x in b.get('lots', []))
+        if total != int(b.get('totalCount') or 0):
+            errors.append(f'homogenization-batches/{b.get("id")}: adet toplamı {total} ≠ totalCount {b.get("totalCount")}')
+        if b.get('endedAt') and b.get('actualMinutes') is not None:
+            over = int(b['actualMinutes']) - int(b.get('plannedMinutes') or 0)
+            if over > 0 and b.get('status') != 'Süre Aşımı':
+                errors.append(f'homogenization-batches/{b.get("id")}: süre aşımı durumu işaretlenmemiş')
+    for cb in data['cooling-batches']:
+        ref('cooling-batches', cb, 'batchId', batches, 'homojenizasyon partisi')
+    for oil in data['oil-rules']:
+        ref('oil-rules', oil, 'machineId', machines, 'makine')
+        if int(oil.get('cutsPerTank') or 0) <= 0:
+            errors.append(f'oil-rules/{oil.get("id")}: kesim/dolum sıfır')
+        if int(oil.get('warnAt') or 0) > int(oil.get('cutsPerTank') or 0):
+            errors.append(f'oil-rules/{oil.get("id")}: uyarı eşiği tank kapasitesinden büyük')
+    for bl in data['blade-rules']:
+        ref('blade-rules', bl, 'machineId', machines, 'makine')
+        if int(bl.get('maxCuts') or 0) <= 0:
+            errors.append(f'blade-rules/{bl.get("id")}: bıçak ömrü sıfır')
+        if int(bl.get('warnAt') or 0) > int(bl.get('maxCuts') or 0):
+            errors.append(f'blade-rules/{bl.get("id")}: uyarı eşiği ömürden büyük')
+    for me in data['maintenance-events']:
+        ref('maintenance-events', me, 'machineId', machines, 'makine')
+    for bf in data['by-product-fates']:
+        ref('by-product-fates', bf, 'materialId', mats, 'malzeme')
+        if bf.get('fate') not in FATES:
+            errors.append(f'by-product-fates/{bf.get("id")}: geçersiz akıbet → {bf.get("fate")}')
+
+    # Olay günlüğü: lot bazında bakiye sürekliliği (docs/09)
+    by_lot = defaultdict(list)
+    for ev in data['events']:
+        lid = ev.get('lotId')
+        if lid != '—' and lid not in lots:
+            errors.append(f'events/{ev.get("id")}: döküm kodu yok → {lid}')
+        if ev.get('fate') and ev['fate'] not in FATES:
+            errors.append(f'events/{ev.get("id")}: geçersiz akıbet → {ev.get("fate")}')
+        by_lot[lid].append(ev)
+    for lid, rows in by_lot.items():
+        rows.sort(key=lambda e: int(e.get('seq') or 0))
+        prev = 0.0
+        for ev in rows:
+            expected = round(prev + float(ev.get('deltaTon') or 0), 4)
+            actual = round(float(ev.get('balanceTon') or 0), 4)
+            if abs(expected - actual) > 0.001:
+                errors.append(f'events/{ev.get("id")} ({lid}): bakiye {actual} ≠ beklenen {expected}')
+            prev = actual
+    for q in data['inbox-queue']:
+        if q.get('status') not in QUEUE_STATES:
+            errors.append(f'inbox-queue/{q.get("id")}: geçersiz kuyruk durumu → {q.get("status")}')
+        if not q.get('clientId'):
+            errors.append(f'inbox-queue/{q.get("id")}: clientId eksik (idempotency)')
+    for vu in data['vendor-updates']:
+        ref('vendor-updates', vu, 'plantId', plants, 'fabrika')
+
+    print(f'  ✓ {len(data["machines"])} makine · {len(data["casting-paths"])} döküm yolu · '
+          f'{len(data["events"])} olay · {len(data["inbox-queue"])} kuyruk kaydı · '
+          f'{len(data["plc-tags"])} PLC tag')
 
     # Bilgilendirici: hareket toplamı ile anlık stok fotoğrafı farkı
     totals = defaultdict(float)
