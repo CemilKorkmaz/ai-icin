@@ -1,0 +1,44 @@
+[
+  {
+    "id": "ADP-simulated",
+    "code": "simulated",
+    "label": "Simülasyon / MANUAL",
+    "protocol": "Yerel",
+    "implemented": true,
+    "capabilities": [
+      "connect",
+      "test",
+      "readFourSignals",
+      "disconnect"
+    ],
+    "note": "Saha kurulumunda ağ olmadan dört sinyali üretir; her fabrikada yedek moddur"
+  },
+  {
+    "id": "ADP-opcua",
+    "code": "opcua",
+    "label": "OPC UA",
+    "protocol": "OPC UA",
+    "implemented": false,
+    "capabilities": [
+      "connect",
+      "test",
+      "readFourSignals",
+      "disconnect"
+    ],
+    "note": "Gerçek sürücü docs/10 aşama 9'da aynı sözleşmeyle takılır"
+  },
+  {
+    "id": "ADP-modbus",
+    "code": "modbus",
+    "label": "Modbus TCP",
+    "protocol": "Modbus",
+    "implemented": false,
+    "capabilities": [
+      "connect",
+      "test",
+      "readFourSignals",
+      "disconnect"
+    ],
+    "note": "Gerçek sürücü docs/10 aşama 9'da aynı sözleşmeyle takılır"
+  }
+]

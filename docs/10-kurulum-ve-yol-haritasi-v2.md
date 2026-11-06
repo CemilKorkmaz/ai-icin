@@ -2,7 +2,7 @@
 
 Bu doküman, saha görüşmesinin sonundaki isteğe cevap verir: "Sen yapın nasıl kuracağımızı bir bul bakayım... Biz bir mini PC, bu senin laptopun olur, sistemi kuracağız, çalıştıracağız. Ama bizim merkezi yönetimi önce yapmamız gerekiyor." Ayrıca düzenleme sitesinin önerdiği geliştirme sırası, yeni görüşmedeki bulgularla birlikte güncellenir.
 
-Önceki `docs/03` içindeki Faz 0–5 sırası korunur; bu doküman onu **çok fabrikalı, modüler ve olay tabanlı** ürün yapısına göre yeniden sıralar. Sürüm 1.1'de genel ERP karşılaştırmasıyla (`docs/11`) ticari ve finansal katman eklenmiş, aşama sırası korunmuştur. Şekil ve şema çizilmez.
+Önceki `docs/03` içindeki Faz 0–5 sırası korunur; bu doküman onu **çok fabrikalı, modüler ve olay tabanlı** ürün yapısına göre yeniden sıralar. Sürüm 1.1'de genel ERP karşılaştırmasıyla (`docs/11`) ticari ve finansal katman, Sürüm 1.2'de modüler saha kurulumu (`docs/12`) eklenmiş, aşama sırası korunmuştur. Şekil ve şema çizilmez.
 
 ---
 
@@ -145,3 +145,8 @@ Bu güncelleme `docs/06` içindeki sekiz açık soruyu kapatmaz; özellikle 17 t
 
 Sohbetin en baştaki hedefi olan "tüm işlevleri bir Word'e döküp yapay zekâya atıp genel yazılım altyapı şemasını oluşturmak" adımı için girdi güncellenmiştir: `docs/Dokumhane-ERP-Plan.docx` artık `00` ile `11` arasındaki on iki dokümanı kapsar.
 
+### 4.2 Sürüm 1.2 eki: gerçek fabrikaya kolay bağlanma
+
+Sürüm 1.2 aşama sırasını değiştirmez; **aşama 1'de sahada yapılan işi kısaltır**. Önceden fabrikaya özel makine listesi koda yazılıyordu; artık fabrika kartı, makineler, döküm yolları, PLC eşlemesi, eşikler ve açık modüller tek bir profil paketidir. Kurulum sihirbazı beş adımda bu veriyi toplar, bağlantıyı test eder ve profili tek işlemde uygular. Başka bir fabrikaya gidildiğinde hazır paket içe alınır veya fırın sayısı değiştirilerek kopyalanır; 5 fırınlı bir profilden 1 fırınlı veya 2 fırınlı fabrika üretilebilir.
+
+Makine sökülmesi de sahada yapılan bir iştir ve artık kayıt silme değildir: bağımlılık raporu gösterilir, gerekçe alınır, makine devre dışı işaretlenir, geçmiş korunur, gerekiyorsa geri alınır. Modül kaydı menüyü ve entegrasyon kurallarını fabrikaya göre filtreler. Adaptör sözleşmesi, gerçek OPC UA / Modbus sürücüsü takılana kadar `MANUAL` yedekle çalışmayı garanti eder. Bu ek, aşama 8'deki gerçek veritabanı/API ve aşama 9'daki gerçek sürücü işlerini ortadan kaldırmaz; yalnızca onların aynı veri sözleşmesiyle takılmasını sağlar. Ayrıntılar `docs/12` Bölüm 12'dedir.

@@ -2,7 +2,8 @@
 // docs/06 (düzeltilmiş metin), docs/07 (hesap motoru), docs/08 (modüler makine),
 // docs/09 (olay arşivi) ve docs/10 (kurulum) bu dosyanın gereksinim kaynağıdır.
 
-import { D, store, uid, nowISO, addActivity, addNotification } from '../store.js';
+import { D, store, uid, nowISO, addActivity, addNotification, activePlantId, machinesOfType, firstMachineId } from '../store.js';
+import { machineRefs, decommissionMachine, recommissionMachine, isModuleEnabled } from '../modularity.js';
 import { icon } from '../icons.js';
 import {
   esc, fmtNum, fmtDateTime, fmtDate, pill, field, input, select, formData,
@@ -31,7 +32,7 @@ const refresh = () => window.App.refresh();
 const currentPlant = () => {
   const d = D();
   if (activePlant && d.plants.some((p) => p.id === activePlant)) return activePlant;
-  return d.settings.activePlantId || d.plants[0]?.id || 'P1';
+  return activePlantId(d);
 };
 
 /* ==================================================================== */
@@ -52,7 +53,7 @@ export const machinesView = {
     })).filter((g) => g.rows.length);
 
     return `
-      <div class="info-banner">${icon('cpu', 18)}<span>Program ilk açıldığında <strong>hiçbir makine tanımlı değildir</strong>. Makineler modül modül eklenir; ancak bu yapı <strong>fabrika operatörü için değil, yazılımı geliştiren ekip içindir</strong>. Yeni ocak alındığında yapılandırma Merkezi Yönetim ekranından uzaktan uygulanır.</span></div>
+      <div class="info-banner">${icon('cpu', 18)}<span>Makineler <strong>eklenir, düzenlenir ve devre dışı bırakılır</strong>; hiçbir kayıt silinmez. Çıkarma öncesi bağımlılık raporu gösterilir. Program ilk açıldığında <strong>hiçbir makine tanımlı değildir</strong>. Makineler modül modül eklenir; ancak bu yapı <strong>fabrika operatörü için değil, yazılımı geliştiren ekip içindir</strong>. Yeni ocak alındığında yapılandırma Merkezi Yönetim ekranından uzaktan uygulanır.</span></div>
 
       <div class="stat-strip">
         <div><span>Aktif Fabrika</span><strong>${esc(plant.name || '—')}</strong></div>
@@ -60,6 +61,7 @@ export const machinesView = {
         <div><span>Tanımlı Makine</span><strong>${machines.length}</strong></div>
         <div><span>Aktif</span><strong class="text-ok">${machines.filter((m) => m.active).length}</strong></div>
         <div><span>Makine Tipi</span><strong>${d.machineTypes.length}</strong></div>
+        <div><span>Devre Dışı</span><strong class="text-warn">${machines.filter((m) => m.decommissionedAt).length}</strong></div>
       </div>
 
       <section class="card">
@@ -83,11 +85,14 @@ export const machinesView = {
                 <div class="cell-sub">${esc(m.id)} · ${m.capacityTon > 0 ? `${fmtNum(m.capacityTon)} ${esc(g.type.capacityUnit)}` : 'Kapasite yok'}</div>
                 <div class="toolbar" style="margin:10px 0 0">
                   ${pill(m.mode === 'PLC' ? 'PLC' : 'Manuel', m.mode === 'PLC' ? 'cyan' : 'neutral')}
-                  ${pill(m.active ? 'Aktif' : 'Pasif', m.active ? 'ok' : 'warn')}
+                  ${pill(m.decommissionedAt ? 'Devre Dışı' : m.active ? 'Aktif' : 'Pasif', m.decommissionedAt ? 'danger' : m.active ? 'ok' : 'warn')}
                   <span class="toolbar-spacer"></span>
-                  <button class="btn btn-ghost btn-sm" data-mch-toggle="${esc(m.id)}">${icon('refresh', 13)}</button>
-                  <button class="btn btn-ghost btn-sm" data-mch-edit="${esc(m.id)}">${icon('edit', 13)}</button>
+                  <button class="btn btn-ghost btn-sm" data-mch-edit="${esc(m.id)}" title="Düzenle">${icon('edit', 13)}</button>
+                  ${m.decommissionedAt
+                    ? `<button class="btn btn-ghost btn-sm" data-mch-back="${esc(m.id)}" title="Geri al">${icon('refresh', 13)}</button>`
+                    : `<button class="btn btn-ghost btn-sm" data-mch-remove="${esc(m.id)}" title="Devre dışı bırak">${icon('x', 13)}</button>`}
                 </div>
+                ${m.decommissionedAt ? `<div class="micro muted" style="margin-top:8px">${esc(m.decommissionReason || '')}</div>` : ''}
               </div>`).join('')}
           </div>
         </section>`).join('') : `<section class="card">${emptyState('Bu fabrikada henüz makine yok. Kurulum sihirbazı ile ekleyin.', 'cpu')}</section>`}
@@ -115,12 +120,15 @@ export const machinesView = {
         body: `<div class="detail-grid"><div class="detail-item"><span>Kod</span><strong>${esc(p.code || '—')}</strong></div><div class="detail-item"><span>Mod</span><strong>${esc(p.mode || '—')}</strong></div></div><p class="detail-desc">${esc(p.note || 'Özel kural tanımlanmadı.')}</p>`,
         actions: [{ label: 'Kapat', onClick: (_e, close) => close() }] });
     });
-    root.querySelectorAll('[data-mch-toggle]').forEach((b) => b.addEventListener('click', () => {
-      const id = b.dataset.mchToggle;
-      store.change((d) => { const m = d.machines.find((x) => x.id === id); if (m) m.active = !m.active; addActivity(`${id} ${D().machines.find((x) => x.id === id)?.active ? 'aktif' : 'pasif'} yapıldı`, 'cpu'); });
-      toast('Makine durumu güncellendi'); refresh();
-    }));
     root.querySelectorAll('[data-mch-edit]').forEach((b) => b.addEventListener('click', () => openMachineModal(b.dataset.mchEdit)));
+    root.querySelectorAll('[data-mch-remove]').forEach((b) => b.addEventListener('click', () => openDecommissionModal(b.dataset.mchRemove)));
+    root.querySelectorAll('[data-mch-back]').forEach((b) => b.addEventListener('click', () => {
+      store.change((d) => {
+        recommissionMachine(d, b.dataset.mchBack);
+        addActivity(`${b.dataset.mchBack} yeniden makine parkına alındı`, 'cpu');
+      });
+      toast('Makine yeniden aktif'); refresh();
+    }));
     root.querySelector('#mch-new')?.addEventListener('click', () => openMachineModal(null));
   }
 };
@@ -152,7 +160,8 @@ function openMachineModal(id) {
           else data.machines.push({
             id: uid('MCH'), plantId: f.plantId, type: f.type, name: f.name,
             capacityTon: Number(f.capacityTon) || 0, mode: f.mode, plcId: f.plcId || null,
-            active: true, installedAt: nowISO().slice(0, 10)
+            active: true, status: 'Aktif', decommissionedAt: null, decommissionReason: '',
+            installedAt: nowISO().slice(0, 10)
           });
           data.vendorUpdates.unshift({ id: uid('VU'), plantId: f.plantId, version: data.settings.version || '1.0',
             kind: m ? 'Parametre Değişikliği' : 'Makine Eklendi', note: `${f.name} (${f.type}) ${m ? 'güncellendi' : 'eklendi'}`, appliedBy: 'Max', at: nowISO() });
@@ -160,6 +169,46 @@ function openMachineModal(id) {
         });
         activePlant = f.plantId;
         close(); toast(m ? 'Makine güncellendi' : 'Makine eklendi, sistem otomatik çalışacak'); refresh();
+      } }
+    ]
+  });
+}
+
+
+/** Makine silinmez; önce bağımlılıklar gösterilir, sonra devre dışı işaretlenir (docs/12 Bölüm 3). */
+function openDecommissionModal(id) {
+  const d = D();
+  const m = d.machines.find((x) => x.id === id);
+  if (!m) return;
+  const refs = machineRefs(d, id);
+  const groups = [...new Set(refs.map((r) => r.collection))].map((c) => ({
+    collection: c, label: refs.find((r) => r.collection === c).label,
+    rows: refs.filter((r) => r.collection === c)
+  }));
+  modal({
+    title: 'Makineyi Devre Dışı Bırak', subtitle: `${m.name} · ${m.id} · ${m.type}`, size: 'wide',
+    body: `<div class="info-banner">${icon('alert', 17)}<span><strong>Kayıt silinmez.</strong> Makine pasife alınır; geçmiş olaylar, bakım kayıtları ve döküm kodları korunur. Bağımlı ${refs.length} kayıt etkilenmez, yalnızca referans olarak kalır.</span></div>
+      <div class="stat-strip">
+        <div><span>Bağımlı Kayıt</span><strong>${refs.length}</strong></div>
+        <div><span>Etkilenen Koleksiyon</span><strong>${groups.length}</strong></div>
+        <div><span>Makine Tipi</span><strong>${esc(m.type)}</strong></div>
+      </div>
+      ${groups.length ? `<div class="table-wrap"><table class="data"><thead><tr><th>Koleksiyon</th><th>Kayıt</th><th>Kayıt Kimliği</th><th>Alan</th></tr></thead>
+        <tbody>${groups.map((g) => g.rows.map((r) => `<tr><td>${esc(g.label)}</td><td class="cell-sub">${esc(g.collection)}</td><td class="cell-strong">${esc(r.recordId)}</td><td>${esc(r.field)}</td></tr>`).join('')).join('')}</tbody></table></div>`
+        : `<div class="micro muted">Bu makineye bağlı kayıt yok; güvenle devre dışı bırakılabilir.</div>`}
+      ${field('Gerekçe', input('reason', 'Söküldü / kullanım dışı', { placeholder: 'Örn. yeni hat kuruldu, eski ocak söküldü' }))}
+      <p class="micro muted" style="margin-top:10px">Geri almak için kart üzerindeki geri alma düğmesi kullanılır; fabrika profili paketi bu değişikliği de taşır.</p>`,
+    actions: [
+      { label: 'Vazgeç', onClick: (_e, close) => close() },
+      { label: 'Devre Dışı Bırak', kind: 'danger', icon: 'x', onClick: (el, close) => {
+        const f = formData(el);
+        store.change((data) => {
+          decommissionMachine(data, id, f.reason);
+          data.vendorUpdates.unshift({ id: uid('VU'), plantId: m.plantId, version: data.settings.version || '1.2',
+            kind: 'Makine Çıkarıldı', note: `${m.name} devre dışı bırakıldı (${refs.length} bağımlı kayıt korundu)`, appliedBy: 'Max', at: nowISO() });
+          addActivity(`${m.name} devre dışı bırakıldı, ${refs.length} kayıt korundu`, 'cpu');
+        });
+        close(); refresh(); toast('Makine silinmedi, devre dışı olarak işaretlendi', 'info');
       } }
     ]
   });
@@ -368,7 +417,7 @@ export const cuttingView = {
       if (!r) return;
       store.change((d) => {
         const seq0 = d.events.filter((e) => e.lotId === r.lotId).length;
-        const base = { lotId: r.lotId, plantId: d.settings.activePlantId || 'P1', machineId: 'MCH-08', actor: 'Siz', source: 'MANUAL', at: nowISO(), grossTon: 0, deltaTon: 0, balanceTon: 0, ref: '', note: '' };
+        const base = { lotId: r.lotId, plantId: activePlantId(d), machineId: firstMachineId('SAW', d), actor: 'Siz', source: 'MANUAL', at: nowISO(), grossTon: 0, deltaTon: 0, balanceTon: 0, ref: '', note: '' };
         const rows = [
           { type: 'HEAD_CUT', materialId: 'B03', fate: 'remelt', deltaTon: -r.headKg / 1000, payload: { headMm: r.effectiveHeadMm, headPerBillet: r.headPerBillet, headKg: r.headKg }, note: 'Kafa kesimleri tekrar fırına' },
           { type: 'SAWDUST', materialId: 'B02', fate: 'sale', deltaTon: -r.sawdustKg / 1000, payload: { bladeMm: r.bladeMm, cuts: r.kerfCuts, sawdustKg: r.sawdustKg }, note: '3 mm bıçak talaşı satışa' },
@@ -509,7 +558,7 @@ export const maintenanceView = {
       modal({ title: 'Bakım Kaydı Ekle', size: 'wide',
         body: `<div class="form-grid">
           ${field('Tür', select('kind', ['Yağ Dolumu', 'Bıçak Değişimi', 'Bakıma Gönderildi', 'Yeni Bıçak Takıldı'], 'Bakıma Gönderildi'))}
-          ${field('Makine', select('machineId', d.machines.map((m) => ({ value: m.id, label: m.name })), 'MCH-08'))}
+          ${field('Makine', select('machineId', machinesOfType('SAW', d).map((m) => ({ value: m.id, label: m.name })), firstMachineId('SAW', d) || ''))}
           ${field('Kesim Sayacı', input('cutsAt', 0, { type: 'number', min: 0, step: 1 }))}
           ${field('Not', input('notes', '', { placeholder: 'Arıza / değişim açıklaması' }))}
         </div>`,

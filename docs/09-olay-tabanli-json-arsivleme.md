@@ -59,7 +59,7 @@ Zaman damgaları her zaman ISO 8601 ve `+03:00` biçimindedir. Kütleler `ton` v
 
 | Tür | Ne zaman | Zorunlu payload |
 | --- | --- | --- |
-| `CAST_START` | Döküm kodu açıldı | `furnaceId`, `alloy`, `grossTon` |
+| `CAST_START` | Döküm kodu açıldı | `machineId`, `alloy`, `grossTon` |
 | `TRANSFER` | Metal başka ocağa aktarıldı | `toMachineId`, `deltaTon` |
 | `PATH_HOLD` | Yollukta metal tutuldu | `pathId`, `holdTon` |
 | `CAST_NET` | Fiilen dökülen miktar | `diameterMm`, `castLengthMm`, `count` |

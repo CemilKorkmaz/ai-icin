@@ -77,7 +77,10 @@ export function formData(root) {
   const out = {};
   root.querySelectorAll('[name]').forEach((el) => {
     if (el.disabled) return;
-    out[el.name] = el.type === 'checkbox' ? el.checked : el.value;
+    // Bazı hafif DOM uygulamaları `checked` özelliğini taşımaz; HTML niteliğine düşülür.
+    out[el.name] = el.type === 'checkbox'
+      ? (typeof el.checked === 'boolean' ? el.checked : el.hasAttribute('checked'))
+      : el.value;
   });
   return out;
 }

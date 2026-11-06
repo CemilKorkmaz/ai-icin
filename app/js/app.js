@@ -2,6 +2,7 @@ import { D, store, setOnline } from './store.js';
 import { icon } from './icons.js';
 import { esc, fmtDateTime, pill, modal, toast } from './ui.js';
 import { VIEWS, NAV, GROUP_OF } from './views/index.js';
+import { visibleNav } from './modularity.js';
 
 let current = 'dashboard';
 let installPrompt = null;
@@ -11,14 +12,14 @@ let installPrompt = null;
 function shell() {
   const d = D();
   const unread = d.notifications.filter((n) => !n.read).length;
-  const nav = NAV.map((g) => `<div class="nav-group"><span class="nav-group-title">${esc(g.group)}</span>${g.items.map((i) => `<a class="nav-item" href="#/${i.id}" data-view="${i.id}" data-nav="${i.id}">${icon(i.icon, 18)}<span>${esc(i.label)}</span>${i.id === 'notifications' && unread ? `<em>${unread}</em>` : ''}</a>`).join('')}</div>`).join('');
+  const nav = visibleNav(NAV, d).map((g) => `<div class="nav-group"><span class="nav-group-title">${esc(g.group)}</span>${g.items.map((i) => `<a class="nav-item" href="#/${i.id}" data-view="${i.id}" data-nav="${i.id}">${icon(i.icon, 18)}<span>${esc(i.label)}</span>${i.id === 'notifications' && unread ? `<em>${unread}</em>` : ''}</a>`).join('')}</div>`).join('');
   return `
     <aside class="sidebar" id="sidebar">
       <div class="brand"><span class="brand-mark">${icon('layers', 22)}</span><div><strong>ERP <i>Studio</i></strong><span>Alüminyum Dökümhane</span></div></div>
       <div class="sidebar-scroll">${nav}</div>
       <div class="sidebar-foot">
         <div class="server-chip"><span class="server-dot ${d.settings.online ? '' : 'off'}"></span><div><strong>${esc(d.settings.serverUrl)}</strong><span>${d.settings.online ? 'LAN + WAN bağlı' : 'Kapalı çevrim · LAN'}</span></div></div>
-        <span class="side-version">v1.1 · Entegre Prototip</span>
+        <span class="side-version">v1.2 · Modüler Saha Kurulumu</span>
       </div>
     </aside>
     <div class="shell-main">
@@ -42,6 +43,9 @@ function shell() {
 function renderView() {
   const main = document.getElementById('main');
   if (!main) return;
+  // Kapalı modülün ekranı doğrudan hash ile açılamaz (docs/12 Bölüm 5).
+  const allowed = visibleNav(NAV, D()).flatMap((g) => g.items.map((i) => i.id));
+  if (!allowed.includes(current)) current = 'dashboard';
   const view = VIEWS[current] || VIEWS.dashboard;
   const scroll = main.scrollTop;
   document.getElementById('crumb-group').textContent = GROUP_OF[current] || 'GENEL';
@@ -82,7 +86,7 @@ function fromHash() {
 /* ---------------- Genel etkileşimler ---------------- */
 
 function openSearch() {
-  const links = NAV.flatMap((g) => g.items.map((i) => ({ ...i, group: g.group })));
+  const links = visibleNav(NAV, D()).flatMap((g) => g.items.map((i) => ({ ...i, group: g.group })));
   const mo = modal({
     title: 'Hızlı Arama', subtitle: 'Ekranlara ve malzeme kartlarına doğrudan gitmek için yazın.',
     body: `<div class="search-box big">${icon('search', 18)}<input class="input" id="qs" placeholder="Örn. stok, reçete, magnezyum…" autocomplete="off"></div><div id="qs-results" class="qs-results"></div>`,
@@ -177,6 +181,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
 window.App = {
   navigate,
   refresh: renderView,
+  renderShell: fullRender,
   toast,
   store,
   get view() { return current; }

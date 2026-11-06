@@ -20,6 +20,7 @@
     { "name": "Üretim Akışı", "short_name": "Üretim", "url": "./#/production", "icons": [{ "src": "./assets/icon-192.png", "sizes": "192x192" }] },
     { "name": "Stok Durumu", "short_name": "Stok", "url": "./#/stock", "icons": [{ "src": "./assets/icon-192.png", "sizes": "192x192" }] },
     { "name": "Raporlar", "short_name": "Raporlar", "url": "./#/reports", "icons": [{ "src": "./assets/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Muhasebe & Fişler", "short_name": "Muhasebe", "url": "./#/finance", "icons": [{ "src": "./assets/icon-192.png", "sizes": "192x192" }] }
+    { "name": "Muhasebe & Fişler", "short_name": "Muhasebe", "url": "./#/finance", "icons": [{ "src": "./assets/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Saha Kurulum Sihirbazı", "short_name": "Kurulum", "url": "./#/setup", "icons": [{ "src": "./assets/icon-192.png", "sizes": "192x192" }] }
   ]
 }

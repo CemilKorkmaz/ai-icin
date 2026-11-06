@@ -1,6 +1,6 @@
 # 05 — Veri Modeli, API Sözleşmesi ve Ekran Envanteri
 
-**Amaç:** `docs/01`–`docs/11` arasında tarif edilen işlevlerin somut veri karşılıklarını, hesap kurallarını ve prototipteki ekranların envanterini vermek. Sürüm 1.1 itibarıyla **53 varlık** ve **32 ekran** kapsanır. Bu doküman, Faz 1 geliştirmesinde API sözleşmesi olarak kullanılır.
+**Amaç:** `docs/01`–`docs/12` arasında tarif edilen işlevlerin somut veri karşılıklarını, hesap kurallarını ve prototipteki ekranların envanterini vermek. Sürüm 1.2 itibarıyla **59 varlık** ve **34 ekran** kapsanır. Bu doküman, Faz 1 geliştirmesinde API sözleşmesi olarak kullanılır.
 
 **Ortak kurallar:** Tüm tarih/saat değerleri ISO 8601 (`2026-11-02T09:30:00+03:00`), tüm ondalıklar nokta ile, tüm miktarlar `quantity` + `unit` ikilisiyle yazılır. Referanslar **ID** iledir; malzeme adı hiçbir kayıtta birincil bağlantı olarak kullanılmaz. `server/erp/data/` altındaki **koleksiyon dosyaları doğrudan kayıt dizisidir** (`settings.json` tek nesnedir); sürüm, üretim zamanı ve dosya listesi `manifest.json` içinde tutulur. Uygulamanın **Ayarlar → Veri Yönetimi** ekranından alınan tam yedek ise tüm koleksiyonları tek bir JSON nesnesinde birleştirir ve `schemaVersion` alanını taşır.
 
@@ -20,9 +20,9 @@
 | 8 | `receipts.json` | Mal kabul kayıtları | order_id, material_id |
 | 9 | `crusher.json` | Kırıcı / fire işlemleri | receipt_id, material_id |
 | 10 | `movements.json` | Tüm stok hareketleri (tek doğruluk kaynağı) | material_id, source |
-| 11 | `furnaces.json` | Ocak tanımları (kapasite, tip, döner ocak) | — |
-| 12 | `recipes.json` | Ergitme / döküm / homojenizasyon reçeteleri + adımlar | furnace_id, material_id |
-| 13 | `lots.json` | Döküm kodu bazlı üretim partileri ve aşama geçmişi | furnace_id, recipe_id |
+| 11 | `furnaces.json` | `machines` içindeki FURNACE/ROTARY kayıtlarının **salt okunur projeksiyonu** (ayrı kart değildir) | machine_id, plant_id |
+| 12 | `recipes.json` | Ergitme / döküm / homojenizasyon reçeteleri + adımlar | machine_id, material_id |
+| 13 | `lots.json` | Döküm kodu bazlı üretim partileri ve aşama geçmişi | machine_id, recipe_id |
 | 14 | `shipments.json` | Sevkiyat, iki kademeli onay, fatura, arşiv | lot_ids, material_id |
 | 15 | `notifications.json` | Sistem içi bildirimler | — |
 | 16 | `outbox.json` | İnternet bekleyen SMS / e-posta / yedek kuyruğu | — |
@@ -36,7 +36,7 @@
 | 24 | `plc-tags.json` | Dört temel sinyalin PLC adres eşleştirmesi | plc_id, machine_id |
 | 25 | `signal-states.json` | Makine başına son dört sinyal durumu | machine_id, signal |
 | 26 | `homogenization-recipes.json` | Homojenizasyon sıcaklık ve süre reçeteleri | alloy |
-| 27 | `homogenization-batches.json` | Karışık partiler, çoklu döküm kodu + adet, planlanan/gerçekleşen süre | lot_ids, recipe_id, furnace_id |
+| 27 | `homogenization-batches.json` | Karışık partiler, çoklu döküm kodu + adet, planlanan/gerçekleşen süre | lot_ids, recipe_id, machine_id |
 | 28 | `cooling-batches.json` | Soğutma partileri ve devralınan veri | batch_id |
 | 29 | `oil-rules.json` | Parametrik yağ eşikleri ve kesim sayaçları | machine_id |
 | 30 | `blade-rules.json` | Bıçak ömrü parametreleri ve sayaçlar | machine_id |
@@ -62,7 +62,13 @@
 | 50 | `shifts.json` | Vardiya, sorumlu, operatörler, devir notu | supervisor_id, operator_ids |
 | 51 | `budgets.json` | Dönemsel planlanan ve gerçekleşen bütçe | period, category |
 | 52 | `period-closures.json` | Mizan doğrulaması ve dönem kapanış durumu | period |
-| 53 | `integration-rules.json` | Tetikleyici ve ürettiği kayıtların matrisi | — |
+| 53 | `integration-rules.json` | Tetikleyici ve ürettiği kayıtların matrisi | module_code |
+| 54 | `machine-aliases.json` | Eski `F20` / `F35` / `FD` kodlarının makine kimliklerine eşlemesi | machine_id, plant_id |
+| 55 | `module-registry.json` | 15 modül: kod, ekran listesi, varsayılan durum, gereksinim | views[] |
+| 56 | `plant-modules.json` | Fabrika bazında açık/kapalı modül haritası | plant_id |
+| 57 | `setup-drafts.json` | Yarım kalan beş adımlı saha kurulum taslağı | step, values |
+| 58 | `adapter-contracts.json` | `simulated` / `opcua` / `modbus` bağlantı sözleşmeleri | capabilities[] |
+| 59 | `profile-packages.json` | İndirilebilir fabrika profil paketleri ve doğrulanmış içerikleri | plant_id, payload |
 
 ---
 
@@ -195,7 +201,7 @@ Türler: `Giriş`, `Çıkış`, `Fire`, `Yan Ürün`, `Transfer`, `Düzeltme`. `
   "type": "Ergitme",
   "name": "6063 / 20 Ton Ocak",
   "alloy": "6063",
-  "furnaceId": "F20",
+  "machineId": "MCH-01",
   "capacityTon": 20,
   "tempC": 750,
   "durationMin": 240,
@@ -226,7 +232,7 @@ Reçete bir **öneri** üretir: `önerilen miktar = perTon × fiilî şarj tonaj
   "lengthM": 6.0,
   "billetCount": 84,
   "weightTon": 17.2,
-  "furnaceId": "F20",
+  "machineId": "MCH-01",
   "recipeId": "RC-6063-20",
   "stage": "Testere",
   "status": "Devam ediyor",
@@ -335,7 +341,8 @@ Sabitler (alüminyum özgül ağırlığı, bıçak kalınlığı, yolluk/filtre
 | POST | `/api/crusher` | Brüt/fire/net → fire ve yan ürün hareketi |
 | GET | `/api/stock` | Anlık bakiyeler + kritik durum |
 | GET | `/api/movements?materialId=&type=&from=` | Hareket logu |
-| CRUD | `/api/furnaces`, `/api/recipes` | Ocak ve reçeteler |
+| CRUD | `/api/machines`, `/api/machine-types`, `/api/recipes` | Makine parkı (tek kaynak) ve reçeteler; `/api/furnaces` salt okunur projeksiyondur |
+| POST | `/api/machines/:id/decommission`, `/api/machines/:id/recommission` | Bağımlılık raporu, gerekçe, devre dışı bırakma ve geri alma; kayıt silinmez |
 | POST | `/api/lots`, `PATCH /api/lots/:id/stage` | Döküm kodu, aşama geçişi, süre/uyarıları |
 | POST | `/api/lots/:id/consumption` | Gerçekleşen miktar → stok düşümü |
 | POST | `/api/shipments`, `/api/shipments/:id/approve` | İki kademeli onay, stok düşümü, arşiv |
@@ -343,6 +350,10 @@ Sabitler (alüminyum özgül ağırlığı, bıçak kalınlığı, yolluk/filtre
 | GET/POST | `/api/notifications`, `/api/outbox`, `/api/outbox/flush` | Bildirim ve kuyruk |
 | POST | `/api/backup`, `GET /api/backup/status` | Yedekleme ve sağlık kontrolü |
 | GET | `/api/audit` | Denetim logu |
+| GET/POST | `/api/plant-profiles` | Fabrika profil paketini indir / doğrula / içe al; `furnaceCount` ile kopyala |
+| GET/PUT | `/api/plant-modules?plantId=` | Fabrika bazında modül açık/kapalı haritası |
+| GET | `/api/module-registry`, `/api/adapter-contracts` | Modül ve bağlantı adaptörü kayıtları |
+| POST | `/api/adapters/:code/test` | `connect / test / readFourSignals / disconnect` sözleşmesi; sürücü yoksa `MANUAL` yedeği |
 
 Tüm yazma uçları idempotent `client_id` kabul eder; çevrimdışı istemcinin tekrar gönderimi çift kayıt oluşturmaz.
 
@@ -361,14 +372,14 @@ Tüm yazma uçları idempotent `client_id` kabul eder; çevrimdışı istemcinin
 | 7 | Mal Kabul | Hammadde & Stok | receipts, orders | Emirden doldurma, kabul/red doğrulaması, stok girişi |
 | 8 | Kırıcı & Fire | Hammadde & Stok | crusher | Otomatik net/oran, fire nedeni, uyarı |
 | 9 | Stok Hareketleri | Hammadde & Stok | movements | Tarih/tür/malzeme filtresi, CSV çıktı |
-| 10 | Üretim Akışı | Üretim | lots, furnaces | **Sürükle-bırak** aşama taşıma, start/finish, alarm, fire ekleme |
+| 10 | Üretim Akışı | Üretim | lots, machines | **Sürükle-bırak** aşama taşıma, start/finish, alarm, fire ekleme |
 | 11 | Reçeteler | Üretim | recipes | Ergitme/döküm/homojenizasyon sekmeleri, adım listesi |
 | 12 | Sevkiyat & Onaylar | Sevkiyat | shipments, lots | Kantar, yönetici onayı, muhasebe onayı, stok düşümü |
 | 13 | Arşiv | Sevkiyat | shipments | Aylık gruplama, fatura/plaka/döküm kodu sorgusu |
 | 14 | Raporlar & İstatistik | Raporlama | tümü | Dönem seçimi, üretim/tüketim grafikleri, giren-çıkan, yazdır/CSV |
 | 15 | Bildirimler & Kuyruk | Sistem | notifications, outbox | Çevrimiçi/çevrimdışı anahtarı, kuyruğu boşaltma, mesaj oluşturma |
 | 16 | Ayarlar | Sistem | settings, users | Roller, sunucu adresi, yedek yolu, JSON içe/dışa aktarma, tema, demo sıfırlama |
-| 17 | Makine Parkı | Makine & Kurulum | plants, machineTypes, machines | Boş başlangıç, fabrika profili seçimi, makine ekleme, `MANUAL`/`PLC` modu |
+| 17 | Makine Parkı | Makine & Kurulum | plants, machineTypes, machines | Boş başlangıç, fabrika profili seçimi, makine ekleme, bağımlılık raporlu devre dışı bırakma ve geri alma |
 | 18 | Döküm Yolları | Makine & Kurulum | castingPaths, machines | Kısa/uzun yol, 1,0 / 1,5 / 2,0 ton tutma parametresi |
 | 19 | Kesim Hesap Motoru | Makine & Kurulum | calc.js, lots, byProductFates | 6300/6000/300/3 mm canlı hesap, kafa ve talaş ayrımı, geometri sapması |
 | 20 | Yağ & Bakım | Makine & Kurulum | oilRules, bladeRules, maintenanceEvents | Parametrik eşikler, sayaçlar, dolum/değişim kaydı, uyarı |
@@ -376,6 +387,8 @@ Tüm yazma uçları idempotent `client_id` kabul eder; çevrimdışı istemcinin
 | 22 | Olay & Arşiv | Üretim | events, inboxQueue | 21/18/17/14 ton zinciri satır satır, bakiye ve akıbet |
 | 23 | PLC Durum | Makine & Kurulum | signalStates, plcTags | Yalnızca dört sinyal, demo değerleriyle; tag adresleri görünmez |
 | 24 | Merkezi Yönetim | Yönetim | plants, plcConnections, plcTags, vendorUpdates | Firma/IP/protokol eşleştirme, güncelleme geçmişi, geliştirici ekranı |
+| 33 | Saha Kurulum Sihirbazı | Yönetim | setupDrafts, plants, machines, castingPaths, moduleRegistry | Beş adım: fabrika, makine parkı, yollar, bağlantı testi, modüller; profil indir / kopyala / içe al |
+| 34 | Modül Kaydı | Yönetim | moduleRegistry, plantModules, NAV | Fabrika bazında modül aç/kapat, gereksinimler ve menü önizlemesi |
 | 25 | Talep & Teklif Akışı | Satın Alma | purchaseRequests, purchaseQuotes | Talep onayı, teklif karşılaştırması, seçilen tekliften emir ve fiyat geçmişi |
 | 26 | Satış Siparişleri | Ticari & Finans | salesOrders, quotations, customers | Kredi kontrolü, otomatik rezervasyon, kısmi sevk |
 | 27 | Müşteriler & Cari | Ticari & Finans | customers, payments | Limit kullanımı, risk, tahsilat ve beraberinde muhasebe fişi |
@@ -423,7 +436,7 @@ Tüm yazma uçları idempotent `client_id` kabul eder; çevrimdışı istemcinin
 
 `inbox-queue.json` kayıtları `clientId`, `type`, `lotId`, `createdAt`, `source`, `payload`, `schemaVersion`, `status`, `retryCount`, `lastError` alanlarını taşır. Aynı `clientId` ikinci kez gelirse olay çift yazılmaz. Kuyruk ile arşivin ayrı klasörlerde tutulması ve silme yerine doğrulama kuralı `docs/09` içinde ayrıntılıdır.
 
-**Şema sürümü:** saha görüşmesiyle gelen 17 yeni koleksiyon ve olay alanları `schemaVersion: 2`, genel ERP karşılaştırmasıyla gelen 18 ticari/finansal koleksiyon `schemaVersion: 3` ile işaretlenir. `manifest.json` içindeki `schema_version` değeri `node tools/export_seed.mjs` ile otomatik güncellenir. Yerel depolama anahtarı `erp_demo_state_v3` biçiminde sürüme bağlıdır; eski şemanın yeni koleksiyonlar olmadan yüklenmesi engellenir.
+**Şema sürümü:** saha görüşmesiyle gelen 17 yeni koleksiyon ve olay alanları `schemaVersion: 2`, genel ERP karşılaştırmasıyla gelen 18 ticari/finansal koleksiyon `schemaVersion: 3`, modüler saha kurulumuyla gelen 6 koleksiyon `schemaVersion: 4` ile işaretlenir. `manifest.json` içindeki `schema_version` değeri `node tools/export_seed.mjs` ile otomatik güncellenir. Yerel depolama anahtarı `erp_demo_state_v4`, çevrimdışı önbellek `erp-studio-v4` biçiminde sürüme bağlıdır; eski şemanın yeni koleksiyonlar olmadan yüklenmesi engellenir.
 
 ---
 
@@ -442,7 +455,7 @@ Tüm yazma uçları idempotent `client_id` kabul eder; çevrimdışı istemcinin
 | Maliyet (`costRecords`) | `lotId`, `period`, `netTon`, beş maliyet kalemi, `totalCost`, `unitCostPerTon`, `unitCostPerKg` | Kalemler toplamı `totalCost` ile aynı; birim maliyet toplam / net ton |
 | Sayım (`stockCounts`) | `warehouseId`, `materialId`, `expectedKg`, `countedKg`, `differenceKg`, `status`, `journalId` | `differenceKg = countedKg − expectedKg` |
 | Rezervasyon (`reservations`) | `salesOrderId`, `lotId`, `warehouseId`, `ton`, `status` | `lotId` döküm koduna veya `—` değerine bağlıdır |
-| Entegrasyon kuralı (`integrationRules`) | `trigger`, `module`, `produces[]`, `accountEffect`, `autoPost`, `requiresApproval` | `produces` boş olamaz; otomatik/onay alanları boolean |
+| Entegrasyon kuralı (`integrationRules`) | `trigger`, `module`, `moduleCode`, `produces[]`, `accountEffect`, `autoPost`, `requiresApproval` | `produces` boş olamaz; `moduleCode` kayıtlı bir modüle bağlıdır |
 
 ## 9. Tek Kayıt, Çok Etki Kuralları
 
@@ -462,3 +475,19 @@ Tüm yazma uçları idempotent `client_id` kabul eder; çevrimdışı istemcinin
 
 Bütün kurallar `integrationRules` koleksiyonunda veri olarak da tutulur; kod ile veri kopyası `tools/smoke_test.mjs` tarafından karşılaştırılır. `validate_data.py` fiş dengesini, KDV tutarlarını, maliyet toplamlarını, sayım farkını ve dönem kapanış koşulunu da doğrular. Ayrıntılı gerekçe ve kapsam dışı kararlar `docs/11` içindedir.
 
+## 10. Modüler Saha Kurulumu Şemaları (`schemaVersion: 4`)
+
+`docs/12` ile gelen kayıtların zorunlu alanları ve kuralları aşağıdadır. Bu şemaların tamamı `app/js/modularity.js` ve `app/js/adapters.js` içinde saf işlevlerle doğrulanır.
+
+| Kayıt | Alanlar | Kural |
+| --- | --- | --- |
+| Makine (`machines`) | `id`, `plantId`, `type`, `name`, `capacityTon`, `mode`, `plcId`, `active`, `status`, `decommissionedAt`, `decommissionReason`, `installedAt` | Tek kaynak; devre dışı makine silinmez, `active: false` ve gerekçe zorunludur |
+| Ocak projeksiyonu (`furnaces`) | `id`, `code`, `name`, `capacityTon`, `type`, `rotary`, `status`, `machineId`, `plantId` | Kimlik kümesi `machines` içindeki FURNACE/ROTARY kümesine eşit olmalıdır |
+| Eski kod (`machineAliases`) | `id`, `legacyCode`, `machineId`, `plantId`, `note` | Yalnızca uyumluluk köprüsü; hedef makine ve fabrika var olmalıdır |
+| Modül (`moduleRegistry`) | `id`, `code`, `label`, `group`, `views[]`, `defaultEnabled`, `requiresMachineType`, `requiresMode`, `note` | 34 ekranın tamamı bir modüle bağlıdır; kod benzersizdir |
+| Fabrika modül haritası (`plantModules`) | `id`, `plantId`, `enabled{}`, `note` | `enabled` anahtarları kayıtlı modül kodlarıdır; `CORE` ve `VENDOR` açıktır |
+| Kurulum taslağı (`setupDrafts`) | `id`, `step`, `values{counts, defaultCapacity, mode, connection, modules, lastTest}`, `updatedAt` | `step` 1–5 arası; her adım kaydedilir |
+| Adaptör (`adapterContracts`) | `id`, `code`, `label`, `protocol`, `implemented`, `capabilities[]`, `note` | Dört yetenek zorunludur; sürücü yoksa `MANUAL` yedeğe düşülür |
+| Profil paketi (`profilePackages.payload`) | `kind`, `packageVersion`, `schemaVersion`, `plant`, `machineTypes`, `machines`, `castingPaths`, `plcConnections`, `plcTags`, eşikler, `plantModules`, `moduleRegistry` | `kind` ve şema sürümü doğrulanır; her yol paket içindeki makinelere bağlıdır |
+
+**Sabit kod yasağı.** Ekran kodunda fabrika veya makine kimliği yazılmaz. Aktif fabrika `activePlantId()`, aktif makine `machinesOfType()` ve `firstMachineId()` yardımcı işlevlerinden gelir. Duman testi 1 ve 2 fırınlı profilleri, bağımlılık raporunu, geri almayı, modül filtresini ve adaptör yedeğini doğrular; veri doğrulayıcı 58 koleksiyonda projeksiyon ve referans bütünlüğünü denetler.

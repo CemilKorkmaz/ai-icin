@@ -7,8 +7,32 @@ export const STAGES = [
 
 export const CATEGORY_ORDER = ['Hammadde', 'Sarf Malzeme', 'Yardımcı Malzeme', 'Yan Ürün', 'Mamul'];
 
+// Tek makine kaynağı. `furnaces` ve bütün referanslar buradan türetilir (docs/12 Bölüm 2).
+const MACHINE_ROWS = [
+    { id: 'MCH-01', plantId: 'P1', type: 'FURNACE', name: 'A Fırını', capacityTon: 20, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
+    { id: 'MCH-02', plantId: 'P1', type: 'FURNACE', name: 'B Fırını', capacityTon: 35, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
+    { id: 'MCH-03', plantId: 'P1', type: 'FURNACE', name: 'C Fırını', capacityTon: 20, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2022-08-03' },
+    { id: 'MCH-04', plantId: 'P1', type: 'FURNACE', name: 'D Fırını', capacityTon: 35, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2023-02-19' },
+    { id: 'MCH-05', plantId: 'P1', type: 'FURNACE', name: 'E Fırını', capacityTon: 20, mode: 'PLC', plcId: 'PLC-1', active: false, installedAt: '2025-06-11' },
+    { id: 'MCH-06', plantId: 'P1', type: 'CAST_TABLE', name: 'Tabla 1', capacityTon: 1, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
+    { id: 'MCH-07', plantId: 'P1', type: 'CAST_TABLE', name: 'Tabla 2', capacityTon: 1, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2022-08-03' },
+    { id: 'MCH-08', plantId: 'P1', type: 'SAW', name: 'Testere 1', capacityTon: 0, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-05-02' },
+    { id: 'MCH-09', plantId: 'P1', type: 'SAW', name: 'Testere 2', capacityTon: 0, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2023-01-18' },
+    { id: 'MCH-10', plantId: 'P1', type: 'HOMO_FURNACE', name: 'Homojen 1', capacityTon: 25, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
+    { id: 'MCH-11', plantId: 'P1', type: 'HOMO_FURNACE', name: 'Homojen 2', capacityTon: 25, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
+    { id: 'MCH-12', plantId: 'P1', type: 'HOMO_FURNACE', name: 'Homojen 3', capacityTon: 25, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2022-09-14' },
+    { id: 'MCH-13', plantId: 'P1', type: 'HOMO_FURNACE', name: 'Homojen 4', capacityTon: 25, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2024-03-07' },
+    { id: 'MCH-14', plantId: 'P1', type: 'CONT_HOMO', name: 'Continue Homojen 1', capacityTon: 12, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2024-11-20' },
+    { id: 'MCH-15', plantId: 'P2', type: 'FURNACE', name: '1. Ocak', capacityTon: 20, mode: 'MANUAL', plcId: null, active: true, installedAt: '2019-03-05' },
+    { id: 'MCH-16', plantId: 'P2', type: 'FURNACE', name: '2. Ocak', capacityTon: 35, mode: 'MANUAL', plcId: null, active: true, installedAt: '2019-03-05' },
+    { id: 'MCH-17', plantId: 'P2', type: 'CAST_TABLE', name: 'Tabla 1', capacityTon: 1, mode: 'MANUAL', plcId: null, active: true, installedAt: '2019-03-05' },
+    { id: 'MCH-18', plantId: 'P2', type: 'SAW', name: 'Testere 1', capacityTon: 0, mode: 'MANUAL', plcId: null, active: true, installedAt: '2020-07-22' },
+    { id: 'MCH-19', plantId: 'P2', type: 'HOMO_FURNACE', name: 'Homojen 1', capacityTon: 25, mode: 'MANUAL', plcId: null, active: true, installedAt: '2020-07-22' },
+    { id: 'MCH-20', plantId: 'P2', type: 'ROTARY', name: 'Döner Ocak', capacityTon: 8, mode: 'MANUAL', plcId: null, active: true, installedAt: '2018-01-15' }
+  ];
+
 export const SEED = {
-  schemaVersion: 3,
+  schemaVersion: 4,
 
   settings: {
     company: 'Anadolu Alüminyum Dökümhane',
@@ -31,7 +55,10 @@ export const SEED = {
     activePlantId: 'P1',
     pollSeconds: 3,
     geometryTolerancePct: 2,
-    version: '1.1',
+    version: '1.2',
+    setupWizard: true,
+    adapterMode: 'simulated',
+    modulePolicy: 'plant',
     vatRate: 20,
     costingMethod: 'Ağırlıklı Ortalama',
     currentPeriod: '2026-11',
@@ -174,20 +201,20 @@ export const SEED = {
   ],
 
   movements: [
-    { id: 'MV-0001', at: '2026-11-02T14:30:00+03:00', type: 'Çıkış', materialId: 'H02', quantity: -800, source: 'Ergitme / F20', ref: 'DK-2026-0138', remaining: 3200, userId: 'U06', notes: 'Şarj girişi' },
+    { id: 'MV-0001', at: '2026-11-02T14:30:00+03:00', type: 'Çıkış', materialId: 'H02', quantity: -800, source: 'Ergitme / A Fırını', ref: 'DK-2026-0138', remaining: 3200, userId: 'U06', notes: 'Şarj girişi' },
     { id: 'MV-0002', at: '2026-11-02T11:15:00+03:00', type: 'Fire', materialId: 'H02', quantity: -700, source: 'Kırıcı', ref: 'CR-001', remaining: 4000, userId: 'U04', notes: 'Nemli malzeme ayıklandı' },
     { id: 'MV-0003', at: '2026-11-02T11:15:00+03:00', type: 'Yan Ürün', materialId: 'B06', quantity: 700, source: 'Kırıcı', ref: 'CR-001', remaining: 700, userId: 'U04', notes: 'Kırıcı firesi stoğa girdi' },
     { id: 'MV-0004', at: '2026-11-02T10:00:00+03:00', type: 'Giriş', materialId: 'H02', quantity: 10200, source: 'Mal Kabul', ref: 'MK-2026-0045', remaining: 4700, userId: 'U03', notes: 'Tartı fişi TF-2026-0412' },
     { id: 'MV-0005', at: '2026-11-02T09:05:00+03:00', type: 'Yan Ürün', materialId: 'B04', quantity: 120, source: 'Döküm', ref: 'DK-2026-0137', remaining: 480, userId: 'U07', notes: 'Yolluk / filtre artığı (döngüsel)' },
     { id: 'MV-0006', at: '2026-11-02T08:40:00+03:00', type: 'Çıkış', materialId: 'S01', quantity: -12, source: 'Döküm', ref: 'DK-2026-0137', remaining: 145, userId: 'U07', notes: 'Döküm reçetesi sarf tüketimi' },
     { id: 'MV-0007', at: '2026-11-02T08:40:00+03:00', type: 'Çıkış', materialId: 'S02', quantity: -6, source: 'Döküm', ref: 'DK-2026-0137', remaining: 28, userId: 'U07', notes: 'Tıkaç tüketimi' },
-    { id: 'MV-0008', at: '2026-11-02T07:50:00+03:00', type: 'Çıkış', materialId: 'H03', quantity: -50, source: 'Ergitme / F20', ref: 'DK-2026-0138', remaining: 850, userId: 'U06', notes: 'Önerilen 80 kg, gerçekleşen 50 kg' },
-    { id: 'MV-0009', at: '2026-11-02T07:50:00+03:00', type: 'Çıkış', materialId: 'H04', quantity: -32, source: 'Ergitme / F20', ref: 'DK-2026-0138', remaining: 120, userId: 'U06', notes: 'Magnezyum' },
-    { id: 'MV-0010', at: '2026-11-02T06:10:00+03:00', type: 'Çıkış', materialId: 'H01', quantity: -13600, source: 'Ergitme / F20', ref: 'DK-2026-0138', remaining: 18500, userId: 'U06', notes: '20 ton şarj' },
+    { id: 'MV-0008', at: '2026-11-02T07:50:00+03:00', type: 'Çıkış', materialId: 'H03', quantity: -50, source: 'Ergitme / A Fırını', ref: 'DK-2026-0138', remaining: 850, userId: 'U06', notes: 'Önerilen 80 kg, gerçekleşen 50 kg' },
+    { id: 'MV-0009', at: '2026-11-02T07:50:00+03:00', type: 'Çıkış', materialId: 'H04', quantity: -32, source: 'Ergitme / A Fırını', ref: 'DK-2026-0138', remaining: 120, userId: 'U06', notes: 'Magnezyum' },
+    { id: 'MV-0010', at: '2026-11-02T06:10:00+03:00', type: 'Çıkış', materialId: 'H01', quantity: -13600, source: 'Ergitme / A Fırını', ref: 'DK-2026-0138', remaining: 18500, userId: 'U06', notes: '20 ton şarj' },
     { id: 'MV-0011', at: '2026-11-01T16:20:00+03:00', type: 'Yan Ürün', materialId: 'B02', quantity: 310, source: 'Testere', ref: 'DK-2026-0136', remaining: 1500, userId: 'U08', notes: '3 mm bıçak talaşı' },
     { id: 'MV-0012', at: '2026-11-01T16:20:00+03:00', type: 'Çıkış', materialId: 'Y01', quantity: -8, source: 'Testere', ref: 'DK-2026-0136', remaining: 180, userId: 'U08', notes: 'Kesim sayısına göre yağ' },
     { id: 'MV-0013', at: '2026-11-01T15:10:00+03:00', type: 'Yan Ürün', materialId: 'B03', quantity: 240, source: 'Testere', ref: 'DK-2026-0136', remaining: 620, userId: 'U08', notes: 'Kafa kesimleri' },
-    { id: 'MV-0014', at: '2026-11-01T11:30:00+03:00', type: 'Yan Ürün', materialId: 'B01', quantity: 430, source: 'Ergitme / F35', ref: 'DK-2026-0135', remaining: 2800, userId: 'U06', notes: 'Cüruf çekimi' },
+    { id: 'MV-0014', at: '2026-11-01T11:30:00+03:00', type: 'Yan Ürün', materialId: 'B01', quantity: 430, source: 'Ergitme / B Fırını', ref: 'DK-2026-0135', remaining: 2800, userId: 'U06', notes: 'Cüruf çekimi' },
     { id: 'MV-0015', at: '2026-10-31T09:00:00+03:00', type: 'Giriş', materialId: 'S01', quantity: 200, source: 'Mal Kabul', ref: 'MK-2026-0044', remaining: 157, userId: 'U03', notes: '' },
     { id: 'MV-0016', at: '2026-10-30T14:00:00+03:00', type: 'Transfer', materialId: 'B01', quantity: 0, source: 'Döner Ocak', ref: 'RO-2026-0007', remaining: 2800, userId: 'U06', notes: 'Geri kazanım: 1,2 t tuz, 2,8 t cüruf → 1,6 t net metal' },
     { id: 'MV-0017', at: '2026-10-29T11:15:00+03:00', type: 'Fire', materialId: 'H02', quantity: -400, source: 'Kırıcı', ref: 'CR-002', remaining: 7600, userId: 'U04', notes: '' },
@@ -196,15 +223,18 @@ export const SEED = {
     { id: 'MV-0020', at: '2026-10-26T17:00:00+03:00', type: 'Çıkış', materialId: 'B01', quantity: -1200, source: 'Sevkiyat', ref: 'SV-2026-0088', remaining: 2370, userId: 'U10', notes: 'Cüruf satışı, iki onay tamam' }
   ],
 
-  furnaces: [
-    { id: 'F20', code: 'F20', name: 'Ocak 1', capacityTon: 20, type: 'Yatay ergitme', rotary: false, status: 'Çalışıyor' },
-    { id: 'F35', code: 'F35', name: 'Ocak 2', capacityTon: 35, type: 'Yatay ergitme', rotary: false, status: 'Çalışıyor' },
-    { id: 'FD', code: 'FD', name: 'Döner Ocak', capacityTon: 8, type: 'Cüruf geri kazanım', rotary: true, status: 'Beklemede' }
-  ],
+  // `furnaces` artık bağımsız bir kart değil, `machines` koleksiyonunun salt-okunur
+  // projeksiyonudur. Eski ekranlar aynı alan adlarıyla çalışmaya devam eder.
+  furnaces: MACHINE_ROWS.filter((m) => m.type === 'FURNACE' || m.type === 'ROTARY').map((m) => ({
+    id: m.id, code: m.id, name: m.name, capacityTon: m.capacityTon,
+    type: m.type === 'ROTARY' ? 'Cüruf geri kazanım' : 'Yatay ergitme',
+    rotary: m.type === 'ROTARY', status: m.active ? 'Çalışıyor' : 'Beklemede',
+    machineId: m.id, plantId: m.plantId
+  })),
 
   recipes: [
     {
-      id: 'RCP-01', type: 'Ergitme', name: '6063 / 20 Ton Ocak', alloy: '6063', furnaceId: 'F20', capacityTon: 20, tempC: 750, durationMin: 240, diameterMm: null, coolingMin: 0,
+      id: 'RCP-01', type: 'Ergitme', name: '6063 / 20 Ton Ocak', alloy: '6063', machineId: 'MCH-01', capacityTon: 20, tempC: 750, durationMin: 240, diameterMm: null, coolingMin: 0,
       items: [
         { materialId: 'H01', perTon: 820, unit: 'kg', label: 'Külçe' },
         { materialId: 'H02', perTon: 160, unit: 'kg', label: 'Hurda' },
@@ -219,7 +249,7 @@ export const SEED = {
       ]
     },
     {
-      id: 'RCP-02', type: 'Ergitme', name: '6063 / 35 Ton Ocak', alloy: '6063', furnaceId: 'F35', capacityTon: 35, tempC: 755, durationMin: 300, diameterMm: null, coolingMin: 0,
+      id: 'RCP-02', type: 'Ergitme', name: '6063 / 35 Ton Ocak', alloy: '6063', machineId: 'MCH-02', capacityTon: 35, tempC: 755, durationMin: 300, diameterMm: null, coolingMin: 0,
       items: [
         { materialId: 'H01', perTon: 825, unit: 'kg', label: 'Külçe' },
         { materialId: 'H02', perTon: 155, unit: 'kg', label: 'Hurda' },
@@ -232,7 +262,7 @@ export const SEED = {
       ]
     },
     {
-      id: 'RCP-03', type: 'Ergitme', name: '6061 / 20 Ton Ocak', alloy: '6061', furnaceId: 'F20', capacityTon: 20, tempC: 760, durationMin: 260, diameterMm: null, coolingMin: 0,
+      id: 'RCP-03', type: 'Ergitme', name: '6061 / 20 Ton Ocak', alloy: '6061', machineId: 'MCH-01', capacityTon: 20, tempC: 760, durationMin: 260, diameterMm: null, coolingMin: 0,
       items: [
         { materialId: 'H01', perTon: 790, unit: 'kg', label: 'Külçe' },
         { materialId: 'H02', perTon: 180, unit: 'kg', label: 'Hurda' },
@@ -243,7 +273,7 @@ export const SEED = {
       steps: [{ atMin: 130, label: 'Karıştırma ve numune', materialId: null, suggestedQty: 0 }]
     },
     {
-      id: 'RCP-04', type: 'Döküm', name: '178 mm Biyet / Sarf Reçetesi', alloy: '6063', furnaceId: null, capacityTon: null, tempC: 720, durationMin: 0, diameterMm: 178, coolingMin: 0,
+      id: 'RCP-04', type: 'Döküm', name: '178 mm Biyet / Sarf Reçetesi', alloy: '6063', machineId: null, capacityTon: null, tempC: 720, durationMin: 0, diameterMm: 178, coolingMin: 0,
       items: [
         { materialId: 'S01', perTon: 0.7, unit: 'adet', label: 'Seramik filtre' },
         { materialId: 'S02', perTon: 0.35, unit: 'adet', label: 'Tıkaç' },
@@ -254,7 +284,7 @@ export const SEED = {
       steps: []
     },
     {
-      id: 'RCP-05', type: 'Homojenizasyon', name: '6063 / 178 mm', alloy: '6063', furnaceId: null, capacityTon: null, tempC: 580, durationMin: 360, diameterMm: 178, coolingMin: 120,
+      id: 'RCP-05', type: 'Homojenizasyon', name: '6063 / 178 mm', alloy: '6063', machineId: null, capacityTon: null, tempC: 580, durationMin: 360, diameterMm: 178, coolingMin: 120,
       items: [{ materialId: 'Y05', perTon: 42, unit: 'm³', label: 'Doğalgaz (tahmini)' }],
       steps: [
         { atMin: 360, label: 'Homojenizasyon süresi doldu, soğutmaya aktar', materialId: null, suggestedQty: 0 },
@@ -262,22 +292,22 @@ export const SEED = {
       ]
     },
     {
-      id: 'RCP-06', type: 'Homojenizasyon', name: '6061 / 152 mm', alloy: '6061', furnaceId: null, capacityTon: null, tempC: 570, durationMin: 420, diameterMm: 152, coolingMin: 150,
+      id: 'RCP-06', type: 'Homojenizasyon', name: '6061 / 152 mm', alloy: '6061', machineId: null, capacityTon: null, tempC: 570, durationMin: 420, diameterMm: 152, coolingMin: 150,
       items: [{ materialId: 'Y05', perTon: 46, unit: 'm³', label: 'Doğalgaz (tahmini)' }],
       steps: [{ atMin: 420, label: 'Soğutmaya aktar', materialId: null, suggestedQty: 0 }]
     }
   ],
 
   lots: [
-    { id: 'DK-2026-0131', code: 'DK-2026-0131', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 46, castLengthMm: 6300, netTon: 18.4, weightTon: 18.4, furnaceId: 'F20', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Mamul Stok', status: 'Sevke Hazır', startedAt: '2026-10-30T05:40:00+03:00', stageStartedAt: '2026-10-31T12:20:00+03:00', paused: false, scrapTon: 0.22, remainingMetalTon: 1.6, remainingDecision: 'Ocakta bırakıldı', alerts: [], history: [{ stage: 'Ergitme', at: '2026-10-30T05:40:00+03:00' }, { stage: 'Döküm', at: '2026-10-30T07:55:00+03:00' }, { stage: 'Testere', at: '2026-10-30T10:10:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-10-30T13:00:00+03:00' }, { stage: 'Soğutma', at: '2026-10-30T19:00:00+03:00' }, { stage: 'Paketleme', at: '2026-10-31T10:00:00+03:00' }, { stage: 'Mamul Stok', at: '2026-10-31T12:20:00+03:00' }] },
-    { id: 'DK-2026-0132', code: 'DK-2026-0132', alloy: '6061', diameterMm: 152, lengthM: 6.0, billetCount: 50, castLengthMm: 6300, netTon: 14.6, weightTon: 14.6, furnaceId: 'F35', pathId: 'CP-2', recipeId: 'RCP-03', stage: 'Mamul Stok', status: 'Sevke Hazır', startedAt: '2026-10-31T06:10:00+03:00', stageStartedAt: '2026-11-01T09:15:00+03:00', paused: false, scrapTon: 0.31, remainingMetalTon: 0, remainingDecision: 'Boş dökülüp hammaddeye', alerts: [], history: [{ stage: 'Ergitme', at: '2026-10-31T06:10:00+03:00' }, { stage: 'Döküm', at: '2026-10-31T08:30:00+03:00' }, { stage: 'Testere', at: '2026-10-31T11:00:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-10-31T14:00:00+03:00' }, { stage: 'Soğutma', at: '2026-10-31T21:00:00+03:00' }, { stage: 'Paketleme', at: '2026-11-01T08:00:00+03:00' }, { stage: 'Mamul Stok', at: '2026-11-01T09:15:00+03:00' }] },
-    { id: 'DK-2026-0133', code: 'DK-2026-0133', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 45, castLengthMm: 6300, netTon: 18.0, weightTon: 18.0, furnaceId: 'F20', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Paketleme', status: 'Devam ediyor', startedAt: '2026-11-01T05:30:00+03:00', stageStartedAt: '2026-11-02T08:10:00+03:00', paused: false, scrapTon: 0.18, remainingMetalTon: 2.0, remainingDecision: 'Ocakta bırakıldı', alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-01T05:30:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T07:45:00+03:00' }, { stage: 'Testere', at: '2026-11-01T10:20:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T13:00:00+03:00' }, { stage: 'Soğutma', at: '2026-11-01T19:00:00+03:00' }, { stage: 'Paketleme', at: '2026-11-02T08:10:00+03:00' }] },
-    { id: 'DK-2026-0134', code: 'DK-2026-0134', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 43, castLengthMm: 6300, netTon: 17.2, weightTon: 17.2, furnaceId: 'F20', pathId: 'CP-3', recipeId: 'RCP-01', stage: 'Soğutma', status: 'Devam ediyor', startedAt: '2026-11-01T12:00:00+03:00', stageStartedAt: '2026-11-02T07:20:00+03:00', paused: false, scrapTon: 0.27, remainingMetalTon: 0, remainingDecision: 'Başka ocağa aktarıldı', alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-01T12:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T14:30:00+03:00' }, { stage: 'Testere', at: '2026-11-01T17:00:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T20:00:00+03:00' }, { stage: 'Soğutma', at: '2026-11-02T07:20:00+03:00' }] },
-    { id: 'DK-2026-0135', code: 'DK-2026-0135', alloy: '6061', diameterMm: 152, lengthM: 6.0, billetCount: 46, castLengthMm: 6300, netTon: 13.5, weightTon: 13.5, furnaceId: 'F35', pathId: 'CP-2', recipeId: 'RCP-03', stage: 'Homojenizasyon', status: 'Süre Aşımı', startedAt: '2026-11-01T18:00:00+03:00', stageStartedAt: '2026-11-01T22:00:00+03:00', paused: false, scrapTon: 0.44, remainingMetalTon: 3.2, remainingDecision: null, alerts: ['Homojenizasyon reçete süresi aşıldı'], history: [{ stage: 'Ergitme', at: '2026-11-01T18:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T20:10:00+03:00' }, { stage: 'Testere', at: '2026-11-01T21:20:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T22:00:00+03:00' }] },
-    { id: 'DK-2026-0136', code: 'DK-2026-0136', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 42, castLengthMm: 6300, netTon: 16.9, weightTon: 16.9, furnaceId: 'F20', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Testere', status: 'Devam ediyor', startedAt: '2026-11-02T00:30:00+03:00', stageStartedAt: '2026-11-02T09:40:00+03:00', paused: false, scrapTon: 0.35, remainingMetalTon: 1.1, remainingDecision: null, alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-02T00:30:00+03:00' }, { stage: 'Döküm', at: '2026-11-02T03:00:00+03:00' }, { stage: 'Testere', at: '2026-11-02T09:40:00+03:00' }] },
-    { id: 'DK-2026-0137', code: 'DK-2026-0137', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 0, weightTon: 17.6, furnaceId: 'F35', pathId: 'CP-1', recipeId: 'RCP-02', stage: 'Döküm', status: 'Devam ediyor', startedAt: '2026-11-02T04:00:00+03:00', stageStartedAt: '2026-11-02T08:05:00+03:00', paused: false, scrapTon: 0.12, remainingMetalTon: null, remainingDecision: null, alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-02T04:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-02T08:05:00+03:00' }] },
-    { id: 'DK-2026-0139', code: 'DK-2026-0139', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 35, weightTon: 14.0, castLengthMm: 6300, netTon: 14.0, furnaceId: 'F20', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Mamul Stok', status: 'Sevke Hazır', startedAt: '2026-11-01T06:00:00+03:00', stageStartedAt: '2026-11-02T10:00:00+03:00', paused: false, scrapTon: 0.115, remainingMetalTon: 1.0, remainingDecision: 'Yollukta kaldı', alerts: [], note: 'Saha görüşmesi örneği: 21 t → 3 t aktarım → 1 t yolluk → 17 t döküm → 14 t net biyet', history: [{ stage: 'Ergitme', at: '2026-11-01T06:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T08:20:00+03:00' }, { stage: 'Testere', at: '2026-11-01T11:30:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T14:00:00+03:00' }, { stage: 'Soğutma', at: '2026-11-01T23:10:00+03:00' }, { stage: 'Paketleme', at: '2026-11-02T08:00:00+03:00' }, { stage: 'Mamul Stok', at: '2026-11-02T10:00:00+03:00' }] },
-    { id: 'DK-2026-0138', code: 'DK-2026-0138', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 0, weightTon: 20.0, furnaceId: 'F20', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Ergitme', status: 'Devam ediyor', startedAt: '2026-11-02T06:10:00+03:00', stageStartedAt: '2026-11-02T06:10:00+03:00', paused: false, scrapTon: 0, remainingMetalTon: 3.0, remainingDecision: null, alerts: ['2. saatte karıştırma uyarısı'], history: [{ stage: 'Ergitme', at: '2026-11-02T06:10:00+03:00' }] }
+    { id: 'DK-2026-0131', code: 'DK-2026-0131', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 46, castLengthMm: 6300, netTon: 18.4, weightTon: 18.4, machineId: 'MCH-01', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Mamul Stok', status: 'Sevke Hazır', startedAt: '2026-10-30T05:40:00+03:00', stageStartedAt: '2026-10-31T12:20:00+03:00', paused: false, scrapTon: 0.22, remainingMetalTon: 1.6, remainingDecision: 'Ocakta bırakıldı', alerts: [], history: [{ stage: 'Ergitme', at: '2026-10-30T05:40:00+03:00' }, { stage: 'Döküm', at: '2026-10-30T07:55:00+03:00' }, { stage: 'Testere', at: '2026-10-30T10:10:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-10-30T13:00:00+03:00' }, { stage: 'Soğutma', at: '2026-10-30T19:00:00+03:00' }, { stage: 'Paketleme', at: '2026-10-31T10:00:00+03:00' }, { stage: 'Mamul Stok', at: '2026-10-31T12:20:00+03:00' }] },
+    { id: 'DK-2026-0132', code: 'DK-2026-0132', alloy: '6061', diameterMm: 152, lengthM: 6.0, billetCount: 50, castLengthMm: 6300, netTon: 14.6, weightTon: 14.6, machineId: 'MCH-02', pathId: 'CP-2', recipeId: 'RCP-03', stage: 'Mamul Stok', status: 'Sevke Hazır', startedAt: '2026-10-31T06:10:00+03:00', stageStartedAt: '2026-11-01T09:15:00+03:00', paused: false, scrapTon: 0.31, remainingMetalTon: 0, remainingDecision: 'Boş dökülüp hammaddeye', alerts: [], history: [{ stage: 'Ergitme', at: '2026-10-31T06:10:00+03:00' }, { stage: 'Döküm', at: '2026-10-31T08:30:00+03:00' }, { stage: 'Testere', at: '2026-10-31T11:00:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-10-31T14:00:00+03:00' }, { stage: 'Soğutma', at: '2026-10-31T21:00:00+03:00' }, { stage: 'Paketleme', at: '2026-11-01T08:00:00+03:00' }, { stage: 'Mamul Stok', at: '2026-11-01T09:15:00+03:00' }] },
+    { id: 'DK-2026-0133', code: 'DK-2026-0133', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 45, castLengthMm: 6300, netTon: 18.0, weightTon: 18.0, machineId: 'MCH-01', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Paketleme', status: 'Devam ediyor', startedAt: '2026-11-01T05:30:00+03:00', stageStartedAt: '2026-11-02T08:10:00+03:00', paused: false, scrapTon: 0.18, remainingMetalTon: 2.0, remainingDecision: 'Ocakta bırakıldı', alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-01T05:30:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T07:45:00+03:00' }, { stage: 'Testere', at: '2026-11-01T10:20:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T13:00:00+03:00' }, { stage: 'Soğutma', at: '2026-11-01T19:00:00+03:00' }, { stage: 'Paketleme', at: '2026-11-02T08:10:00+03:00' }] },
+    { id: 'DK-2026-0134', code: 'DK-2026-0134', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 43, castLengthMm: 6300, netTon: 17.2, weightTon: 17.2, machineId: 'MCH-01', pathId: 'CP-3', recipeId: 'RCP-01', stage: 'Soğutma', status: 'Devam ediyor', startedAt: '2026-11-01T12:00:00+03:00', stageStartedAt: '2026-11-02T07:20:00+03:00', paused: false, scrapTon: 0.27, remainingMetalTon: 0, remainingDecision: 'Başka ocağa aktarıldı', alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-01T12:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T14:30:00+03:00' }, { stage: 'Testere', at: '2026-11-01T17:00:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T20:00:00+03:00' }, { stage: 'Soğutma', at: '2026-11-02T07:20:00+03:00' }] },
+    { id: 'DK-2026-0135', code: 'DK-2026-0135', alloy: '6061', diameterMm: 152, lengthM: 6.0, billetCount: 46, castLengthMm: 6300, netTon: 13.5, weightTon: 13.5, machineId: 'MCH-02', pathId: 'CP-2', recipeId: 'RCP-03', stage: 'Homojenizasyon', status: 'Süre Aşımı', startedAt: '2026-11-01T18:00:00+03:00', stageStartedAt: '2026-11-01T22:00:00+03:00', paused: false, scrapTon: 0.44, remainingMetalTon: 3.2, remainingDecision: null, alerts: ['Homojenizasyon reçete süresi aşıldı'], history: [{ stage: 'Ergitme', at: '2026-11-01T18:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T20:10:00+03:00' }, { stage: 'Testere', at: '2026-11-01T21:20:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T22:00:00+03:00' }] },
+    { id: 'DK-2026-0136', code: 'DK-2026-0136', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 42, castLengthMm: 6300, netTon: 16.9, weightTon: 16.9, machineId: 'MCH-01', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Testere', status: 'Devam ediyor', startedAt: '2026-11-02T00:30:00+03:00', stageStartedAt: '2026-11-02T09:40:00+03:00', paused: false, scrapTon: 0.35, remainingMetalTon: 1.1, remainingDecision: null, alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-02T00:30:00+03:00' }, { stage: 'Döküm', at: '2026-11-02T03:00:00+03:00' }, { stage: 'Testere', at: '2026-11-02T09:40:00+03:00' }] },
+    { id: 'DK-2026-0137', code: 'DK-2026-0137', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 0, weightTon: 17.6, machineId: 'MCH-02', pathId: 'CP-1', recipeId: 'RCP-02', stage: 'Döküm', status: 'Devam ediyor', startedAt: '2026-11-02T04:00:00+03:00', stageStartedAt: '2026-11-02T08:05:00+03:00', paused: false, scrapTon: 0.12, remainingMetalTon: null, remainingDecision: null, alerts: [], history: [{ stage: 'Ergitme', at: '2026-11-02T04:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-02T08:05:00+03:00' }] },
+    { id: 'DK-2026-0139', code: 'DK-2026-0139', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 35, weightTon: 14.0, castLengthMm: 6300, netTon: 14.0, machineId: 'MCH-01', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Mamul Stok', status: 'Sevke Hazır', startedAt: '2026-11-01T06:00:00+03:00', stageStartedAt: '2026-11-02T10:00:00+03:00', paused: false, scrapTon: 0.115, remainingMetalTon: 1.0, remainingDecision: 'Yollukta kaldı', alerts: [], note: 'Saha görüşmesi örneği: 21 t → 3 t aktarım → 1 t yolluk → 17 t döküm → 14 t net biyet', history: [{ stage: 'Ergitme', at: '2026-11-01T06:00:00+03:00' }, { stage: 'Döküm', at: '2026-11-01T08:20:00+03:00' }, { stage: 'Testere', at: '2026-11-01T11:30:00+03:00' }, { stage: 'Homojenizasyon', at: '2026-11-01T14:00:00+03:00' }, { stage: 'Soğutma', at: '2026-11-01T23:10:00+03:00' }, { stage: 'Paketleme', at: '2026-11-02T08:00:00+03:00' }, { stage: 'Mamul Stok', at: '2026-11-02T10:00:00+03:00' }] },
+    { id: 'DK-2026-0138', code: 'DK-2026-0138', alloy: '6063', diameterMm: 178, lengthM: 6.0, billetCount: 0, weightTon: 20.0, machineId: 'MCH-01', pathId: 'CP-1', recipeId: 'RCP-01', stage: 'Ergitme', status: 'Devam ediyor', startedAt: '2026-11-02T06:10:00+03:00', stageStartedAt: '2026-11-02T06:10:00+03:00', paused: false, scrapTon: 0, remainingMetalTon: 3.0, remainingDecision: null, alerts: ['2. saatte karıştırma uyarısı'], history: [{ stage: 'Ergitme', at: '2026-11-02T06:10:00+03:00' }] }
   ],
 
   shipments: [
@@ -334,28 +364,12 @@ export const SEED = {
     { id: 'MT6', code: 'ROTARY', name: 'Döner Ocak', icon: 'recycle', capacityUnit: 'ton', signals: ['door', 'alarm', 'running'] }
   ],
 
-  machines: [
-    { id: 'MCH-01', plantId: 'P1', type: 'FURNACE', name: 'A Fırını', capacityTon: 20, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
-    { id: 'MCH-02', plantId: 'P1', type: 'FURNACE', name: 'B Fırını', capacityTon: 35, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
-    { id: 'MCH-03', plantId: 'P1', type: 'FURNACE', name: 'C Fırını', capacityTon: 20, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2022-08-03' },
-    { id: 'MCH-04', plantId: 'P1', type: 'FURNACE', name: 'D Fırını', capacityTon: 35, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2023-02-19' },
-    { id: 'MCH-05', plantId: 'P1', type: 'FURNACE', name: 'E Fırını', capacityTon: 20, mode: 'PLC', plcId: 'PLC-1', active: false, installedAt: '2025-06-11' },
-    { id: 'MCH-06', plantId: 'P1', type: 'CAST_TABLE', name: 'Tabla 1', capacityTon: 1, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
-    { id: 'MCH-07', plantId: 'P1', type: 'CAST_TABLE', name: 'Tabla 2', capacityTon: 1, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2022-08-03' },
-    { id: 'MCH-08', plantId: 'P1', type: 'SAW', name: 'Testere 1', capacityTon: 0, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-05-02' },
-    { id: 'MCH-09', plantId: 'P1', type: 'SAW', name: 'Testere 2', capacityTon: 0, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2023-01-18' },
-    { id: 'MCH-10', plantId: 'P1', type: 'HOMO_FURNACE', name: 'Homojen 1', capacityTon: 25, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
-    { id: 'MCH-11', plantId: 'P1', type: 'HOMO_FURNACE', name: 'Homojen 2', capacityTon: 25, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2021-04-12' },
-    { id: 'MCH-12', plantId: 'P1', type: 'HOMO_FURNACE', name: 'Homojen 3', capacityTon: 25, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2022-09-14' },
-    { id: 'MCH-13', plantId: 'P1', type: 'HOMO_FURNACE', name: 'Homojen 4', capacityTon: 25, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2024-03-07' },
-    { id: 'MCH-14', plantId: 'P1', type: 'CONT_HOMO', name: 'Continue Homojen 1', capacityTon: 12, mode: 'PLC', plcId: 'PLC-1', active: true, installedAt: '2024-11-20' },
-    { id: 'MCH-15', plantId: 'P2', type: 'FURNACE', name: '1. Ocak', capacityTon: 20, mode: 'MANUAL', plcId: null, active: true, installedAt: '2019-03-05' },
-    { id: 'MCH-16', plantId: 'P2', type: 'FURNACE', name: '2. Ocak', capacityTon: 35, mode: 'MANUAL', plcId: null, active: true, installedAt: '2019-03-05' },
-    { id: 'MCH-17', plantId: 'P2', type: 'CAST_TABLE', name: 'Tabla 1', capacityTon: 1, mode: 'MANUAL', plcId: null, active: true, installedAt: '2019-03-05' },
-    { id: 'MCH-18', plantId: 'P2', type: 'SAW', name: 'Testere 1', capacityTon: 0, mode: 'MANUAL', plcId: null, active: true, installedAt: '2020-07-22' },
-    { id: 'MCH-19', plantId: 'P2', type: 'HOMO_FURNACE', name: 'Homojen 1', capacityTon: 25, mode: 'MANUAL', plcId: null, active: true, installedAt: '2020-07-22' },
-    { id: 'MCH-20', plantId: 'P2', type: 'ROTARY', name: 'Döner Ocak', capacityTon: 8, mode: 'MANUAL', plcId: null, active: true, installedAt: '2018-01-15' }
-  ],
+  machines: MACHINE_ROWS.map((m) => ({
+    status: m.active ? 'Aktif' : 'Devre Dışı',
+    decommissionedAt: m.active ? null : '2025-06-11T00:00:00+03:00',
+    decommissionReason: m.active ? '' : 'Bakıma alındı, parktan çıkarıldı',
+    ...m
+  })),
 
   castingPaths: [
     { id: 'CP-1', plantId: 'P1', fromMachineId: 'MCH-01', tableId: 'MCH-06', label: 'Kısa yol', holdTon: 1.0, note: 'A Fırını, Tabla 1' },
@@ -667,15 +681,334 @@ export const SEED = {
   ],
 
   integrationRules: [
-    { id: 'IR-01', trigger: 'Satış siparişi onayı', module: 'Satış', produces: ['Rezervasyon', 'Kredi kontrolü', 'Müşteri cari hareketi'], accountEffect: 'Henüz muhasebe fişi yok', autoPost: true, requiresApproval: false },
-    { id: 'IR-02', trigger: 'İki kademeli sevkiyat onayı', module: 'Sevkiyat', produces: ['Stok çıkış hareketi', 'Satış faturası', 'Borç / alacak fişi', 'Müşteri bakiyesi', 'Maliyet yansıması', 'Bildirim + giden kutu', 'Olay satırı'], accountEffect: '120 borç / 600 + 391 alacak', autoPost: true, requiresApproval: true },
-    { id: 'IR-03', trigger: 'Mal kabul', module: 'Satın Alma', produces: ['Stok giriş hareketi', 'Fiyat geçmişi', 'Emir karşılama durumu', 'Olay satırı'], accountEffect: 'Fatura gelene kadar bekler', autoPost: true, requiresApproval: false },
-    { id: 'IR-04', trigger: 'Alış faturası', module: 'Muhasebe', produces: ['Borç / alacak fişi', 'Satıcı cari hareketi', 'Ödeme vadesi', 'Bütçe gerçekleşen'], accountEffect: '150 + 191 borç / 320 alacak', autoPost: true, requiresApproval: true },
-    { id: 'IR-05', trigger: 'Satın alma talebi onayı', module: 'Satın Alma', produces: ['Teklif çağrısı', 'Onay izi', 'Bildirim'], accountEffect: 'Yok', autoPost: true, requiresApproval: true },
-    { id: 'IR-06', trigger: 'Teklif seçimi', module: 'Satın Alma', produces: ['Satın alma emri', 'Fiyat geçmişi önizlemesi', 'Talep durumu'], accountEffect: 'Yok', autoPost: true, requiresApproval: false },
-    { id: 'IR-07', trigger: 'Üretim olayı (NET_BILLET)', module: 'Üretim', produces: ['Yan ürün kaydı', 'Mamul stok', 'Döküm kodu maliyeti', 'Olay günlüğü'], accountEffect: '730 borç / 150 alacak', autoPost: true, requiresApproval: false },
-    { id: 'IR-08', trigger: 'Fiziki sayım farkı', module: 'Depo', produces: ['Düzeltme hareketi', 'Borç / alacak fişi', 'Denetim izi'], accountEffect: '153 borç / 730 alacak', autoPost: false, requiresApproval: true },
-    { id: 'IR-09', trigger: 'Tahsilat / ödeme', module: 'Finans', produces: ['Cari bakiye', 'Banka hareketi', 'Borç / alacak fişi'], accountEffect: '102 borç / 120 alacak', autoPost: true, requiresApproval: false },
-    { id: 'IR-10', trigger: 'Dönem kapanışı', module: 'Finans', produces: ['Mizan kontrolü', 'Bütçe sapması', 'Yönetim raporu', 'Arşiv'], accountEffect: 'Borç = alacak doğrulaması', autoPost: false, requiresApproval: true }
+    { id: 'IR-01', moduleCode: 'SALES', trigger: 'Satış siparişi onayı', module: 'Satış', produces: ['Rezervasyon', 'Kredi kontrolü', 'Müşteri cari hareketi'], accountEffect: 'Henüz muhasebe fişi yok', autoPost: true, requiresApproval: false },
+    { id: 'IR-02', moduleCode: 'SHIPPING', trigger: 'İki kademeli sevkiyat onayı', module: 'Sevkiyat', produces: ['Stok çıkış hareketi', 'Satış faturası', 'Borç / alacak fişi', 'Müşteri bakiyesi', 'Maliyet yansıması', 'Bildirim + giden kutu', 'Olay satırı'], accountEffect: '120 borç / 600 + 391 alacak', autoPost: true, requiresApproval: true },
+    { id: 'IR-03', moduleCode: 'PURCHASING', trigger: 'Mal kabul', module: 'Satın Alma', produces: ['Stok giriş hareketi', 'Fiyat geçmişi', 'Emir karşılama durumu', 'Olay satırı'], accountEffect: 'Fatura gelene kadar bekler', autoPost: true, requiresApproval: false },
+    { id: 'IR-04', moduleCode: 'FINANCE', trigger: 'Alış faturası', module: 'Muhasebe', produces: ['Borç / alacak fişi', 'Satıcı cari hareketi', 'Ödeme vadesi', 'Bütçe gerçekleşen'], accountEffect: '150 + 191 borç / 320 alacak', autoPost: true, requiresApproval: true },
+    { id: 'IR-05', moduleCode: 'PURCHASING', trigger: 'Satın alma talebi onayı', module: 'Satın Alma', produces: ['Teklif çağrısı', 'Onay izi', 'Bildirim'], accountEffect: 'Yok', autoPost: true, requiresApproval: true },
+    { id: 'IR-06', moduleCode: 'PURCHASING', trigger: 'Teklif seçimi', module: 'Satın Alma', produces: ['Satın alma emri', 'Fiyat geçmişi önizlemesi', 'Talep durumu'], accountEffect: 'Yok', autoPost: true, requiresApproval: false },
+    { id: 'IR-07', moduleCode: 'PRODUCTION', trigger: 'Üretim olayı (NET_BILLET)', module: 'Üretim', produces: ['Yan ürün kaydı', 'Mamul stok', 'Döküm kodu maliyeti', 'Olay günlüğü'], accountEffect: '730 borç / 150 alacak', autoPost: true, requiresApproval: false },
+    { id: 'IR-08', moduleCode: 'WAREHOUSE', trigger: 'Fiziki sayım farkı', module: 'Depo', produces: ['Düzeltme hareketi', 'Borç / alacak fişi', 'Denetim izi'], accountEffect: '153 borç / 730 alacak', autoPost: false, requiresApproval: true },
+    { id: 'IR-09', moduleCode: 'FINANCE', trigger: 'Tahsilat / ödeme', module: 'Finans', produces: ['Cari bakiye', 'Banka hareketi', 'Borç / alacak fişi'], accountEffect: '102 borç / 120 alacak', autoPost: true, requiresApproval: false },
+    { id: 'IR-10', moduleCode: 'FINANCE', trigger: 'Dönem kapanışı', module: 'Finans', produces: ['Mizan kontrolü', 'Bütçe sapması', 'Yönetim raporu', 'Arşiv'], accountEffect: 'Borç = alacak doğrulaması', autoPost: false, requiresApproval: true }
   ],
+
+  /* ------------------------------------------------------------------ */
+  /* Saha kurulumu ve modüler yaşam döngüsü (v4, docs/12)                 */
+  /* ------------------------------------------------------------------ */
+
+  machineAliases: [
+    { id: 'MA-01', legacyCode: 'F20', machineId: 'MCH-01', plantId: 'P1', note: 'Eski 20 ton ocak kodu' },
+    { id: 'MA-02', legacyCode: 'F35', machineId: 'MCH-02', plantId: 'P1', note: 'Eski 35 ton ocak kodu' },
+    { id: 'MA-03', legacyCode: 'FD', machineId: 'MCH-20', plantId: 'P2', note: 'Eski döner ocak kodu' }
+  ],
+
+  moduleRegistry: [
+  {
+    "id": "MOD-CORE",
+    "code": "CORE",
+    "label": "Çekirdek",
+    "group": "Genel / Sistem",
+    "views": [
+      "dashboard",
+      "notifications",
+      "settings"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Panel, bildirim ve ayarlar her fabrikada açıktır"
+  },
+  {
+    "id": "MOD-PURCHASING",
+    "code": "PURCHASING",
+    "label": "Satın Alma",
+    "group": "Ticari",
+    "views": [
+      "materials",
+      "orders",
+      "prices",
+      "suppliers",
+      "requests"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Değişken malzeme kartları ve talep/teklif akışı"
+  },
+  {
+    "id": "MOD-INVENTORY",
+    "code": "INVENTORY",
+    "label": "Hammadde & Stok",
+    "group": "Üretim",
+    "views": [
+      "stock",
+      "receipts",
+      "crusher",
+      "movements"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Faz 1 kapsamı, her fabrikada zorunlu"
+  },
+  {
+    "id": "MOD-PRODUCTION",
+    "code": "PRODUCTION",
+    "label": "Üretim",
+    "group": "Üretim",
+    "views": [
+      "production",
+      "recipes",
+      "batches",
+      "events"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": "FURNACE",
+    "requiresMode": null,
+    "note": "En az bir ergitme ocağı tanımlı olmalı"
+  },
+  {
+    "id": "MOD-MACHINES",
+    "code": "MACHINES",
+    "label": "Makine Parkı",
+    "group": "Kurulum",
+    "views": [
+      "machines",
+      "paths",
+      "cutting",
+      "maintenance"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Ekleme, düzenleme ve devre dışı bırakma"
+  },
+  {
+    "id": "MOD-ROTARY",
+    "code": "ROTARY",
+    "label": "Döner Ocak / Cüruf",
+    "group": "Kurulum",
+    "views": [],
+    "defaultEnabled": false,
+    "requiresMachineType": "ROTARY",
+    "requiresMode": null,
+    "note": "Yalnızca döner ocağı olan fabrikada görünür"
+  },
+  {
+    "id": "MOD-PLC",
+    "code": "PLC",
+    "label": "PLC Durum",
+    "group": "Kurulum",
+    "views": [
+      "plc"
+    ],
+    "defaultEnabled": false,
+    "requiresMachineType": null,
+    "requiresMode": "PLC",
+    "note": "Fabrika modu PLC değilse menüde görünmez"
+  },
+  {
+    "id": "MOD-SALES",
+    "code": "SALES",
+    "label": "Satış & Müşteri",
+    "group": "Ticari",
+    "views": [
+      "sales",
+      "customers"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "docs/11 ile eklenen ticari katman"
+  },
+  {
+    "id": "MOD-FINANCE",
+    "code": "FINANCE",
+    "label": "Muhasebe & Maliyet",
+    "group": "Ticari",
+    "views": [
+      "finance",
+      "costing"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Fiş, mizan, fatura, döküm kodu maliyeti"
+  },
+  {
+    "id": "MOD-WAREHOUSE",
+    "code": "WAREHOUSE",
+    "label": "Depo & Sayım",
+    "group": "Lojistik",
+    "views": [
+      "warehouse"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Depo lokasyonu ve rezervasyon"
+  },
+  {
+    "id": "MOD-HR",
+    "code": "HR",
+    "label": "Personel & Vardiya",
+    "group": "Lojistik",
+    "views": [
+      "hr"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Bordro harici; yalnızca operatör izi"
+  },
+  {
+    "id": "MOD-SHIPPING",
+    "code": "SHIPPING",
+    "label": "Sevkiyat",
+    "group": "Lojistik",
+    "views": [
+      "shipments",
+      "archive"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "İki kademeli onay ve arşiv"
+  },
+  {
+    "id": "MOD-REPORTS",
+    "code": "REPORTS",
+    "label": "Raporlama",
+    "group": "Yönetim",
+    "views": [
+      "reports"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Günlük / haftalık / aylık çıktılar"
+  },
+  {
+    "id": "MOD-INTEGRATION",
+    "code": "INTEGRATION",
+    "label": "Entegrasyon",
+    "group": "Yönetim",
+    "views": [
+      "integration"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Tek kayıt çok etki matrisi"
+  },
+  {
+    "id": "MOD-VENDOR",
+    "code": "VENDOR",
+    "label": "Merkezi Yönetim",
+    "group": "Yönetim",
+    "views": [
+      "vendor",
+      "setup",
+      "modules"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Yalnızca geliştirici ekibi; operatör ekranı değildir"
+  }
+],
+
+  plantModules: [
+    { id: 'PM-01', plantId: 'P1', enabled: { ...{"CORE": true, "PURCHASING": true, "INVENTORY": true, "PRODUCTION": true, "MACHINES": true, "ROTARY": false, "PLC": false, "SALES": true, "FINANCE": true, "WAREHOUSE": true, "HR": true, "SHIPPING": true, "REPORTS": true, "INTEGRATION": true, "VENDOR": true}, PLC: true, ROTARY: false }, note: 'PLC modlu, döner ocaksız fabrika' },
+    { id: 'PM-02', plantId: 'P2', enabled: { ...{"CORE": true, "PURCHASING": true, "INVENTORY": true, "PRODUCTION": true, "MACHINES": true, "ROTARY": false, "PLC": false, "SALES": true, "FINANCE": true, "WAREHOUSE": true, "HR": true, "SHIPPING": true, "REPORTS": true, "INTEGRATION": true, "VENDOR": true}, PLC: false, ROTARY: true }, note: 'MANUAL modlu, döner ocaklı fabrika' },
+    { id: 'PM-03', plantId: 'P3', enabled: { ...{"CORE": true, "PURCHASING": true, "INVENTORY": true, "PRODUCTION": true, "MACHINES": true, "ROTARY": false, "PLC": false, "SALES": true, "FINANCE": true, "WAREHOUSE": true, "HR": true, "SHIPPING": true, "REPORTS": true, "INTEGRATION": true, "VENDOR": true}, PLC: true, ROTARY: false }, note: 'Pasif demo profili' }
+  ],
+
+  setupDrafts: [
+    { id: 'SD-1', step: 1, updatedAt: '2026-11-04T09:00:00+03:00', note: 'Yarım kalan saha kurulumu örneği', values: { code: 'FIRM4', name: 'Yeni Fabrika', city: 'İzmir', mode: 'MANUAL', note: '', counts: { FURNACE: 1, CAST_TABLE: 1, SAW: 1, HOMO_FURNACE: 1, CONT_HOMO: 0, ROTARY: 0 }, defaultCapacity: { FURNACE: 20, CAST_TABLE: 1, SAW: 0, HOMO_FURNACE: 25, CONT_HOMO: 12, ROTARY: 8 }, holdTon: 1, connection: { name: 'Fırın hattı PLC', ip: '192.168.1.50', protocol: 'OPC UA', port: 4840, pollSeconds: 3, adapter: 'simulated' }, modules: { ...{"CORE": true, "PURCHASING": true, "INVENTORY": true, "PRODUCTION": true, "MACHINES": true, "ROTARY": false, "PLC": false, "SALES": true, "FINANCE": true, "WAREHOUSE": true, "HR": true, "SHIPPING": true, "REPORTS": true, "INTEGRATION": true, "VENDOR": true} }, lastTest: null } }
+  ],
+
+  adapterContracts: [
+  {
+    "id": "ADP-simulated",
+    "code": "simulated",
+    "label": "Simülasyon / MANUAL",
+    "protocol": "Yerel",
+    "implemented": true,
+    "capabilities": [
+      "connect",
+      "test",
+      "readFourSignals",
+      "disconnect"
+    ],
+    "note": "Saha kurulumunda ağ olmadan dört sinyali üretir; her fabrikada yedek moddur"
+  },
+  {
+    "id": "ADP-opcua",
+    "code": "opcua",
+    "label": "OPC UA",
+    "protocol": "OPC UA",
+    "implemented": false,
+    "capabilities": [
+      "connect",
+      "test",
+      "readFourSignals",
+      "disconnect"
+    ],
+    "note": "Gerçek sürücü docs/10 aşama 9'da aynı sözleşmeyle takılır"
+  },
+  {
+    "id": "ADP-modbus",
+    "code": "modbus",
+    "label": "Modbus TCP",
+    "protocol": "Modbus",
+    "implemented": false,
+    "capabilities": [
+      "connect",
+      "test",
+      "readFourSignals",
+      "disconnect"
+    ],
+    "note": "Gerçek sürücü docs/10 aşama 9'da aynı sözleşmeyle takılır"
+  }
+],
+
+  profilePackages: []
 };
+
+// Kayıtlı profil paketleri: sahada "indir, götür, içe al" için hazır örnekler.
+// Paketler daima güncel `plants` / `machines` / `castingPaths` verisinden üretilir.
+function makePlantPackage(plantId, code, name) {
+  const plant = SEED.plants.find((p) => p.id === plantId);
+  if (!plant) return null;
+  const machines = SEED.machines.filter((m) => m.plantId === plantId);
+  const ids = new Set(machines.map((m) => m.id));
+  const plcIds = new Set(SEED.plcConnections.filter((c) => c.plantId === plantId).map((c) => c.id));
+  return {
+    id: `PKG-${plantId}`, code, name, plantId, createdAt: '2026-11-04T09:00:00+03:00',
+    machineCount: machines.length, furnaceCount: machines.filter((m) => m.type === 'FURNACE').length,
+    note: plant.note || '',
+    payload: {
+      kind: 'erp-plant-profile', packageVersion: 1, schemaVersion: SEED.schemaVersion,
+      code, name, generatedAt: '2026-11-04T09:00:00+03:00', source: 'ERP Studio · fabrika profil paketi',
+      plant: { ...plant },
+      machineTypes: SEED.machineTypes.map((x) => ({ ...x })),
+      machines: machines.map((x) => ({ ...x })),
+      castingPaths: SEED.castingPaths.filter((x) => x.plantId === plantId).map((x) => ({ ...x })),
+      plcConnections: SEED.plcConnections.filter((x) => x.plantId === plantId).map((x) => ({ ...x })),
+      plcTags: SEED.plcTags.filter((x) => plcIds.has(x.plcId)).map((x) => ({ ...x })),
+      oilRules: SEED.oilRules.filter((x) => ids.has(x.machineId)).map((x) => ({ ...x })),
+      bladeRules: SEED.bladeRules.filter((x) => ids.has(x.machineId)).map((x) => ({ ...x })),
+      maintenanceEvents: SEED.maintenanceEvents.filter((x) => ids.has(x.machineId)).map((x) => ({ ...x })),
+      signalStates: SEED.signalStates.filter((x) => ids.has(x.machineId)).map((x) => ({ ...x })),
+      homogenizationBatches: SEED.homogenizationBatches.filter((x) => ids.has(x.machineId)).map((x) => ({ ...x })),
+      plantModules: SEED.plantModules.find((x) => x.plantId === plantId) || null,
+      moduleRegistry: SEED.moduleRegistry.map((x) => ({ ...x }))
+    }
+  };
+}
+SEED.profilePackages = [
+  makePlantPackage('P1', 'FIRM1', 'Anadolu Alüminyum · 5 fırın'),
+  makePlantPackage('P2', 'FIRM2', 'Marmara Alüminyum · 2 fırın')
+];

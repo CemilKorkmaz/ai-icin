@@ -1,0 +1,215 @@
+[
+  {
+    "id": "MOD-CORE",
+    "code": "CORE",
+    "label": "Çekirdek",
+    "group": "Genel / Sistem",
+    "views": [
+      "dashboard",
+      "notifications",
+      "settings"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Panel, bildirim ve ayarlar her fabrikada açıktır"
+  },
+  {
+    "id": "MOD-PURCHASING",
+    "code": "PURCHASING",
+    "label": "Satın Alma",
+    "group": "Ticari",
+    "views": [
+      "materials",
+      "orders",
+      "prices",
+      "suppliers",
+      "requests"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Değişken malzeme kartları ve talep/teklif akışı"
+  },
+  {
+    "id": "MOD-INVENTORY",
+    "code": "INVENTORY",
+    "label": "Hammadde & Stok",
+    "group": "Üretim",
+    "views": [
+      "stock",
+      "receipts",
+      "crusher",
+      "movements"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Faz 1 kapsamı, her fabrikada zorunlu"
+  },
+  {
+    "id": "MOD-PRODUCTION",
+    "code": "PRODUCTION",
+    "label": "Üretim",
+    "group": "Üretim",
+    "views": [
+      "production",
+      "recipes",
+      "batches",
+      "events"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": "FURNACE",
+    "requiresMode": null,
+    "note": "En az bir ergitme ocağı tanımlı olmalı"
+  },
+  {
+    "id": "MOD-MACHINES",
+    "code": "MACHINES",
+    "label": "Makine Parkı",
+    "group": "Kurulum",
+    "views": [
+      "machines",
+      "paths",
+      "cutting",
+      "maintenance"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Ekleme, düzenleme ve devre dışı bırakma"
+  },
+  {
+    "id": "MOD-ROTARY",
+    "code": "ROTARY",
+    "label": "Döner Ocak / Cüruf",
+    "group": "Kurulum",
+    "views": [],
+    "defaultEnabled": false,
+    "requiresMachineType": "ROTARY",
+    "requiresMode": null,
+    "note": "Yalnızca döner ocağı olan fabrikada görünür"
+  },
+  {
+    "id": "MOD-PLC",
+    "code": "PLC",
+    "label": "PLC Durum",
+    "group": "Kurulum",
+    "views": [
+      "plc"
+    ],
+    "defaultEnabled": false,
+    "requiresMachineType": null,
+    "requiresMode": "PLC",
+    "note": "Fabrika modu PLC değilse menüde görünmez"
+  },
+  {
+    "id": "MOD-SALES",
+    "code": "SALES",
+    "label": "Satış & Müşteri",
+    "group": "Ticari",
+    "views": [
+      "sales",
+      "customers"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "docs/11 ile eklenen ticari katman"
+  },
+  {
+    "id": "MOD-FINANCE",
+    "code": "FINANCE",
+    "label": "Muhasebe & Maliyet",
+    "group": "Ticari",
+    "views": [
+      "finance",
+      "costing"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Fiş, mizan, fatura, döküm kodu maliyeti"
+  },
+  {
+    "id": "MOD-WAREHOUSE",
+    "code": "WAREHOUSE",
+    "label": "Depo & Sayım",
+    "group": "Lojistik",
+    "views": [
+      "warehouse"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Depo lokasyonu ve rezervasyon"
+  },
+  {
+    "id": "MOD-HR",
+    "code": "HR",
+    "label": "Personel & Vardiya",
+    "group": "Lojistik",
+    "views": [
+      "hr"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Bordro harici; yalnızca operatör izi"
+  },
+  {
+    "id": "MOD-SHIPPING",
+    "code": "SHIPPING",
+    "label": "Sevkiyat",
+    "group": "Lojistik",
+    "views": [
+      "shipments",
+      "archive"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "İki kademeli onay ve arşiv"
+  },
+  {
+    "id": "MOD-REPORTS",
+    "code": "REPORTS",
+    "label": "Raporlama",
+    "group": "Yönetim",
+    "views": [
+      "reports"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Günlük / haftalık / aylık çıktılar"
+  },
+  {
+    "id": "MOD-INTEGRATION",
+    "code": "INTEGRATION",
+    "label": "Entegrasyon",
+    "group": "Yönetim",
+    "views": [
+      "integration"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Tek kayıt çok etki matrisi"
+  },
+  {
+    "id": "MOD-VENDOR",
+    "code": "VENDOR",
+    "label": "Merkezi Yönetim",
+    "group": "Yönetim",
+    "views": [
+      "vendor",
+      "setup",
+      "modules"
+    ],
+    "defaultEnabled": true,
+    "requiresMachineType": null,
+    "requiresMode": null,
+    "note": "Yalnızca geliştirici ekibi; operatör ekranı değildir"
+  }
+]

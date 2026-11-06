@@ -9,7 +9,10 @@ Kontroller:
   - lots.stage değerlerinin manifestteki aşama listesinde olması,
   - stok bakiyesi ile hareket toplamı farkı (bilgilendirici uyarı — demo snapshot),
   - ticari/finansal katman: borç = alacak, KDV tutarları, cari/fatura referansları,
-    maliyet kalemleri toplamı, sayım farkı ve dönem kapanışı (docs/11).
+    maliyet kalemleri toplamı, sayım farkı ve dönem kapanışı (docs/11),
+  - modüler kurulum (docs/12): furnaces.json'un machines.json projeksiyonu olması,
+    eski kod eşlemeleri, modül kaydı, fabrika profilleri, adaptör sözleşmeleri,
+    devre dışı bırakılmış makinelerin kayıtlarının korunması.
 
 Kullanım: python3 server/erp/scripts/validate_data.py
 """
@@ -36,7 +39,10 @@ COLLECTIONS = [
     'accounts', 'customers', 'quotations', 'sales-orders', 'purchase-requests',
     'purchase-quotes', 'invoices', 'journal-entries', 'payments', 'warehouses',
     'stock-counts', 'reservations', 'cost-records', 'employees', 'shifts',
-    'budgets', 'period-closures', 'integration-rules'
+    'budgets', 'period-closures', 'integration-rules',
+    # Modüler saha kurulumu (docs/12, schemaVersion 4)
+    'machine-aliases', 'module-registry', 'plant-modules', 'setup-drafts',
+    'adapter-contracts', 'profile-packages'
 ]
 
 SIGNALS = {'door', 'casting', 'alarm', 'running'}
@@ -98,7 +104,11 @@ def main() -> int:
 
     mats = ids(data['materials'])
     sups = ids(data['suppliers'])
-    fur = ids(data['furnaces'])
+    # `furnaces` artık `machines` koleksiyonunun salt-okunur projeksiyonudur.
+    # Tek kaynak ihlali burada yakalanır (docs/12 Bölüm 2).
+    fur = {m.get('id') for m in data['machines'] if isinstance(m, dict) and m.get('type') in ('FURNACE', 'ROTARY')}
+    if ids(data['furnaces']) != fur:
+        errors.append('furnaces.json, machines.json içindeki FURNACE/ROTARY kayıtlarının birebir projeksiyonu değil')
     rec = ids(data['recipes'])
     lots = ids(data['lots'])
     orders = ids(data['purchase-orders'])
@@ -133,8 +143,8 @@ def main() -> int:
     for m in data['movements']:
         ref('movements', m, 'materialId', mats, 'malzeme')
     for r in data['recipes']:
-        if r.get('furnaceId') and r['furnaceId'] not in fur:
-            errors.append(f'recipes/{r.get("id")}: ocak yok → {r.get("furnaceId")}')
+        if r.get('machineId') and r['machineId'] not in fur:
+            errors.append(f'recipes/{r.get("id")}: ocak makinesi yok → {r.get("machineId")}')
         for i in r.get('items', []):
             if i.get('materialId') not in mats:
                 errors.append(f'recipes/{r.get("id")}: malzeme yok → {i.get("materialId")}')
@@ -142,7 +152,7 @@ def main() -> int:
             if s.get('materialId') and s['materialId'] not in mats:
                 errors.append(f'recipes/{r.get("id")}/step: malzeme yok → {s.get("materialId")}')
     for l in data['lots']:
-        ref('lots', l, 'furnaceId', fur, 'ocak')
+        ref('lots', l, 'machineId', fur, 'ocak makinesi')
         ref('lots', l, 'recipeId', rec, 'reçete')
         if stages and l.get('stage') not in stages:
             errors.append(f'lots/{l.get("id")}: geçersiz aşama → {l.get("stage")}')
@@ -424,6 +434,84 @@ def main() -> int:
     for key in ('vatRate', 'currentPeriod', 'costingMethod', 'defaultWarehouseId', 'approvalLimitPurchase'):
         if isinstance(settings, dict) and key not in settings:
             errors.append(f'settings: {key} alanı eksik (schemaVersion 3)')
+
+    # ---------- Modüler saha kurulumu: tek kaynak, profil, modül, adaptör (docs/12) ----------
+    module_codes = {m.get('code') for m in data['module-registry'] if isinstance(m, dict)}
+    adapter_codes = {a.get('code') for a in data['adapter-contracts'] if isinstance(a, dict)}
+    plant_ids = ids(data['plants'])
+    machine_ids_all = ids(data['machines'])
+
+    for ma in data['machine-aliases']:
+        ref('machine-aliases', ma, 'machineId', machine_ids_all, 'makine')
+        ref('machine-aliases', ma, 'plantId', plant_ids, 'fabrika')
+        if not ma.get('legacyCode'):
+            errors.append(f'machine-aliases/{ma.get("id")}: eski kod boş')
+    for mod in data['module-registry']:
+        if not isinstance(mod.get('views'), list):
+            errors.append(f'module-registry/{mod.get("code")}: views dizisi eksik')
+        if not isinstance(mod.get('defaultEnabled'), bool):
+            errors.append(f'module-registry/{mod.get("code")}: defaultEnabled boolean değil')
+    for pm in data['plant-modules']:
+        ref('plant-modules', pm, 'plantId', plant_ids, 'fabrika')
+        enabled = pm.get('enabled')
+        if not isinstance(enabled, dict):
+            errors.append(f'plant-modules/{pm.get("id")}: enabled nesnesi eksik')
+        else:
+            for code in enabled:
+                if code not in module_codes:
+                    errors.append(f'plant-modules/{pm.get("id")}: kayıtlı olmayan modül → {code}')
+    for dr in data['setup-drafts']:
+        vals = dr.get('values') or {}
+        if not isinstance(vals.get('counts'), dict) or not isinstance(vals.get('modules'), dict):
+            errors.append(f'setup-drafts/{dr.get("id")}: counts veya modules nesnesi eksik')
+        if not (1 <= int(dr.get('step') or 0) <= 5):
+            errors.append(f'setup-drafts/{dr.get("id")}: adım 1–5 dışında')
+    for ad in data['adapter-contracts']:
+        caps = ad.get('capabilities') or []
+        for fn in ('connect', 'test', 'readFourSignals', 'disconnect'):
+            if fn not in caps:
+                errors.append(f'adapter-contracts/{ad.get("code")}: {fn} sözleşmede yok')
+        if not isinstance(ad.get('implemented'), bool):
+            errors.append(f'adapter-contracts/{ad.get("code")}: implemented boolean değil')
+    for pkg in data['profile-packages']:
+        payload = pkg.get('payload') or {}
+        if payload.get('kind') != 'erp-plant-profile':
+            errors.append(f'profile-packages/{pkg.get("id")}: kind alanı geçersiz')
+        if payload.get('schemaVersion') != 4:
+            errors.append(f'profile-packages/{pkg.get("id")}: schemaVersion 4 değil')
+        pids = {m.get('id') for m in payload.get('machines') or [] if isinstance(m, dict)}
+        for cp in payload.get('castingPaths') or []:
+            if cp.get('fromMachineId') not in pids or cp.get('tableId') not in pids:
+                errors.append(f'profile-packages/{pkg.get("id")}: paket dışı makineye bağlı yol → {cp.get("id")}')
+        if int(pkg.get('furnaceCount') or 0) != len([m for m in payload.get('machines') or [] if m.get('type') == 'FURNACE']):
+            errors.append(f'profile-packages/{pkg.get("id")}: fırın sayısı özeti uyuşmuyor')
+
+    # Devre dışı bırakılan makine hâlâ veri içinde olmalı: çıkarma = silme değildir.
+    decommissioned = 0
+    for m in data['machines']:
+        if m.get('decommissionedAt'):
+            decommissioned += 1
+            if m.get('active') is not False:
+                errors.append(f'machines/{m.get("id")}: devre dışı makine active=false olmalı')
+            if not m.get('decommissionReason'):
+                errors.append(f'machines/{m.get("id")}: devre dışı bırakma gerekçesi eksik')
+    # Referans bütünlüğü: hiçbir yol/tag/kural silinmiş bir makineye işaret etmemeli.
+    for cp in data['casting-paths']:
+        ref('casting-paths', cp, 'fromMachineId', machine_ids_all, 'kaynak ocak')
+        ref('casting-paths', cp, 'tableId', machine_ids_all, 'döküm tablası')
+    for key in ('plc-tags', 'signal-states', 'oil-rules', 'blade-rules', 'maintenance-events',
+                'homogenization-batches', 'events'):
+        for row in data[key]:
+            if row.get('machineId'):
+                ref(key, row, 'machineId', machine_ids_all, 'makine')
+    for key in ('setupWizard', 'adapterMode', 'modulePolicy'):
+        if isinstance(settings, dict) and key not in settings:
+            errors.append(f'settings: {key} alanı eksik (schemaVersion 4)')
+    if settings.get('adapterMode') not in adapter_codes:
+        errors.append('settings.adapterMode kayıtlı bir adaptöre işaret etmiyor')
+
+    print(f'  ✓ {len(module_codes)} modül · {len(adapter_codes)} adaptör · {len(data["profile-packages"])} profil paketi · '
+          f'{decommissioned} devre dışı makine (kayıtları korundu)')
 
     print(f'  ✓ {len(data["accounts"])} hesap · {len(data["journal-entries"])} muhasebe fişi · '
           f'{len(data["invoices"])} fatura · {len(data["cost-records"])} maliyet kaydı · '

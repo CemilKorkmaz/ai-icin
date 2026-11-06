@@ -1,8 +1,8 @@
 {
-  "schema_version": 3,
-  "generated_at": "2026-11-04T16:04:24.340Z",
+  "schema_version": 4,
+  "generated_at": "2026-11-06T19:18:45.325Z",
   "source": "app/js/seed.js (node tools/export_seed.mjs)",
-  "note": "Koleksiyon dosyaları doğrudan kayıt dizisidir (settings.json tek nesnedir). schemaVersion 3: genel ERP karşılaştırmasıyla müşteri/cari, satış siparişi, talep ve teklif, fatura, borç-alacak fişi, ödeme, depo, rezervasyon, sayım, maliyet, personel, vardiya, bütçe, dönem kapanışı ve entegrasyon kuralları eklendi. Olayların kalıcı hâli server/erp/archive/ altındadır.",
+  "note": "Koleksiyon dosyaları doğrudan kayıt dizisidir (settings.json tek nesnedir). schemaVersion 4: modüler saha kurulumuyla fabrika profil paketleri, modül kaydı, makine eşlemeleri, adaptör sözleşmeleri, kurulum taslakları ve devre dışı bırakma alanları eklendi; furnaces.json machines.json projeksiyonudur. Önceki sürümde (schemaVersion 3) genel ERP karşılaştırmasıyla müşteri/cari, satış siparişi, talep ve teklif, fatura, borç-alacak fişi, ödeme, depo, rezervasyon, sayım, maliyet, personel, vardiya, bütçe, dönem kapanışı ve entegrasyon kuralları eklendi. Olayların kalıcı hâli server/erp/archive/ altındadır.",
   "stages": [
     "Ergitme",
     "Döküm",
@@ -74,7 +74,7 @@
     {
       "file": "furnaces.json",
       "collection": "furnaces",
-      "records": 3
+      "records": 8
     },
     {
       "file": "recipes.json",
@@ -285,6 +285,36 @@
       "file": "integration-rules.json",
       "collection": "integrationRules",
       "records": 10
+    },
+    {
+      "file": "machine-aliases.json",
+      "collection": "machineAliases",
+      "records": 3
+    },
+    {
+      "file": "module-registry.json",
+      "collection": "moduleRegistry",
+      "records": 15
+    },
+    {
+      "file": "plant-modules.json",
+      "collection": "plantModules",
+      "records": 3
+    },
+    {
+      "file": "setup-drafts.json",
+      "collection": "setupDrafts",
+      "records": 1
+    },
+    {
+      "file": "adapter-contracts.json",
+      "collection": "adapterContracts",
+      "records": 3
+    },
+    {
+      "file": "profile-packages.json",
+      "collection": "profilePackages",
+      "records": 2
     }
   ]
 }

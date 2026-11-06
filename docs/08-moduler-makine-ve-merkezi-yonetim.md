@@ -153,4 +153,87 @@ Konuşmada bir müşterinin "1'den 3'e aktarıyorum, 3'ten 1'e aktarıyorum" gib
 | Uzaktan güncelleme geçmişi | Merkezi Yönetim | `vendor-updates.json` |
 | Farklı döküm yolları | Döküm Yolları | `casting-paths.json` |
 
-Prototipte PLC bağlantısı **gerçek haberleşme yapmaz**; dört sinyal demo değerleriyle ve `MANUAL` modda operatör seçimiyle simüle edilir. Gerçek OPC UA / Modbus sürücüsü, `docs/10` içindeki yol haritasının son aşamasında ayrı bir modül olarak eklenir. Bu bilinçli bir sınırdır: önce üretim mantığı PLC olmadan oturtulur.
+Sürüm 1.2'de bu tabloya **Saha Kurulum Sihirbazı**, **Modül Kaydı**, **fabrika profil paketi**, **devre dışı bırakma** ve **adaptör sözleşmesi** eklenmiştir; Bölüm 8–12 ayrıntılıdır. Prototipte PLC bağlantısı **gerçek haberleşme yapmaz**; dört sinyal demo değerleriyle ve `MANUAL` modda operatör seçimiyle simüle edilir. Gerçek OPC UA / Modbus sürücüsü, `docs/10` içindeki yol haritasının son aşamasında ayrı bir modül olarak eklenir. Bu bilinçli bir sınırdır: önce üretim mantığı PLC olmadan oturtulur.
+
+---
+
+## 8. Tek makine kaynağı: çift kaynak kaldırıldı
+
+Sürüm 1.1'de üretim tarafında iki ayrı ocak dünyası vardı. `machines` koleksiyonu modüler makine parkını, `furnaces` koleksiyonu ise `F20`, `F35`, `FD` kodlu sabit üç ocağı tutuyordu. Reçeteler ve döküm kodları `furnaceId` alanıyla bu sabit kodlara bağlıydı. Bu, "her şey modüler olsun" isteğiyle doğrudan çelişiyordu: yeni bir ocak eklendiğinde üretim ekranı onu görmüyor, bir ocak çıkarıldığında ise `furnaces` içindeki sabit kayıt kalıyordu.
+
+Sürüm 1.2'de tek kaynak ilkesi uygulanır:
+
+1. `machines` koleksiyonu **tek gerçek kaynaktır**. Bütün makineler, tipler, kapasiteler, modlar ve devre dışı bilgileri burada tutulur.
+2. `furnaces` koleksiyonu bağımsız bir kart değil, `machines` içindeki `FURNACE` ve `ROTARY` kayıtlarının **salt okunur projeksiyonudur**. Eski ekranların beklediği `id`, `code`, `name`, `capacityTon`, `type`, `rotary`, `status` alanları üretilerek verilir; `machineId` ve `plantId` eklenir.
+3. Projeksiyonun kimliği makine kimliğidir: `F20` değil `MCH-01`. Eski dış dosyalarda kalan `F20`, `F35`, `FD` kodları `machineAliases` koleksiyonuyla çevrilir; bu koleksiyon bir uyumluluk köprüsüdür, yeni kayıtların alanı değildir.
+4. `recipes` ve `lots` içindeki `furnaceId` alanı `machineId` olarak yeniden adlandırılır ve doğrudan makine kimliği taşır. Üretim ekranındaki ocak seçimleri sabit listeden değil, **aktif fabrikanın aktif FURNACE makinelerinden** üretilir.
+5. `validate_data.py` her çalıştırmada `furnaces.json` kimlik kümesinin `machines.json` içindeki ilgili kayıtlarla birebir aynı olduğunu doğrular. Fark çıkarsa şema hatası verilir; iki kaynak birbirinden ayrılamaz.
+
+Bu değişiklik, "başka bir fabrikada 2 fırın yok 1 fırın var" cümlesinin kod karşılığıdır. Fırın sayısı bir veri değeridir; ekran, hesap ve rapor sayıyı kod içinde varsaymaz.
+
+---
+
+## 9. Ekleme ve çıkarma: silme yok, devre dışı bırakma var
+
+Kullanıcı "makinelerin sisteme kolayca ekleme çıkarma sistemi olsun" demiştir. Üretim verisi geçmişe dönük olduğu için çıkarma işlemi **kayıt silme** olarak yorumlanmamıştır. Bir ocak söküldüğünde ona bağlı döküm kodları, olay satırları, bakım kayıtları, yağ ve bıçak sayaçları, PLC tag eşlemeleri ve döküm yolları hâlâ okunabilir olmalıdır; aksi hâlde geçmiş raporlar ve kütle dengesi bozulur.
+
+Uygulanan kural:
+
+1. Makine Parkı ekranında **Makine Ekle**, **Düzenle**, **Devre Dışı Bırak** ve **Geri Al** işlemleri vardır.
+2. Devre dışı bırakma düğmesine basıldığında önce **bağımlılık raporu** gösterilir. Rapor `castingPaths`, `recipes`, `lots`, `plcTags`, `signalStates`, `oilRules`, `bladeRules`, `maintenanceEvents`, `homogenizationBatches`, `events` ve `machineAliases` koleksiyonlarını tarar; koleksiyon, kayıt kimliği ve alan adı bazında kaç kaydın etkileneceğini listeler.
+3. Kullanıcıdan **gerekçe** istenir. Onay sonrası makine kaydı korunur; `active` yanlışa çekilir, `status` "Devre Dışı" olur, `decommissionedAt` ve `decommissionReason` yazılır. Hiçbir bağımlı kayıt silinmez.
+4. Devre dışı makine üretim seçimlerinde, yeni döküm başlatma ve kapasite hesaplarında görünmez; geçmiş kayıtlarda ve arşivde görünmeye devam eder.
+5. **Geri Al** düğmesi makineyi yeniden aktif eder, devre dışı alanlarını temizler. Yanlışlıkla çıkarılan bir makine için veri kurtarma gerekmez.
+6. Olay, merkezi yönetim geçmişine `vendorUpdates` satırı olarak yazılır.
+
+Bağımlılık raporu aynı zamanda güvenli çıkarma denetimidir: rapor boşsa makinenin geçmiş bağlantısı yoktur; doluysa kullanıcı hangi kayıtların referans olarak kalacağını işlem öncesinde görür. Doğrulayıcı, devre dışı bırakılmış her makinenin hâlâ `machines` içinde bulunduğunu, `active: false` ve gerekçe alanlarının dolu olduğunu, hiçbir yol veya kuralın silinmiş bir makineye işaret etmediğini kontrol eder.
+
+---
+
+## 10. Fabrika profil paketi: sahada "kolayca bağlama"
+
+Gerçek bir fabrikaya gidildiğinde yapılacak iş, koddaki sabitleri değiştirmek değil fabrikanın kurulumunu bir **JSON paketi** olarak sisteme vermektir. Paket `kind: erp-plant-profile`, `packageVersion: 1` ve `schemaVersion: 4` taşır; içinde fabrika kartı, makine tipleri, makineler, döküm yolları, PLC bağlantıları, dört sinyalin tag eşlemeleri, yağ ve bıçak eşikleri, bakım kayıtları, sinyal durumları, homojenizasyon partileri ve modül açık/kapalı haritası bulunur.
+
+Paket üç biçimde kullanılır:
+
+1. **İndir.** Kaynak fabrika seçilir, `buildPlantPackage` güncel veriden paketi üretir, JSON dosyası olarak alınır.
+2. **Kopyala ve uygula.** Paket yeni fabrika kodu ve adıyla, istenirse **fırın sayısı azaltılarak** uygulanır. Örnek: 5 fırınlı Firma 1 profili 1 fırınlı yeni fabrikaya dönüştürülür. Kullanılmayan fırınlara bağlı döküm yolları otomatik atlanır; diğer makineler, tag eşlemeleri ve eşikler yeni kimliklerle kopyalanır.
+3. **İçe al.** Dışarıdan gelen paket doğrulanır: tür, şema sürümü, fabrika kartı, makine tipleri, makine kimliklerinin benzersizliği ve döküm yollarının paket içindeki makinelere bağlı olması. Doğrulamadan geçmeyen paket uygulanmaz.
+
+Uygulama sırasında mevcut fabrikaların hiçbir kaydı değiştirilmez; `idFactory` tüm koleksiyonlardaki mevcut kimlikleri tarayarak çakışmayan yeni kimlikler üretir. Yeni fabrika aktif hale gelir ve kurulum `vendorUpdates` satırına yazılır. Bu sayede aynı yazılım ikilisi 1 fırınlı, 2 fırınlı veya 5 fırınlı sahada hiç kod değişikliği olmadan çalışır.
+
+---
+
+## 11. Beş adımlı kurulum sihirbazı
+
+Merkezi yönetim tarafında **Saha Kurulum Sihirbazı** ekranı vardır. Sıra, sahada bilginin toplanma sırasını izler:
+
+1. **Fabrika kartı:** kod, ad, şehir, `MANUAL` / `PLC` modu, saha notu.
+2. **Makine parkı:** altı makine tipi için adet ve varsayılan kapasite. Fırın adedi 1, 2 veya 5 girilebilir; ekran aynıdır.
+3. **Döküm yolları:** yollukta tutulan metal tonajı; her fırın ve tabla çifti için kaç yol oluşacağı anlık gösterilir.
+4. **PLC / bağlantı:** adaptör, bağlantı adı, IP, protokol, port ve tarama süresi; **Bağlantıyı Test Et** ve **Dört Sinyali Oku** düğmeleri. Sürücü yoksa sistem `MANUAL` yedeğe düşer, kurulum yarım kalmaz.
+5. **Modüller ve doğrulama:** açılacak modüller seçilir, fabrika kodu benzersizliği, en az bir fırın, geçerli yollar ve modül kaydı doğrulanır; **Profili Oluştur** tek işlemde fabrikayı, makineleri, yolları, bağlantıyı, dört tag'i, modül haritasını ve sürüm kaydını yazar.
+
+Her adım `setupDrafts` koleksiyonuna kaydedilir. Saha ziyareti yarım kalsa bile aynı taslak kaldığı adımdan devam eder. Mod `MANUAL` ise bağlantı adımı atlanabilir; `PLC` seçilirse dört sinyal için otomatik tag taslağı üretilir.
+
+---
+
+## 12. Modül kaydı ve adaptör sözleşmesi
+
+### 12.1 Modül kaydı veridir
+
+`moduleRegistry` koleksiyonu her modülün kodunu, adını, grubunu, kapsadığı ekran kimliklerini, varsayılan açık/kapalı durumunu ve varsa gereksinimini taşır. `plantModules` koleksiyonu fabrika bazında hangi modülün açık olduğunu tutar. Menü `visibleNav` işleviyle bu kayda göre çizilir; kapalı modülün ekranı doğrudan adresle açılamaz. Entegrasyon kuralları da `moduleCode` alanıyla aynı kayda bağlıdır; kapalı modülün kuralı matris ekranında gösterilmez.
+
+Bazı modüller koşulludur. `PLC` modülü yalnızca fabrika modu `PLC` ise, `ROTARY` modülü yalnızca o tipte aktif bir makine varsa görünür. Üretim modülü en az bir aktif fırın gerektirir. `CORE` ve `VENDOR` modülleri kapatılamaz; aksi hâlde sistemi yönetecek ekran kalmaz. Yeni bir modül eklemek kayda satır eklemektir; menü dosyasına veya çekirdek koda dokunmak gerekmez.
+
+### 12.2 Adaptör sözleşmesi
+
+`adapterContracts` koleksiyonu desteklenen bağlantı yollarını ve her birinin `connect`, `test`, `readFourSignals`, `disconnect` yeteneklerini listeler. `simulated` adaptörü hazırdır; `opcua` ve `modbus` adaptörleri **sözleşmeye hazırdır**, sürücüleri sonraki aşamada takılır. `testConnection` sürücü yüklü olmadığında hata vermez, `MANUAL` yedeğe düşer ve bunu açıkça bildirir. `readFourSignals` her adaptörde aynı dört sinyali aynı biçimde döndürür; üst katman hangi protokol kullanıldığını bilmez.
+
+Bu ayrım, gerçek fabrikada bağlantı işini ikiye böler: saha ekibi IP, port ve tag adreslerini **veri** olarak girer; yazılım ekibi gerektiğinde yeni bir sürücüyü aynı sözleşmeyle ekler. İkisi birbirini beklemez.
+
+### 12.3 Sabit kodların temizlenmesi
+
+Sürüm 1.1'de `P1`, `MCH-08`, `F20` ve `F35` gibi değerler ekran koduna yazılmıştı. Sürüm 1.2'de bunların tamamı kaldırılır: aktif fabrika `activePlantId` yardımcı işlevinden gelir ve ayar geçersizse ilk aktif fabrikaya düşer; kesim ve bakım ekranlarındaki makine `firstMachineId('SAW')` ile bulunur; ocak kodları makine kimliğine çevrilir. Prototipte sabit kalmış fabrika veya makine kimliği yoktur.
+
+Ayrıntılı saha senaryosu, dosya envanteri ve doğrulama adımları `docs/12` içindedir.

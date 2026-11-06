@@ -6,7 +6,7 @@ Sunucu kökünde `erp/` klasörü bulunur. `README.md` kurulumu, `data/` JSON ar
 
 | Klasör | İçerik | Bu depoda |
 | --- | --- | --- |
-| `erp/data/` | 53 JSON dosyası, `manifest.json` | Gerçek dosyalar var |
+| `erp/data/` | 59 JSON dosyası, `manifest.json` (`schema_version: 4`) | Gerçek dosyalar var |
 | `erp/scripts/` | `backup.py`, `outbox_worker.py`, `validate_data.py`, `event_worker.py`, `plc_poller.py` | Çalışan scriptler var |
 | `erp/inbox/` | Arayüzden gelen olay kuyruğu | README + örnek kayıtlar |
 | `erp/archive/` | Append-only olay günlüğü | README + örnek `events.jsonl` |

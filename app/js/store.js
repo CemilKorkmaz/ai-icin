@@ -68,7 +68,27 @@ export function customerName(id) { const c = customer(id); return c ? c.name : '
 export function account(id) { return (D().accounts || []).find((a) => a.id === id) || null; }
 export function accountName(id) { const a = account(id); return a ? `${a.code} · ${a.name}` : '—'; }
 export function warehouseName(id) { const w = (D().warehouses || []).find((x) => x.id === id); return w ? w.name : '—'; }
-export function furnace(id) { return D().furnaces.find((f) => f.id === id) || null; }
+export function furnace(id) {
+  // `furnaces` artık `machines` projeksiyonudur; eski ekranlar aynı yardımcıyı kullanır.
+  return (D().furnaces || []).find((f) => f.id === id) || null;
+}
+export function machine(id) { return (D().machines || []).find((m) => m.id === id) || null; }
+
+/** Aktif fabrika: ayardaki kimlik geçerli değilse ilk aktif fabrikaya düşer, sabit 'P1' kullanılmaz. */
+export function activePlantId(d = D()) {
+  const plants = d?.plants || [];
+  const wanted = d?.settings?.activePlantId;
+  return plants.find((p) => p.id === wanted && p.active !== false)?.id
+    || plants.find((p) => p.active !== false)?.id
+    || plants[0]?.id || null;
+}
+
+/** Aktif fabrikanın belirli tipteki, devre dışı bırakılmamış makineleri. */
+export function machinesOfType(type, d = D()) {
+  const pid = activePlantId(d);
+  return (d?.machines || []).filter((m) => m.plantId === pid && m.type === type && m.active && !m.decommissionedAt);
+}
+export function firstMachineId(type, d = D()) { return machinesOfType(type, d)[0]?.id || null; }
 export function recipe(id) { return D().recipes.find((r) => r.id === id) || null; }
 export function lot(id) { return D().lots.find((l) => l.id === id) || null; }
 

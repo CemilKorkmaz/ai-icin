@@ -1,9 +1,9 @@
 /* ERP Studio — uygulama kabuğu önbelleği.
    Kapalı çevrim: sunucuya erişim kesilse de arayüz açılmaya devam eder. */
 
-// Şema sürümüyle birlikte yükseltildi: yeni modüller (calc, posting, engineering,
-// enterprise) çevrimdışı ilk açılışta da önbellekte bulunmalıdır.
-const CACHE = 'erp-studio-v3';
+// Şema sürümüyle birlikte yükseltildi: modüler kurulum çekirdeği, adaptör sözleşmesi,
+// menü tanımı ve kurulum sihirbazı çevrimdışı ilk açılışta da önbellekte bulunmalıdır.
+const CACHE = 'erp-studio-v4';
 const SHELL = [
   './',
   './index.html',
@@ -17,9 +17,13 @@ const SHELL = [
   './js/seed.js',
   './js/calc.js',
   './js/posting.js',
+  './js/modularity.js',
+  './js/adapters.js',
   './js/icons.js',
   './js/ui.js',
   './js/views/index.js',
+  './js/views/nav.js',
+  './js/views/setup.js',
   './js/views/dashboard.js',
   './js/views/purchasing.js',
   './js/views/inventory.js',
