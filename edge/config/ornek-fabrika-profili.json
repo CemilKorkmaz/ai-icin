@@ -1,0 +1,900 @@
+{
+  "kind": "erp-plant-profile",
+  "packageVersion": 1,
+  "schemaVersion": 4,
+  "code": "FIRM1",
+  "name": "Anadolu Alüminyum · 5 fırın",
+  "generatedAt": "2026-11-04T09:00:00+03:00",
+  "source": "ERP Studio · fabrika profil paketi",
+  "plant": {
+    "id": "P1",
+    "code": "FIRM1",
+    "name": "Anadolu Alüminyum",
+    "city": "Kocaeli",
+    "mode": "PLC",
+    "active": true,
+    "note": "5 fırın, 2 döküm tablası, 4 homojen fırın, 2 testere, 1 sürekli homojenizasyon"
+  },
+  "machineTypes": [
+    {
+      "id": "MT1",
+      "code": "FURNACE",
+      "name": "Ergitme / Döküm Ocağı",
+      "icon": "flame",
+      "capacityUnit": "ton",
+      "signals": [
+        "door",
+        "casting",
+        "alarm",
+        "running"
+      ]
+    },
+    {
+      "id": "MT2",
+      "code": "CAST_TABLE",
+      "name": "Döküm Tablası",
+      "icon": "layers",
+      "capacityUnit": "hat",
+      "signals": [
+        "casting",
+        "alarm",
+        "running"
+      ]
+    },
+    {
+      "id": "MT3",
+      "code": "SAW",
+      "name": "Testere",
+      "icon": "scissors",
+      "capacityUnit": "kesim",
+      "signals": [
+        "alarm",
+        "running"
+      ]
+    },
+    {
+      "id": "MT4",
+      "code": "HOMO_FURNACE",
+      "name": "Homojenizasyon Fırını",
+      "icon": "flame",
+      "capacityUnit": "ton",
+      "signals": [
+        "door",
+        "alarm",
+        "running"
+      ]
+    },
+    {
+      "id": "MT5",
+      "code": "CONT_HOMO",
+      "name": "Sürekli Homojenizasyon Hattı",
+      "icon": "refresh",
+      "capacityUnit": "ton/saat",
+      "signals": [
+        "alarm",
+        "running"
+      ]
+    },
+    {
+      "id": "MT6",
+      "code": "ROTARY",
+      "name": "Döner Ocak",
+      "icon": "recycle",
+      "capacityUnit": "ton",
+      "signals": [
+        "door",
+        "alarm",
+        "running"
+      ]
+    }
+  ],
+  "machines": [
+    {
+      "status": "Aktif",
+      "decommissionedAt": null,
+      "decommissionReason": "",
+      "id": "MCH-01",
+      "plantId": "P1",
+      "type": "FURNACE",
+      "name": "A Fırını",
+      "capacityTon": 20,
+      "mode": "PLC",
+      "plcId": "PLC-1",
+      "active": true,
+      "installedAt": "2021-04-12"
+    },
+    {
+      "status": "Aktif",
+      "decommissionedAt": null,
+      "decommissionReason": "",
+      "id": "MCH-02",
+      "plantId": "P1",
+      "type": "FURNACE",
+      "name": "B Fırını",
+      "capacityTon": 35,
+      "mode": "PLC",
+      "plcId": "PLC-1",
+      "active": true,
+      "installedAt": "2021-04-12"
+    },
+    {
+      "status": "Aktif",
+      "decommissionedAt": null,
+      "decommissionReason": "",
+      "id": "MCH-03",
+      "plantId": "P1",
+      "type": "FURNACE",
+      "name": "C Fırını",
+      "capacityTon": 20,
+      "mode": "PLC",
+      "plcId": "PLC-1",
+      "active": true,
+      "installedAt": "2022-08-03"
+    },
+    {
+      "status": "Aktif",
+      "decommissionedAt": null,
+      "decommissionReason": "",
+      "id": "MCH-04",
+      "plantId": "P1",
+      "type": "FURNACE",
+      "name": "D Fırını",
+      "capacityTon": 35,
+      "mode": "PLC",
+      "plcId": "PLC-1",
+      "active": true,
+      "installedAt": "2023-02-19"
+    },
+    {
+      "status": "Devre Dışı",
+      "decommissionedAt": "2025-06-11T00:00:00+03:00",
+      "decommissionReason": "Bakıma alındı, parktan çıkarıldı",
+      "id": "MCH-05",
+      "plantId": "P1",
+      "type": "FURNACE",
+      "name": "E Fırını",
+      "capacityTon": 20,
+      "mode": "PLC",
+      "plcId": "PLC-1",
+      "active": false,
+      "installedAt": "2025-06-11"
+    },
+    {
+      "status": "Aktif",
+      "decommissionedAt": null,
+      "decommissionReason": "",
+      "id": "MCH-06",
+      "plantId": "P1",
+      "type": "CAST_TABLE",
+      "name": "Tabla 1",
+      "capacityTon": 1,
+      "mode": "PLC",
+      "plcId": "PLC-1",
+      "active": true,
+      "installedAt": "2021-04-12"
+    },
+    {
+      "status": "Aktif",
+      "decommissionedAt": null,
+      "decommissionReason": "",
+      "id": "MCH-07",
+      "plantId": "P1",
+      "type": "CAST_TABLE",
+      "name": "Tabla 2",
+      "capacityTon": 1,
+      "mode": "PLC",
+      "plcId": "PLC-1",
+      "active": true,
+      "installedAt": "2022-08-03"
+    },
+    {
+      "status": "Aktif",
+      "decommissionedAt": null,
+      "decommissionReason": "",
+      "id": "MCH-08",
+      "plantId": "P1",
+      "type": "SAW",
+      "name": "Testere 1",
+      "capacityTon": 0,
+      "mode": "PLC",
+      "plcId": "PLC-1",
+      "active": true,
+      "installedAt": "2021-05-02"
+    },
+    {
+      "status": "Aktif",
+      "decommissionedAt": null,
+      "decommissionReason": "",
+      "id": "MCH-09",
+      "plantId": "P1",
+      "type": "SAW",
+      "name": "Testere 2",
+      "capacityTon": 0,
+      "mode": "PLC",
+      "plcId": "PLC-1",
+      "active": true,
+      "installedAt": "2023-01-18"
+    },
+    {
+      "status": "Aktif",
+      "decommissionedAt": null,
+      "decommissionReason": "",
+      "id": "MCH-10",
+      "plantId": "P1",
+      "type": "HOMO_FURNACE",
+      "name": "Homojen 1",
+      "capacityTon": 25,
+      "mode": "PLC",
+      "plcId": "PLC-1",
+      "active": true,
+      "installedAt": "2021-04-12"
+    },
+    {
+      "status": "Aktif",
+      "decommissionedAt": null,
+      "decommissionReason": "",
+      "id": "MCH-11",
+      "plantId": "P1",
+      "type": "HOMO_FURNACE",
+      "name": "Homojen 2",
+      "capacityTon": 25,
+      "mode": "PLC",
+      "plcId": "PLC-1",
+      "active": true,
+      "installedAt": "2021-04-12"
+    },
+    {
+      "status": "Aktif",
+      "decommissionedAt": null,
+      "decommissionReason": "",
+      "id": "MCH-12",
+      "plantId": "P1",
+      "type": "HOMO_FURNACE",
+      "name": "Homojen 3",
+      "capacityTon": 25,
+      "mode": "PLC",
+      "plcId": "PLC-1",
+      "active": true,
+      "installedAt": "2022-09-14"
+    },
+    {
+      "status": "Aktif",
+      "decommissionedAt": null,
+      "decommissionReason": "",
+      "id": "MCH-13",
+      "plantId": "P1",
+      "type": "HOMO_FURNACE",
+      "name": "Homojen 4",
+      "capacityTon": 25,
+      "mode": "PLC",
+      "plcId": "PLC-1",
+      "active": true,
+      "installedAt": "2024-03-07"
+    },
+    {
+      "status": "Aktif",
+      "decommissionedAt": null,
+      "decommissionReason": "",
+      "id": "MCH-14",
+      "plantId": "P1",
+      "type": "CONT_HOMO",
+      "name": "Continue Homojen 1",
+      "capacityTon": 12,
+      "mode": "PLC",
+      "plcId": "PLC-1",
+      "active": true,
+      "installedAt": "2024-11-20"
+    }
+  ],
+  "castingPaths": [
+    {
+      "id": "CP-1",
+      "plantId": "P1",
+      "fromMachineId": "MCH-01",
+      "tableId": "MCH-06",
+      "label": "Kısa yol",
+      "holdTon": 1,
+      "note": "A Fırını, Tabla 1"
+    },
+    {
+      "id": "CP-2",
+      "plantId": "P1",
+      "fromMachineId": "MCH-02",
+      "tableId": "MCH-06",
+      "label": "Uzun yol",
+      "holdTon": 2,
+      "note": "B Fırını, aynı tabla"
+    },
+    {
+      "id": "CP-3",
+      "plantId": "P1",
+      "fromMachineId": "MCH-02",
+      "tableId": "MCH-07",
+      "label": "Orta yol",
+      "holdTon": 1.5,
+      "note": "B Fırını, Tabla 2"
+    }
+  ],
+  "plcConnections": [
+    {
+      "id": "PLC-1",
+      "plantId": "P1",
+      "name": "Fırın hattı PLC",
+      "ip": "192.168.1.50",
+      "protocol": "OPC UA",
+      "port": 4840,
+      "pollSeconds": 3,
+      "active": true
+    }
+  ],
+  "plcTags": [
+    {
+      "id": "TAG-01",
+      "plcId": "PLC-1",
+      "machineId": "MCH-01",
+      "signal": "door",
+      "address": "ns=2;s=F1.DoorOpen",
+      "invert": false,
+      "label": "A Fırını Kapı"
+    },
+    {
+      "id": "TAG-02",
+      "plcId": "PLC-1",
+      "machineId": "MCH-01",
+      "signal": "casting",
+      "address": "ns=2;s=F1.Pouring",
+      "invert": false,
+      "label": "A Fırını Döküm Modu"
+    },
+    {
+      "id": "TAG-03",
+      "plcId": "PLC-1",
+      "machineId": "MCH-01",
+      "signal": "alarm",
+      "address": "ns=2;s=F1.FaultLamp",
+      "invert": false,
+      "label": "A Fırını Arıza Lambası"
+    },
+    {
+      "id": "TAG-04",
+      "plcId": "PLC-1",
+      "machineId": "MCH-01",
+      "signal": "running",
+      "address": "ns=2;s=F1.Running",
+      "invert": false,
+      "label": "A Fırını Çalışıyor"
+    },
+    {
+      "id": "TAG-05",
+      "plcId": "PLC-1",
+      "machineId": "MCH-08",
+      "signal": "door",
+      "address": "ns=2;s=SAW1.Guard",
+      "invert": false,
+      "label": "Testere 1 Koruma"
+    },
+    {
+      "id": "TAG-06",
+      "plcId": "PLC-1",
+      "machineId": "MCH-08",
+      "signal": "casting",
+      "address": "ns=2;s=SAW1.CutActive",
+      "invert": false,
+      "label": "Testere 1 Kesim"
+    },
+    {
+      "id": "TAG-07",
+      "plcId": "PLC-1",
+      "machineId": "MCH-08",
+      "signal": "alarm",
+      "address": "ns=2;s=SAW1.FaultLamp",
+      "invert": false,
+      "label": "Testere 1 Arıza Lambası"
+    },
+    {
+      "id": "TAG-08",
+      "plcId": "PLC-1",
+      "machineId": "MCH-08",
+      "signal": "running",
+      "address": "ns=2;s=SAW1.Running",
+      "invert": false,
+      "label": "Testere 1 Çalışıyor"
+    },
+    {
+      "id": "TAG-09",
+      "plcId": "PLC-1",
+      "machineId": "MCH-10",
+      "signal": "alarm",
+      "address": "ns=2;s=H1.FaultLamp",
+      "invert": false,
+      "label": "Homojen 1 Arıza Lambası"
+    },
+    {
+      "id": "TAG-10",
+      "plcId": "PLC-1",
+      "machineId": "MCH-10",
+      "signal": "running",
+      "address": "ns=2;s=H1.Running",
+      "invert": false,
+      "label": "Homojen 1 Çalışıyor"
+    }
+  ],
+  "oilRules": [
+    {
+      "id": "OIL-1",
+      "machineId": "MCH-08",
+      "tankLitres": 120,
+      "cutsPerTank": 100,
+      "warnAt": 90,
+      "cutsSinceFill": 86,
+      "cutBasis": "count",
+      "lastFillAt": "2026-11-01T08:00:00+03:00",
+      "active": true
+    },
+    {
+      "id": "OIL-2",
+      "machineId": "MCH-09",
+      "tankLitres": 120,
+      "cutsPerTank": 150,
+      "warnAt": 140,
+      "cutsSinceFill": 42,
+      "cutBasis": "count",
+      "lastFillAt": "2026-11-02T06:00:00+03:00",
+      "active": true
+    }
+  ],
+  "bladeRules": [
+    {
+      "id": "BLD-1",
+      "machineId": "MCH-08",
+      "maxCuts": 1200,
+      "warnAt": 1100,
+      "cutsSinceChange": 1140,
+      "bladeNo": "B-2026-0088",
+      "bladeMm": 3,
+      "lastChangeAt": "2026-10-24T07:30:00+03:00",
+      "active": true
+    },
+    {
+      "id": "BLD-2",
+      "machineId": "MCH-09",
+      "maxCuts": 1500,
+      "warnAt": 1400,
+      "cutsSinceChange": 310,
+      "bladeNo": "B-2026-0091",
+      "bladeMm": 3,
+      "lastChangeAt": "2026-11-01T07:30:00+03:00",
+      "active": true
+    }
+  ],
+  "maintenanceEvents": [
+    {
+      "id": "ME-001",
+      "kind": "Yağ Dolumu",
+      "machineId": "MCH-08",
+      "at": "2026-11-01T08:00:00+03:00",
+      "cutsAt": 100,
+      "user": "U08",
+      "notes": "Bir tank dolumu, sayaç sıfırlandı"
+    },
+    {
+      "id": "ME-002",
+      "kind": "Bıçak Değişimi",
+      "machineId": "MCH-08",
+      "at": "2026-10-24T07:30:00+03:00",
+      "cutsAt": 1200,
+      "user": "U08",
+      "notes": "B-2026-0087 söküldü, B-2026-0088 takıldı"
+    },
+    {
+      "id": "ME-003",
+      "kind": "Bakıma Gönderildi",
+      "machineId": "MCH-08",
+      "at": "2026-11-02T14:30:00+03:00",
+      "cutsAt": 1140,
+      "user": "U08",
+      "notes": "Arıza lambası yandı, ekip çağrıldı"
+    },
+    {
+      "id": "ME-004",
+      "kind": "Yağ Dolumu",
+      "machineId": "MCH-09",
+      "at": "2026-11-02T06:00:00+03:00",
+      "cutsAt": 150,
+      "user": "U08",
+      "notes": "Firma 2 eşiği farklı: 150 kesim"
+    }
+  ],
+  "signalStates": [
+    {
+      "id": "SIG-01",
+      "machineId": "MCH-01",
+      "signal": "door",
+      "value": "closed",
+      "at": "2026-11-02T14:32:00+03:00",
+      "source": "PLC"
+    },
+    {
+      "id": "SIG-02",
+      "machineId": "MCH-01",
+      "signal": "casting",
+      "value": "pouring",
+      "at": "2026-11-02T14:32:00+03:00",
+      "source": "PLC"
+    },
+    {
+      "id": "SIG-03",
+      "machineId": "MCH-01",
+      "signal": "alarm",
+      "value": "ok",
+      "at": "2026-11-02T14:32:00+03:00",
+      "source": "PLC"
+    },
+    {
+      "id": "SIG-04",
+      "machineId": "MCH-01",
+      "signal": "running",
+      "value": "running",
+      "at": "2026-11-02T14:32:00+03:00",
+      "source": "PLC"
+    },
+    {
+      "id": "SIG-05",
+      "machineId": "MCH-08",
+      "signal": "door",
+      "value": "closed",
+      "at": "2026-11-02T14:32:00+03:00",
+      "source": "PLC"
+    },
+    {
+      "id": "SIG-06",
+      "machineId": "MCH-08",
+      "signal": "casting",
+      "value": "idle",
+      "at": "2026-11-02T14:32:00+03:00",
+      "source": "PLC"
+    },
+    {
+      "id": "SIG-07",
+      "machineId": "MCH-08",
+      "signal": "alarm",
+      "value": "fault",
+      "at": "2026-11-02T14:30:00+03:00",
+      "source": "PLC"
+    },
+    {
+      "id": "SIG-08",
+      "machineId": "MCH-08",
+      "signal": "running",
+      "value": "stopped",
+      "at": "2026-11-02T14:32:00+03:00",
+      "source": "PLC"
+    },
+    {
+      "id": "SIG-09",
+      "machineId": "MCH-10",
+      "signal": "alarm",
+      "value": "ok",
+      "at": "2026-11-02T14:32:00+03:00",
+      "source": "PLC"
+    },
+    {
+      "id": "SIG-10",
+      "machineId": "MCH-10",
+      "signal": "running",
+      "value": "running",
+      "at": "2026-11-02T14:32:00+03:00",
+      "source": "PLC"
+    }
+  ],
+  "homogenizationBatches": [
+    {
+      "id": "HMB-001",
+      "code": "HMB-2026-0041",
+      "plantId": "P1",
+      "machineId": "MCH-10",
+      "recipeId": "HR-01",
+      "status": "Süre Aşımı",
+      "startedAt": "2026-11-01T22:00:00+03:00",
+      "endedAt": "2026-11-02T07:00:00+03:00",
+      "plannedMinutes": 480,
+      "actualMinutes": 540,
+      "lots": [
+        {
+          "lotId": "DK-2026-0135",
+          "count": 20
+        }
+      ],
+      "totalCount": 20,
+      "operator": "U09",
+      "note": "8 saat doldu, fırın 1 saat daha çalıştı"
+    },
+    {
+      "id": "HMB-002",
+      "code": "HMB-2026-0042",
+      "plantId": "P1",
+      "machineId": "MCH-11",
+      "recipeId": "HR-01",
+      "status": "Devam ediyor",
+      "startedAt": "2026-11-02T09:00:00+03:00",
+      "endedAt": null,
+      "plannedMinutes": 480,
+      "actualMinutes": null,
+      "lots": [
+        {
+          "lotId": "DK-2026-0131",
+          "count": 20
+        },
+        {
+          "lotId": "DK-2026-0132",
+          "count": 15
+        },
+        {
+          "lotId": "DK-2026-0133",
+          "count": 10
+        }
+      ],
+      "totalCount": 45,
+      "operator": "U09",
+      "note": "Karışık parti: üç farklı döküm kodu"
+    },
+    {
+      "id": "HMB-003",
+      "code": "HMB-2026-0043",
+      "plantId": "P1",
+      "machineId": "MCH-12",
+      "recipeId": "HR-02",
+      "status": "Tamamlandı",
+      "startedAt": "2026-11-01T06:00:00+03:00",
+      "endedAt": "2026-11-01T15:00:00+03:00",
+      "plannedMinutes": 540,
+      "actualMinutes": 540,
+      "lots": [
+        {
+          "lotId": "DK-2026-0134",
+          "count": 30
+        }
+      ],
+      "totalCount": 30,
+      "operator": "U09",
+      "note": "Planlanan sürede tamamlandı"
+    }
+  ],
+  "plantModules": {
+    "id": "PM-01",
+    "plantId": "P1",
+    "enabled": {
+      "CORE": true,
+      "PURCHASING": true,
+      "INVENTORY": true,
+      "PRODUCTION": true,
+      "MACHINES": true,
+      "ROTARY": false,
+      "PLC": true,
+      "SALES": true,
+      "FINANCE": true,
+      "WAREHOUSE": true,
+      "HR": true,
+      "SHIPPING": true,
+      "REPORTS": true,
+      "INTEGRATION": true,
+      "VENDOR": true
+    },
+    "note": "PLC modlu, döner ocaksız fabrika"
+  },
+  "moduleRegistry": [
+    {
+      "id": "MOD-CORE",
+      "code": "CORE",
+      "label": "Çekirdek",
+      "group": "Genel / Sistem",
+      "views": [
+        "dashboard",
+        "notifications",
+        "settings"
+      ],
+      "defaultEnabled": true,
+      "requiresMachineType": null,
+      "requiresMode": null,
+      "note": "Panel, bildirim ve ayarlar her fabrikada açıktır"
+    },
+    {
+      "id": "MOD-PURCHASING",
+      "code": "PURCHASING",
+      "label": "Satın Alma",
+      "group": "Ticari",
+      "views": [
+        "materials",
+        "orders",
+        "prices",
+        "suppliers",
+        "requests"
+      ],
+      "defaultEnabled": true,
+      "requiresMachineType": null,
+      "requiresMode": null,
+      "note": "Değişken malzeme kartları ve talep/teklif akışı"
+    },
+    {
+      "id": "MOD-INVENTORY",
+      "code": "INVENTORY",
+      "label": "Hammadde & Stok",
+      "group": "Üretim",
+      "views": [
+        "stock",
+        "receipts",
+        "crusher",
+        "movements"
+      ],
+      "defaultEnabled": true,
+      "requiresMachineType": null,
+      "requiresMode": null,
+      "note": "Faz 1 kapsamı, her fabrikada zorunlu"
+    },
+    {
+      "id": "MOD-PRODUCTION",
+      "code": "PRODUCTION",
+      "label": "Üretim",
+      "group": "Üretim",
+      "views": [
+        "production",
+        "recipes",
+        "batches",
+        "events"
+      ],
+      "defaultEnabled": true,
+      "requiresMachineType": "FURNACE",
+      "requiresMode": null,
+      "note": "En az bir ergitme ocağı tanımlı olmalı"
+    },
+    {
+      "id": "MOD-MACHINES",
+      "code": "MACHINES",
+      "label": "Makine Parkı",
+      "group": "Kurulum",
+      "views": [
+        "machines",
+        "paths",
+        "cutting",
+        "maintenance"
+      ],
+      "defaultEnabled": true,
+      "requiresMachineType": null,
+      "requiresMode": null,
+      "note": "Ekleme, düzenleme ve devre dışı bırakma"
+    },
+    {
+      "id": "MOD-ROTARY",
+      "code": "ROTARY",
+      "label": "Döner Ocak / Cüruf",
+      "group": "Kurulum",
+      "views": [],
+      "defaultEnabled": false,
+      "requiresMachineType": "ROTARY",
+      "requiresMode": null,
+      "note": "Yalnızca döner ocağı olan fabrikada görünür"
+    },
+    {
+      "id": "MOD-PLC",
+      "code": "PLC",
+      "label": "PLC Durum",
+      "group": "Kurulum",
+      "views": [
+        "plc"
+      ],
+      "defaultEnabled": false,
+      "requiresMachineType": null,
+      "requiresMode": "PLC",
+      "note": "Fabrika modu PLC değilse menüde görünmez"
+    },
+    {
+      "id": "MOD-SALES",
+      "code": "SALES",
+      "label": "Satış & Müşteri",
+      "group": "Ticari",
+      "views": [
+        "sales",
+        "customers"
+      ],
+      "defaultEnabled": true,
+      "requiresMachineType": null,
+      "requiresMode": null,
+      "note": "docs/11 ile eklenen ticari katman"
+    },
+    {
+      "id": "MOD-FINANCE",
+      "code": "FINANCE",
+      "label": "Muhasebe & Maliyet",
+      "group": "Ticari",
+      "views": [
+        "finance",
+        "costing"
+      ],
+      "defaultEnabled": true,
+      "requiresMachineType": null,
+      "requiresMode": null,
+      "note": "Fiş, mizan, fatura, döküm kodu maliyeti"
+    },
+    {
+      "id": "MOD-WAREHOUSE",
+      "code": "WAREHOUSE",
+      "label": "Depo & Sayım",
+      "group": "Lojistik",
+      "views": [
+        "warehouse"
+      ],
+      "defaultEnabled": true,
+      "requiresMachineType": null,
+      "requiresMode": null,
+      "note": "Depo lokasyonu ve rezervasyon"
+    },
+    {
+      "id": "MOD-HR",
+      "code": "HR",
+      "label": "Personel & Vardiya",
+      "group": "Lojistik",
+      "views": [
+        "hr"
+      ],
+      "defaultEnabled": true,
+      "requiresMachineType": null,
+      "requiresMode": null,
+      "note": "Bordro harici; yalnızca operatör izi"
+    },
+    {
+      "id": "MOD-SHIPPING",
+      "code": "SHIPPING",
+      "label": "Sevkiyat",
+      "group": "Lojistik",
+      "views": [
+        "shipments",
+        "archive"
+      ],
+      "defaultEnabled": true,
+      "requiresMachineType": null,
+      "requiresMode": null,
+      "note": "İki kademeli onay ve arşiv"
+    },
+    {
+      "id": "MOD-REPORTS",
+      "code": "REPORTS",
+      "label": "Raporlama",
+      "group": "Yönetim",
+      "views": [
+        "reports"
+      ],
+      "defaultEnabled": true,
+      "requiresMachineType": null,
+      "requiresMode": null,
+      "note": "Günlük / haftalık / aylık çıktılar"
+    },
+    {
+      "id": "MOD-INTEGRATION",
+      "code": "INTEGRATION",
+      "label": "Entegrasyon",
+      "group": "Yönetim",
+      "views": [
+        "integration"
+      ],
+      "defaultEnabled": true,
+      "requiresMachineType": null,
+      "requiresMode": null,
+      "note": "Tek kayıt çok etki matrisi"
+    },
+    {
+      "id": "MOD-VENDOR",
+      "code": "VENDOR",
+      "label": "Merkezi Yönetim",
+      "group": "Yönetim",
+      "views": [
+        "vendor",
+        "setup",
+        "modules"
+      ],
+      "defaultEnabled": true,
+      "requiresMachineType": null,
+      "requiresMode": null,
+      "note": "Yalnızca geliştirici ekibi; operatör ekranı değildir"
+    }
+  ]
+}

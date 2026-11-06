@@ -307,5 +307,10 @@ Finansal kayıtlar üretim gibi çevrimdışıyken de oluşur. Dışa gönderilm
 | Departman etkileşimi | Üretim olayları ve stok hareketi | Tek onaydan sekiz koleksiyona atomik yazım |
 | Doğrulama | Referans ve kütle dengesi | Ayrıca borç = alacak, KDV, maliyet, sayım, dönem |
 | Şema | `schemaVersion: 2` | `schemaVersion: 4`, sürüme bağlı yerel anahtar; tek makine kaynağı, profil paketi, modül kaydı ve adaptör sözleşmesi (`docs/12`) |
+| Saha exe'si | ERP arayüzü için exe reddedildi | ERP arayüzü PWA kalır; **farklı bir yazılım** olarak fabrikadaki tek veri toplama bilgisayarında `ERP-Edge-Collector.exe` çalışır (`docs/13`) |
 
 Bu doküman, `docs/Dokumhane-ERP-Plan.docx` içinde de yer alır ve "yapay zekâya verilip genel yazılım altyapı şemasının oluşturulması" için gereken teknik girdiyi sağlar.
+
+## 14. Edge veri toplama bilgisayarı
+
+`docs/04` içindeki "istemcide exe değil, sunucuda servis" kararı **ERP'nin kullanıcı arayüzü** içindir ve geçerliliğini korur. Kullanıcının Sürüm 1.3'te istediği exe, operatörün çalıştırdığı bir istemci değildir: makinelere ve PLC'ye fiziksel olarak bağlı tek bir saha bilgisayarında çalışan veri toplama ajanıdır. Bu ajan sensör verisini yerel SQLite'a yazar, imzalı tek bir uç noktadan ERP'ye iletir ve kendi teknisyen arayüzünü sunar. İşletme kayıtlarını üretmez; stok, fatura, maliyet ve muhasebe tablolarına doğrudan erişmez. Ayrıntı `docs/13` Bölüm 1 ve 6'dadır.

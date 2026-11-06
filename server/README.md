@@ -54,3 +54,6 @@ python3 server/erp/scripts/plc_poller.py --dry-run
 
 Bu katman sunucuda yeni bir servis gerektirmez; veri `data/` altında, hesap mantığı prototipte `app/js/posting.js` içindedir. Gerçek kurulumda fiş, stok hareketi ve cari bakiye `db/` içinde tek veritabanı işlemiyle yazılır. `data/*.json` arşiv ve aktarım görünümü olarak kalır. Ayrıntı: `docs/04` Bölüm 13.
 
+## Fabrikadaki veri toplama bilgisayarı
+
+`edge/` klasöründeki `ERP-Edge-Collector.exe` sensör verisini **doğrudan bu JSON dosyalarına yazmaz**. Önce kendi yerel SQLite veritabanına kaydeder, ardından imzalı `POST /api/edge/ingest` isteğiyle ERP'ye iletir; sunucu tarafındaki worker doğrulayıp koleksiyonları üretir. Bu ayrım, arşiv dosyalarının yarış koşuluna girmesini ve ham PLC verisinin işletme kayıtlarına karışmasını engeller. Ayrıntı `docs/13` Bölüm 3 ve 6'dadır.

@@ -1,6 +1,6 @@
 # 05 — Veri Modeli, API Sözleşmesi ve Ekran Envanteri
 
-**Amaç:** `docs/01`–`docs/12` arasında tarif edilen işlevlerin somut veri karşılıklarını, hesap kurallarını ve prototipteki ekranların envanterini vermek. Sürüm 1.2 itibarıyla **59 varlık** ve **34 ekran** kapsanır. Bu doküman, Faz 1 geliştirmesinde API sözleşmesi olarak kullanılır.
+**Amaç:** `docs/01`–`docs/13` arasında tarif edilen işlevlerin somut veri karşılıklarını, hesap kurallarını ve prototipteki ekranların envanterini vermek. Sürüm 1.3 itibarıyla **59 varlık**, **34 ERP ekranı** ve **1 saha arayüzü** kapsanır. Bu doküman, Faz 1 geliştirmesinde API sözleşmesi olarak kullanılır.
 
 **Ortak kurallar:** Tüm tarih/saat değerleri ISO 8601 (`2026-11-02T09:30:00+03:00`), tüm ondalıklar nokta ile, tüm miktarlar `quantity` + `unit` ikilisiyle yazılır. Referanslar **ID** iledir; malzeme adı hiçbir kayıtta birincil bağlantı olarak kullanılmaz. `server/erp/data/` altındaki **koleksiyon dosyaları doğrudan kayıt dizisidir** (`settings.json` tek nesnedir); sürüm, üretim zamanı ve dosya listesi `manifest.json` içinde tutulur. Uygulamanın **Ayarlar → Veri Yönetimi** ekranından alınan tam yedek ise tüm koleksiyonları tek bir JSON nesnesinde birleştirir ve `schemaVersion` alanını taşır.
 
@@ -354,6 +354,7 @@ Sabitler (alüminyum özgül ağırlığı, bıçak kalınlığı, yolluk/filtre
 | GET/PUT | `/api/plant-modules?plantId=` | Fabrika bazında modül açık/kapalı haritası |
 | GET | `/api/module-registry`, `/api/adapter-contracts` | Modül ve bağlantı adaptörü kayıtları |
 | POST | `/api/adapters/:code/test` | `connect / test / readFourSignals / disconnect` sözleşmesi; sürücü yoksa `MANUAL` yedeği |
+| POST | `/api/edge/ingest` | Fabrikadaki exe ajanının **tek yazma ucu**: imzalı `edge-batch`, `readings[]` + `events[]`, `clientId` ile idempotent (`docs/13`) |
 
 Tüm yazma uçları idempotent `client_id` kabul eder; çevrimdışı istemcinin tekrar gönderimi çift kayıt oluşturmaz.
 
@@ -491,3 +492,17 @@ Bütün kurallar `integrationRules` koleksiyonunda veri olarak da tutulur; kod i
 | Profil paketi (`profilePackages.payload`) | `kind`, `packageVersion`, `schemaVersion`, `plant`, `machineTypes`, `machines`, `castingPaths`, `plcConnections`, `plcTags`, eşikler, `plantModules`, `moduleRegistry` | `kind` ve şema sürümü doğrulanır; her yol paket içindeki makinelere bağlıdır |
 
 **Sabit kod yasağı.** Ekran kodunda fabrika veya makine kimliği yazılmaz. Aktif fabrika `activePlantId()`, aktif makine `machinesOfType()` ve `firstMachineId()` yardımcı işlevlerinden gelir. Duman testi 1 ve 2 fırınlı profilleri, bağımlılık raporunu, geri almayı, modül filtresini ve adaptör yedeğini doğrular; veri doğrulayıcı 58 koleksiyonda projeksiyon ve referans bütünlüğünü denetler.
+
+## 11. Edge Ajanının Yerel SQL Şeması (`docs/13`)
+
+`docs/13` ile gelen ajan, ERP koleksiyonlarından **ayrı** bir yerel SQLite veritabanı (`edge/data/edge.db`, WAL) tutar. Bu, aynı verinin iki yerde tutulması değildir: saha bilgisayarında ham okuma ve gönderim kuyruğu, sunucuda doğrulanmış işletme kaydı vardır.
+
+| Tablo | Alanlar | Kural |
+| --- | --- | --- |
+| `readings` | `client_id`, `at`, `plant_id`, `machine_id`, `tag_id`, `kind`, `signal`, `value_num`, `value_text`, `unit`, `quality`, `source`, `adapter`, `raw` | `client_id` benzersiz; `kind` = `signal` veya `telemetry`; dört sinyal + sıcaklık ölçümü |
+| `events` | `client_id`, `at`, `machine_id`, `signal`, `kind`, `previous`, `current`, `severity`, `note` | `STATE_CHANGE` / `THRESHOLD` / `DRIVER_FALLBACK`; silinmez |
+| `outbox` | `client_id`, `batch_id`, `endpoint`, `payload_json`, `status`, `attempts`, `next_attempt_at`, `last_error` | `queued → sending → sent / failed → dead`; hiçbir satır silinmez |
+| `runs` | `at`, `duration_ms`, `tag_count`, `reading_count`, `event_count`, `adapter`, `errors` | Her tarama döngüsünün izi |
+| `app_log` | `at`, `level`, `source`, `message` | Ajan günlüğü |
+
+**Kalite ayrımı.** `quality` alanı `GOOD`, `SIMULATED`, `STALE`, `BAD` alır; gerçek sürücü takılı değilken üretilen veri `SIMULATED` olarak işaretlenir ve sahada ölçülmüş gibi raporlanmaz. **Sıcaklık beşinci kontrol sinyali değildir**: `docs/08` Bölüm 4'teki dört sinyal (`door`, `casting`, `alarm`, `running`) değişmez, ölçümler `telemetry` kategorisinde ayrı tutulur. Bağlantı, imza, çevrimdışı kuyruk ve exe üretimi `docs/13` içindedir.

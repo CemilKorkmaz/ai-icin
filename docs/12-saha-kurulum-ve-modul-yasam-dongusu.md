@@ -169,7 +169,7 @@ Sürüm 1.2'de ekran kodunda sabit fabrika veya makine kimliği bırakılmamış
 | `server/erp/scripts/validate_data.py` | 58 koleksiyon; projeksiyon, modül, adaptör, profil ve devre dışı denetimleri |
 | `tools/smoke_test.mjs` | 34 ekran + 1 fırın / 2 fırın profil, çıkarma, geri alma, adaptör, menü testleri |
 | `tools/export_seed.mjs` | `schemaVersion: 4` manifest notu |
-| `tools/build_docx.py` | 13 dokümanı tek Word dosyasında birleştirir |
+| `tools/build_docx.py` | Sürüm 1.2'de 13 dokümanı birleştirdi; Sürüm 1.3'te 14 dokümana çıktı |
 | `docs/08`, `docs/12` | Modüler makine kararının genişletilmesi ve bu doküman |
 | `docs/Dokumhane-ERP-Plan.docx` | On üç dokümanı birleştiren tek "AI'a atılacak" çıktı |
 
@@ -184,7 +184,7 @@ Altı yeni koleksiyon: `machineAliases` (3), `moduleRegistry` (15), `plantModule
 | `node tools/smoke_test.mjs` | 34 menü / 34 ekran, hesap motoru, mizan, idempotency, 1 ve 2 fırınlı profil, 20 bağımlı kaydın korunması, geri alma, adaptör yedeği: **TÜM TESTLER GEÇTİ** |
 | `python3 server/erp/scripts/validate_data.py` | 58 koleksiyon, `schema_version: 4`, 15 modül, 3 adaptör, 2 profil paketi, 1 devre dışı makine: **0 hata, 1 uyarı** |
 | `node tools/export_seed.mjs` | 59 JSON dosyası ve manifest üretildi |
-| `python3 tools/build_docx.py` | 13 doküman tek geçerli OOXML Word dosyasında birleşti |
+| `python3 tools/build_docx.py` | 13 doküman tek geçerli OOXML Word dosyasında birleşti (Sürüm 1.2 anlık görüntüsü; 1.3'te 14) |
 | Tarayıcı DOM denetimi | **34 ekran · 10 akış**: sihirbaz adımları, bağlantı testi, profil oluşturma, bağımlılık raporlu çıkarma/geri alma, modül filtresi, 5 fırın → 1 fırın kopyası, JSON içe alma ve eski üretim akışları geçti |
 
 Tek bilgilendirici uyarı, demo malzeme stok fotoğrafı ile hareket toplamı farkıdır; gerçek kurulumda bakiye tüm hareketlerden türetilir (`docs/11`).
@@ -201,5 +201,7 @@ Bu sürüm **prototip düzeyinde modülerlik** sağlar. Aşağıdakiler bilinçl
 4. Profil paketinin sunucu tarafında sürüm geçmişi, çakışma birleştirme ve geri alma işlemi. Şu an içe alma yeni fabrika olarak yapılır; mevcut fabrikanın üzerine yazmaz.
 5. Standart maliyet ile ağırlıklı ortalama / FIFO karşılaştırması, 17 tondan 14 tona dağıtım kuralı ve `docs/06` içindeki sekiz açık soru.
 6. Gerçek tarayıcı ve tablet testi; şu ana kadarki DOM denetimi linkedom üzerinde yapılmıştır.
+
+Sürüm 1.3'te bu yapıya **fabrikadaki tek bilgisayarda çalışan exe ajan** eklenmiştir (`docs/13`). Ajan bu dokümandaki fabrika profil paketini okur, aynı adaptör sözleşmesini kullanır, dört sinyale ek olarak sıcaklık telemetrisi üretir ve veriyi yerel SQLite + ERP kuyruğuna yazar. Profil değişince ajanın kodu değişmez.
 
 Bu sınırlar, kullanıcının istediği "kolayca bağlama" hedefini engellemez: sahada yapılan iş veri girişi, profil kopyası ve bağlantı testidir; kod derlemesi veya veritabanı taşıması değildir. Sürücü ve sunucu katmanı eklendiğinde aynı profil paketi, aynı modül kaydı ve aynı adaptör sözleşmesi kullanılmaya devam eder.

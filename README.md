@@ -2,7 +2,7 @@
 
 Bu depo, sohbette tarif edilen **alüminyum biyet dökümhanesi** için uçtan uca ERP planını, çalışan bir web prototipini ve firma sunucusundaki `ERP/` klasörünün dosya tabanlı modelini içerir. Genel dökümhane planı değil; sürekli döküm, ergitme, testere, homojenizasyon, soğutma, paketleme ve iki onaylı sevkiyat akışı esas alınır.
 
-**Sürüm:** 1.2 · Modüler Saha Kurulumu · `schemaVersion: 4` · **34 ekran** · **59 varlık** · **13 doküman**
+**Sürüm:** 1.3 · Edge Veri Toplama Ajanı · `schemaVersion: 4` · **34 ekran + 1 saha arayüzü** · **59 varlık** · **14 doküman**
 
 ---
 
@@ -23,10 +23,12 @@ Bu depo, sohbette tarif edilen **alüminyum biyet dökümhanesi** için uçtan u
 | `docs/10-kurulum-ve-yol-haritasi-v2.md` | Mini PC ile kurulum, aşama sırası, Sürüm 1.1 eki, riskler ve doğrulanacaklar |
 | `docs/11-genel-erp-karsilastirma-ve-bosluk-analizi.md` | **Genel ERP metninin modül bazında karşılaştırması**, bulunan boşluklar, eklenenler ve kasten kapsam dışı bırakılanlar |
 | `docs/12-saha-kurulum-ve-modul-yasam-dongusu.md` | **Gerçek fabrikaya kolay bağlanma**: profil paketi, 1 / 2 / 5 fırın, kurulum sihirbazı, makine ekleme-çıkarma, modül kaydı, adaptör sözleşmesi |
-| `docs/Dokumhane-ERP-Plan.docx` | **13 dokümanın tamamını** birleştiren tek **Word** dosyası ("AI'a atılacak" çıktı) |
+| `docs/13-edge-veri-toplama-ajani.md` | **Fabrikadaki tek bilgisayar için exe**: sıcaklık/alarm/sensör okuma, yerel SQLite, imzalı ERP gönderimi, Türkçe canlı arayüz |
+| `docs/Dokumhane-ERP-Plan.docx` | **14 dokümanın tamamını** birleştiren tek **Word** dosyası ("AI'a atılacak" çıktı) |
 | `app/` | Çalışan PWA prototipi: bağımlılık yok, saf HTML/CSS/JS, **34 ekran**, `calc.js` + `posting.js` + `modularity.js` + `adapters.js` |
 | `server/erp/` | Firma sunucusundaki `ERP/` klasörünün modeli: **59 JSON dosyası**, olay kuyruğu, arşiv, worker'lar |
-| `tools/` | Word üretici, seed aktarımı, ikon üretici, duman testi |
+| `edge/` | **Fabrikadaki tek bilgisayar**: `ERP-Edge-Collector.exe` kaynağı, SQLite şeması, adaptörler, yerel web arayüzü, PyInstaller spec ve kurulum betikleri |
+| `tools/` | Word üretici, seed aktarımı, ikon üretici, duman testi, **edge ajanı duman testi** |
 
 ---
 
@@ -60,12 +62,13 @@ Veriyi sıfırlamak için **Ayarlar → Demo Verisini Sıfırla**. Yerel depolam
 12. **Şekil ve şema çizilmez.** `docs/01` yalnızca başlık ve anlatımdır; diğer dokümanlarda tablo kullanılır, kutu çizimi ve ok şeması yoktur.
 13. **Tek kayıt, çok etki (Sürüm 1.1).** Onaylanan bir sevkiyat stok, fatura, muhasebe fişi, cari bakiye, maliyet, olay, bildirim ve rapor kuyruğunu tek işlemde üretir.
 14. **Modüler saha kurulumu (Sürüm 1.2).** Aynı yazılım 1, 2 veya 5 fırınlı fabrikaya kod değişikliği olmadan bağlanır; makineler eklenir, gerekçeyle devre dışı bırakılır (silinmez), fabrika profili JSON olarak indirilir/içe alınır, modüller ve PLC adaptörleri veriyle yönetilir.
+15. **Edge veri toplama ajanı (Sürüm 1.3).** Fabrikadaki tek bilgisayarda çalışan exe, dört sinyale ek olarak sıcaklık gibi ölçümleri okur; önce yerel SQLite'a yazar, imzalı batch ile ERP'ye gönderir, çevrimdışıyken kuyruğu korur. Bu exe ERP arayüzü değildir; PWA ve tarayıcı kararı değişmez.
 14. **Maliyet nesnesi döküm kodudur.** Genel ERP'deki proje modülü burada `DK-...` partisi olarak tercüme edilir; bordro, CAD/BIM ve kampanya CRM'i kasten dışarıda kalır.
 15. **Belirsiz terimler sabitlenmez.** `PIS`, `GNSL`, `Stone`, `Barsa piyazesi` ve `Saf küçük` için `docs/06` Bölüm 5'teki 8 soru hâlâ açıktır.
 
 ---
 
-## 4. Prototipteki ekranlar (32)
+## 4. Prototipteki ekranlar (34)
 
 | Grup | Ekranlar |
 | --- | --- |
@@ -82,11 +85,11 @@ Veriyi sıfırlamak için **Ayarlar → Demo Verisini Sıfırla**. Yerel depolam
 | Yönetim | **Saha Kurulum Sihirbazı**, **Modül Kaydı**, Merkezi Yönetim |
 | Sistem | Bildirimler & Kuyruk, Ayarlar |
 
-Kalın olan 8 ekran Sürüm 1.1'de, **Saha Kurulum Sihirbazı** ve **Modül Kaydı** Sürüm 1.2'de eklendi; gerekçeler `docs/11` ve `docs/12` içindedir.
+Kalın olan 8 ekran Sürüm 1.1'de, **Saha Kurulum Sihirbazı** ve **Modül Kaydı** Sürüm 1.2'de eklendi; gerekçeler `docs/11` ve `docs/12` içindedir. Sürüm 1.3 ERP'ye ekran eklemez; `edge/` altına fabrikadaki tek bilgisayar için ayrı bir exe ve kendi arayüzünü ekler (`docs/13`).
 
 ---
 
-## 5. Sürüm 1.1 ve 1.2'de kapatılan boşluklar
+## 5. Sürüm 1.1, 1.2 ve 1.3'te kapatılan boşluklar
 
 Genel ERP anlatımı bu projeye uygulandığında en büyük eksik **modül sayısı değil, departmanlar arası otomatik veri akışıydı**. Önceki sürüm üretim, kütle dengesi ve olay günlüğünde güçlüydü; müşteri kartı, satış siparişi, satın alma talebi, hesap planı, muhasebe fişi, mizan, fatura, cari bakiye, ürün maliyeti, bütçe, depo lokasyonu ve vardiya yoktu.
 
@@ -104,6 +107,8 @@ Genel ERP anlatımı bu projeye uygulandığında en büyük eksik **modül say�
 | Genişletilmiş doğrulama | Borç = alacak, KDV, fatura tutarı, maliyet toplamı, sayım farkı, dönem kapanışı | `validate_data.py`, `smoke_test.mjs` |
 | `docs/11` + güncellenen 5 doküman | Karşılaştırma, boşluk analizi ve kapsam dışı kararların gerekçesi | `docs/`, tek Word çıktısı |
 | `docs/12` + 34. ekran | Saha kurulum, profil paketi, modül yaşam döngüsü, adaptör sözleşmesi | `docs/12`, `app/js/views/setup.js` |
+| `edge/` exe ajanı | Sıcaklık/alarm okuma, yerel SQL, imzalı ERP gönderimi, canlı arayüz | `edge/main.py`, `edge/erp_edge/`, `docs/13` |
+| `docs/13` + 14. doküman | Saha otomasyonu ile ERP arasındaki köprü ve sınırları | `docs/13`, tek Word çıktısı |
 
 Kasten eklenmeyenler: bordro ve özlük, kampanya CRM'i, inşaat proje kartı, AutoCAD/BIM, perakende POS, e-fatura, banka mutabakatı, KDV beyannamesi, çoklu para birimi. Kaynak metindeki otel/elektrik taahhüt örneği bu fabrikaya uygulanmadı.
 
@@ -119,19 +124,38 @@ python3 server/erp/scripts/event_worker.py --dry-run  # kuyruk simülasyonu (sil
 python3 server/erp/scripts/plc_poller.py --dry-run    # dört sinyal kuralı
 python3 server/erp/scripts/outbox_worker.py --dry-run # çevrimdışı kuyruk
 python3 server/erp/scripts/backup.py --no-external    # yedek + checksum
-python3 tools/build_docx.py                           # 13 dokümanı tek Word'e derle
+python3 tools/edge_smoke_test.py                       # exe ajanı: 12 test
+python3 edge/main.py --dry-run                         # tek döngü, yazmadan
+python3 edge/main.py --bind 0.0.0.0 --port 8787       # saha arayüzü (önizleme)
+python3 tools/build_docx.py                           # 14 dokümanı tek Word'e derle
 ```
 
-Son doğrulama sonuçları: 34 menü / 34 ekran eşleşiyor, mizan borç = alacak, maliyet kalemleri tutarlı, 1 ve 2 fırınlı profil testleri ve devre dışı bırakma/geri alma geçti, 58 koleksiyonda 0 hata ve 1 bilgilendirici uyarı (demo stok fotoğrafı), geçerli OOXML Word çıktısı.
+Son doğrulama sonuçları: 34 menü / 34 ekran eşleşiyor, mizan borç = alacak, 1 ve 2 fırınlı profil testleri geçti, 58 koleksiyonda 0 hata ve 1 bilgilendirici uyarı, **edge ajanının 12 testi ve 11 JSON ucu geçti**, 14 doküman geçerli OOXML Word çıktısında birleşti.
 
 > **Sınır:** Bu bir plan doğrulama prototipidir. Gerçek API/veritabanı, RBAC/VPN, OPC UA/Modbus sürücüsü, SMTP/SMS sağlayıcısı ve PLC donanımı bağlı değildir. Canlı kurulumda doğruluk kaynağı işlemsel veritabanı, JSON dosyaları arşiv ve aktarım görünümüdür.
 
 ---
 
-## 7. Sonraki adım
+## 7. Fabrikadaki bilgisayar (Sürüm 1.3)
+
+ERP'nin kullanıcı arayüzü hâlâ tarayıcıdaki PWA'dır. `edge/` klasöründeki program **farklı bir yazılımdır**: fabrikadaki tek veri toplama bilgisayarında çalışan `ERP-Edge-Collector.exe`. Ocak içi sıcaklık, alarm ve diğer sensör verilerini okur, `data/edge.db` SQLite veritabanına yazar, HMAC imzalı `POST /api/edge/ingest` ile ERP'ye gönderir; ERP yoksa kuyruğu silmeden bekletir. Kendi Türkçe arayüzü `http://127.0.0.1:8787` adresindedir.
+
+```bash
+python3 edge/main.py --dry-run                     # bu depoda, yazmadan tek döngü
+python3 edge/main.py --once                        # SQL + kuyruk
+python3 edge/main.py --bind 0.0.0.0 --port 8787    # canlı saha arayüzü
+python3 tools/edge_smoke_test.py                   # 12 test
+```
+
+Windows ikilisi bu Linux ortamında üretilemediği için depoya konmamıştır; `edge/build_exe.bat` Windows'ta tek komutla `dist\ERP-Edge-Collector.exe` dosyasını üretir, `edge/install-task.ps1` otomatik başlatmayı kurar. Ayrıntılar `docs/13` içindedir.
+
+---
+
+## 8. Sonraki adım
 
 1. `docs/06` Bölüm 5'teki 8 soruyu mühendisle kapatmak (özellikle 17 tondan 14 tona düşüşün dağılımı ve 300 mm kafa payı).
-2. `docs/10` aşama 8: gerçek API + veritabanı + RBAC; fiş, stok ve cari yazımlarını tek transaction içine almak.
-3. Standart maliyet ve stok değerleme yöntemini (ağırlıklı ortalama / FIFO) netleştirmek.
-4. e-Fatura, banka mutabakatı ve KDV entegrasyonlarını ayrı servis olarak eklemek.
-5. `docs/Dokumhane-ERP-Plan.docx` dosyasını yapay zekâya verip genel yazılım altyapı şemasını oluşturmak — sohbetin en baştaki hedefi için girdi hazırdır.
+2. `docs/10` aşama 8: gerçek API + veritabanı + RBAC; fiş, stok ve cari yazımlarını tek transaction içine almak. `/api/edge/ingest` worker'ını kurmak.
+3. `docs/10` aşama 9: gerçek OPC UA / Modbus sürücüsünü `edge/erp_edge/adapters.py` sözleşmesine takmak; sıcaklık eşiklerini sahada doğrulamak.
+4. Standart maliyet ve stok değerleme yöntemini (ağırlıklı ortalama / FIFO) netleştirmek.
+5. e-Fatura, banka mutabakatı ve KDV entegrasyonlarını ayrı servis olarak eklemek.
+6. `docs/Dokumhane-ERP-Plan.docx` dosyasını yapay zekâya verip genel yazılım altyapı şemasını oluşturmak — sohbetin en baştaki hedefi için girdi hazırdır.

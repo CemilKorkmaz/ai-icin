@@ -153,7 +153,7 @@ Konuşmada bir müşterinin "1'den 3'e aktarıyorum, 3'ten 1'e aktarıyorum" gib
 | Uzaktan güncelleme geçmişi | Merkezi Yönetim | `vendor-updates.json` |
 | Farklı döküm yolları | Döküm Yolları | `casting-paths.json` |
 
-Sürüm 1.2'de bu tabloya **Saha Kurulum Sihirbazı**, **Modül Kaydı**, **fabrika profil paketi**, **devre dışı bırakma** ve **adaptör sözleşmesi** eklenmiştir; Bölüm 8–12 ayrıntılıdır. Prototipte PLC bağlantısı **gerçek haberleşme yapmaz**; dört sinyal demo değerleriyle ve `MANUAL` modda operatör seçimiyle simüle edilir. Gerçek OPC UA / Modbus sürücüsü, `docs/10` içindeki yol haritasının son aşamasında ayrı bir modül olarak eklenir. Bu bilinçli bir sınırdır: önce üretim mantığı PLC olmadan oturtulur.
+Sürüm 1.2'de bu tabloya **Saha Kurulum Sihirbazı**, **Modül Kaydı**, **fabrika profil paketi**, **devre dışı bırakma** ve **adaptör sözleşmesi** eklenmiştir; Bölüm 8–12 ayrıntılıdır. Sürüm 1.3'te aynı adaptör sözleşmesini fabrikadaki tek bilgisayarda fiziksel olarak çalıştıran `ERP-Edge-Collector.exe` eklenmiştir (`docs/13`); dört sinyal kuralı ve `MANUAL` yedek kararı değişmemiştir. Prototipte PLC bağlantısı **gerçek haberleşme yapmaz**; dört sinyal demo değerleriyle ve `MANUAL` modda operatör seçimiyle simüle edilir. Gerçek OPC UA / Modbus sürücüsü, `docs/10` içindeki yol haritasının son aşamasında ayrı bir modül olarak eklenir. Bu bilinçli bir sınırdır: önce üretim mantığı PLC olmadan oturtulur.
 
 ---
 

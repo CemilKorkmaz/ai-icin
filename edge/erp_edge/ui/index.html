@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="tr" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ERP Edge Collector · Saha Veri Toplama</title>
+  <link rel="stylesheet" href="./app.css">
+</head>
+<body>
+  <div id="app">
+    <aside class="side">
+      <div class="brand"><span class="mark">E</span><div><strong>ERP <i>Edge</i></strong><small>Saha Veri Toplama Ajanı</small></div></div>
+      <nav id="nav">
+        <button class="nav active" data-tab="overview"><span>▦</span> Genel Bakış</button>
+        <button class="nav" data-tab="sensors"><span>◉</span> Sensörler</button>
+        <button class="nav" data-tab="sql"><span>▤</span> SQL Veritabanı</button>
+        <button class="nav" data-tab="queue"><span>⇄</span> ERP Kuyruğu</button>
+        <button class="nav" data-tab="profile"><span>◈</span> Fabrika Profili</button>
+        <button class="nav" data-tab="settings"><span>⚙</span> Ayarlar</button>
+      </nav>
+      <div class="side-foot">
+        <div class="mini"><span>Sürüm</span><strong id="version">—</strong></div>
+        <div class="mini"><span>SQL</span><strong id="sql-file">—</strong></div>
+        <div class="mini"><span>Mod</span><strong id="adapter-mode">—</strong></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="top">
+        <div><h1 id="site-title">Saha Bilgisayarı</h1><p id="site-sub">Sensörler → SQLite → ERP</p></div>
+        <div class="chips">
+          <span class="chip" id="chip-collector">Toplayıcı</span>
+          <span class="chip" id="chip-plc">PLC</span>
+          <span class="chip" id="chip-erp">ERP</span>
+          <span class="chip" id="chip-sql">SQL</span>
+        </div>
+        <div class="actions">
+          <button class="btn ghost" id="btn-test">Bağlantıyı Test Et</button>
+          <button class="btn ghost" id="btn-poll">Şimdi Oku</button>
+          <button class="btn primary" id="btn-toggle">Durdur</button>
+        </div>
+      </header>
+
+      <div class="banner" id="banner"></div>
+      <div id="toast"></div>
+
+      <!-- GENEL BAKIŞ -->
+      <section class="tab active" id="tab-overview">
+        <div class="kpis">
+          <div class="kpi"><span>Makine</span><strong id="k-machines">0</strong><small>profildeki aktif makine</small></div>
+          <div class="kpi"><span>Tag / Ölçüm</span><strong id="k-tags">0</strong><small>dört sinyal + telemetri</small></div>
+          <div class="kpi"><span>SQL Okuma</span><strong id="k-readings">0</strong><small>kalıcı kayıt</small></div>
+          <div class="kpi warn"><span>Bekleyen Batch</span><strong id="k-queued">0</strong><small>çevrimdışı kuyruk</small></div>
+          <div class="kpi"><span>Son Döngü</span><strong id="k-cycle">—</strong><small id="k-duration">—</small></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div><strong>Canlı Makine Durumu</strong><p class="muted">Dört sinyal kuralı + sıcaklık telemetrisi · 2 saniyede bir yenilenir</p></div><span class="tag" id="last-at">—</span></div>
+          <div class="machines" id="machines"></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card"><div class="card-head"><strong>Durum ve Eşik Olayları</strong><span class="tag">son 12</span></div><div id="events" class="list"></div></div>
+          <div class="card"><div class="card-head"><strong>Ajan Günlüğü</strong><span class="tag">son 14</span></div><div id="logs" class="list mono"></div></div>
+        </div>
+      </section>
+
+      <!-- SENSÖRLER -->
+      <section class="tab" id="tab-sensors">
+        <div class="card">
+          <div class="card-head"><div><strong>Son Okumalar</strong><p class="muted">Her tag için en son satır; kalite ve kaynak alanı korunur</p></div>
+            <input id="sensor-filter" class="input" placeholder="Makine / sinyal ara…"></div>
+          <div class="table-wrap"><table><thead><tr><th>Zaman</th><th>Makine</th><th>Tag</th><th>Tür</th><th>Sinyal</th><th>Değer</th><th>Birim</th><th>Kalite</th><th>Kaynak</th></tr></thead><tbody id="latest-rows"></tbody></table></div>
+        </div>
+        <div class="card"><div class="card-head"><strong>Tarama Döngüleri</strong><span class="tag">runs tablosu</span></div>
+          <div class="table-wrap"><table><thead><tr><th>Zaman</th><th>Süre</th><th>Tag</th><th>Okuma</th><th>Olay</th><th>Adaptör</th><th>Hata</th></tr></thead><tbody id="runs-rows"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- SQL -->
+      <section class="tab" id="tab-sql">
+        <div class="card"><div class="card-head"><div><strong>Yerel SQLite Şeması</strong><p class="muted" id="sql-path">—</p></div><button class="btn ghost" id="btn-purge">Saklama Süresi Temizliği</button></div>
+          <div class="schema" id="schema"></div>
+        </div>
+        <div class="card"><div class="card-head"><strong>readings · Son Kayıtlar</strong><span class="tag" id="sql-count">—</span></div>
+          <div class="table-wrap"><table><thead><tr><th>#</th><th>client_id</th><th>Makine</th><th>Sinyal</th><th>Değer</th><th>Kalite</th><th>at</th></tr></thead><tbody id="sql-rows"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- KUYRUK -->
+      <section class="tab" id="tab-queue">
+        <div class="kpis">
+          <div class="kpi"><span>Kuyrukta</span><strong id="q-queued">0</strong></div>
+          <div class="kpi ok"><span>Gönderildi</span><strong id="q-sent">0</strong></div>
+          <div class="kpi danger"><span>Ölü</span><strong id="q-dead">0</strong></div>
+          <div class="kpi"><span>Olay</span><strong id="q-events">0</strong></div>
+        </div>
+        <div class="card"><div class="card-head"><div><strong>ERP Gönderim Kuyruğu</strong><p class="muted">Başarısız kayıt silinmez; üstel geri çekilme ile yeniden denenir</p></div><button class="btn primary" id="btn-flush">Şimdi Gönder</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Batch</th><th>Durum</th><th>Deneme</th><th>Uç Nokta</th><th>Oluşturma</th><th>Son Hata</th></tr></thead><tbody id="queue-rows"></tbody></table></div>
+        </div>
+        <div class="card"><div class="card-head"><strong>Gönderim Sözleşmesi</strong></div>
+          <div class="contract">
+            <div><code>POST /api/edge/ingest</code><p>Tek yazma ucu. Ajan stok, maliyet veya muhasebe tablosuna doğrudan erişmez; ERP worker doğrulayıp <code>signalStates</code>, telemetri ve bakım bildirimi üretir.</p></div>
+            <div><code>X-Edge-Client-Id</code> · <code>X-Edge-Signature</code><p>HMAC-SHA256 imza ve batch başına benzersiz istemci kimliği; tekrar gönderim çift kayıt oluşturmaz.</p></div>
+            <div><code>queued → sending → sent / failed → dead</code><p>İnternet veya ERP yoksa üretim durmaz; veri önce SQLite'a yazılır, kuyrukta bekler.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROFİL -->
+      <section class="tab" id="tab-profile">
+        <div class="card"><div class="card-head"><div><strong>Fabrika Profil Paketi</strong><p class="muted">docs/12 · makineler ve dört sinyalin tag adresleri buradan gelir; kod içinde sabit makine yoktur</p></div><span class="tag" id="profile-valid">—</span></div>
+          <div class="profile" id="profile"></div>
+        </div>
+        <div class="card"><div class="card-head"><strong>Adaptör Sözleşmeleri</strong><span class="tag">connect / test / readFourSignals / readTelemetry / disconnect</span></div>
+          <div class="table-wrap"><table><thead><tr><th>Kod</th><th>Ad</th><th>Protokol</th><th>Sürücü</th><th>Yetenekler</th></tr></thead><tbody id="adapter-rows"></tbody></table></div>
+        </div>
+        <div class="card"><div class="card-head"><strong>Telemetri Şablonları</strong><p class="muted">Sıcaklık gibi ölçümler makine tipine bağlıdır</p></div>
+          <div class="table-wrap"><table><thead><tr><th>Tip</th><th>Ölçüm</th><th>Birim</th><th>Nominal</th><th>Uyarı</th><th>Kritik</th><th>Adres Kalıbı</th></tr></thead><tbody id="telemetry-rows"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- AYARLAR -->
+      <section class="tab" id="tab-settings">
+        <div class="card"><div class="card-head"><div><strong>Ajan Yapılandırması</strong><p class="muted">Kaydedildiğinde <code>config/edge-config.json</code> güncellenir ve profil yeniden okunur</p></div><button class="btn primary" id="btn-save">Kaydet</button></div>
+          <div class="form" id="config-form"></div>
+        </div>
+        <div class="card"><div class="card-head"><strong>Bağlantı Testi Sonucu</strong></div><div id="test-result" class="test-result muted">Henüz test çalıştırılmadı.</div></div>
+      </section>
+
+      <footer class="foot">ERP Edge Collector · yalnızca Python standart kütüphanesi · Windows'ta <code>build_exe.bat</code> ile tek .exe üretilir · docs/13</footer>
+    </main>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>
