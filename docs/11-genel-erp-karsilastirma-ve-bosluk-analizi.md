@@ -115,13 +115,15 @@ Bu kararlar, ilk sohbetteki "ekran kalabalık olmasın", "operatör ekranı ile 
 | `shifts` | Vardiya, sorumlu, devir notu | `budgets` | Planlanan ve gerçekleşen |
 | `periodClosures` | Mizan ve dönem durumu | `integrationRules` | Tetikleyici ve ürettiği kayıtlar |
 
-Sayısal özet: varlık sayısı 35'ten **53'e**, ekran sayısı 24'ten **32'ye**, menü öğesi 32'ye, `schemaVersion` 2'den **3'e**, `server/erp/data/` içindeki JSON dosyası 35'ten **53'e** çıktı. Doğrulayıcı 52 koleksiyonu ve `settings.json` dosyasını kapsar.
+Sürüm 1.1 için geçerli sayısal özet (Sürüm 1.2'de 59 varlık / 34 ekran / `schemaVersion: 4`'e çıkmıştır, `docs/12`): varlık sayısı 35'ten **53'e**, ekran sayısı 24'ten **32'ye**, menü öğesi 32'ye, `schemaVersion` 2'den **3'e**, `server/erp/data/` içindeki JSON dosyası 35'ten **53'e** çıktı. Doğrulayıcı 52 koleksiyonu ve `settings.json` dosyasını kapsar.
 
 Yeni ekranlar şunlardır: **Satış Siparişleri**, **Müşteriler & Cari**, **Talep & Teklif Akışı**, **Muhasebe & Fişler**, **Maliyet & Kârlılık**, **Depo, Rezervasyon & Sayım**, **Personel & Vardiya**, **Entegrasyon Matrisi**. Menüde satın alma grubu talep ekranıyla genişletildi; ticari, finans, depolama, personel ve entegrasyon için ayrı gruplar açıldı.
 
-Yerel depolama anahtarı artık şema sürümüne bağlıdır (`erp_demo_state_v3`). Böylece eski sürümden kalan, yeni koleksiyonları içermeyen veri yüklenip ekranları bozmaz. `settings` içine KDV oranı, maliyet yöntemi, açık dönem, varsayılan depo, satın alma onay limiti, kredi kontrolü ve otomatik muhasebeleştirme anahtarları eklendi. `docs/09` içindeki olay ve arşiv kuralları değişmedi; olay günlüğü muhasebe fişi üretiminde de kaynak olarak kullanılır.
+Yerel depolama anahtarı artık şema sürümüne bağlıdır (Sürüm 1.1'de `erp_demo_state_v3`, Sürüm 1.2'de `erp_demo_state_v4`). Böylece eski sürümden kalan, yeni koleksiyonları içermeyen veri yüklenip ekranları bozmaz. `settings` içine KDV oranı, maliyet yöntemi, açık dönem, varsayılan depo, satın alma onay limiti, kredi kontrolü ve otomatik muhasebeleştirme anahtarları eklendi. `docs/09` içindeki olay ve arşiv kuralları değişmedi; olay günlüğü muhasebe fişi üretiminde de kaynak olarak kullanılır.
 
-## 7. Doğrulama sonuçları
+## 7. Doğrulama sonuçları (Sürüm 1.1 anlık görüntüsü)
+
+Aşağıdaki satırlar Sürüm 1.1 teslim anındaki değerlerdir; Sürüm 1.2'nin güncel sonuçları `docs/12` Bölüm 11'dedir.
 
 | Komut | Sonuç |
 | --- | --- |
@@ -145,3 +147,7 @@ Bu açıklar `docs/10` yol haritasındaki aşama sırasını bozmaz: önce merke
 Kaynak metnin projeye kattığı en değerli fikir yeni bir modül değil, **bir kaydın bütün departmanları aynı anda beslemesi** ilkesidir. Önceki sürüm bu ilkeyi üretim ve olay tarafında uygulamış, finans ve cari tarafında uygulamamıştı. Sürüm 1.1 bu eşitsizliği giderir: onaylanan bir sevkiyat artık stok, fatura, muhasebe fişi, müşteri bakiyesi, maliyet, olay günlüğü, bildirim ve rapor kuyruğunu tek işlemde üretir. Genel ERP metnindeki proje, bordro ve CAD örnekleri dökümhane gerçeğine göre ya tercüme edilmiş ya da bilinçli olarak dışarıda bırakılmıştır.
 
 Sohbetin en baştaki hedefi olan "tüm işlevleri tek bir Word'e döküp yapay zekâya atıp genel yazılım altyapı şemasını oluşturmak" adımı için gereken girdi güncellenmiştir: `docs/Dokumhane-ERP-Plan.docx` artık `00` ile `11` arasındaki on iki dokümanın tamamını içerir.
+
+## 10. Sonraki sürüm notu
+
+`docs/11` ticari ve finansal boşlukları kapatır. Kullanıcının sonraki isteği olan **gerçek fabrikaya kolay bağlanma, makine ekleme-çıkarma ve genel modülerlik** bu dokümanın kapsamı dışında kalmış, `docs/12` içinde ayrı bir sürüm olarak ele alınmıştır. Orada tek makine kaynağı, güvenli devre dışı bırakma, fabrika profil paketi, beş adımlı kurulum sihirbazı, modül kaydı ve adaptör sözleşmesi tanımlanır. Bu dokümandaki tek kayıt çok etki ilkesi, mizan dengesi ve maliyet kuralları değişmeden korunur.

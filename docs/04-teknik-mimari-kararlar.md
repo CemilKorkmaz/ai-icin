@@ -306,6 +306,6 @@ Finansal kayıtlar üretim gibi çevrimdışıyken de oluşur. Dışa gönderilm
 | Finansal kayıt | Fatura numarası sevkiyatta serbest metindi | Müşteri kartı, fatura, fiş, cari, ödeme, mizan |
 | Departman etkileşimi | Üretim olayları ve stok hareketi | Tek onaydan sekiz koleksiyona atomik yazım |
 | Doğrulama | Referans ve kütle dengesi | Ayrıca borç = alacak, KDV, maliyet, sayım, dönem |
-| Şema | `schemaVersion: 2` | `schemaVersion: 3`, sürüme bağlı yerel anahtar |
+| Şema | `schemaVersion: 2` | `schemaVersion: 4`, sürüme bağlı yerel anahtar; tek makine kaynağı, profil paketi, modül kaydı ve adaptör sözleşmesi (`docs/12`) |
 
 Bu doküman, `docs/Dokumhane-ERP-Plan.docx` içinde de yer alır ve "yapay zekâya verilip genel yazılım altyapı şemasının oluşturulması" için gereken teknik girdiyi sağlar.

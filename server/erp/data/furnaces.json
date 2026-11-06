@@ -1,29 +1,90 @@
 [
   {
-    "id": "F20",
-    "code": "F20",
-    "name": "Ocak 1",
+    "id": "MCH-01",
+    "code": "MCH-01",
+    "name": "A Fırını",
     "capacityTon": 20,
     "type": "Yatay ergitme",
     "rotary": false,
-    "status": "Çalışıyor"
+    "status": "Çalışıyor",
+    "machineId": "MCH-01",
+    "plantId": "P1"
   },
   {
-    "id": "F35",
-    "code": "F35",
-    "name": "Ocak 2",
+    "id": "MCH-02",
+    "code": "MCH-02",
+    "name": "B Fırını",
     "capacityTon": 35,
     "type": "Yatay ergitme",
     "rotary": false,
-    "status": "Çalışıyor"
+    "status": "Çalışıyor",
+    "machineId": "MCH-02",
+    "plantId": "P1"
   },
   {
-    "id": "FD",
-    "code": "FD",
+    "id": "MCH-03",
+    "code": "MCH-03",
+    "name": "C Fırını",
+    "capacityTon": 20,
+    "type": "Yatay ergitme",
+    "rotary": false,
+    "status": "Çalışıyor",
+    "machineId": "MCH-03",
+    "plantId": "P1"
+  },
+  {
+    "id": "MCH-04",
+    "code": "MCH-04",
+    "name": "D Fırını",
+    "capacityTon": 35,
+    "type": "Yatay ergitme",
+    "rotary": false,
+    "status": "Çalışıyor",
+    "machineId": "MCH-04",
+    "plantId": "P1"
+  },
+  {
+    "id": "MCH-05",
+    "code": "MCH-05",
+    "name": "E Fırını",
+    "capacityTon": 20,
+    "type": "Yatay ergitme",
+    "rotary": false,
+    "status": "Beklemede",
+    "machineId": "MCH-05",
+    "plantId": "P1"
+  },
+  {
+    "id": "MCH-15",
+    "code": "MCH-15",
+    "name": "1. Ocak",
+    "capacityTon": 20,
+    "type": "Yatay ergitme",
+    "rotary": false,
+    "status": "Çalışıyor",
+    "machineId": "MCH-15",
+    "plantId": "P2"
+  },
+  {
+    "id": "MCH-16",
+    "code": "MCH-16",
+    "name": "2. Ocak",
+    "capacityTon": 35,
+    "type": "Yatay ergitme",
+    "rotary": false,
+    "status": "Çalışıyor",
+    "machineId": "MCH-16",
+    "plantId": "P2"
+  },
+  {
+    "id": "MCH-20",
+    "code": "MCH-20",
     "name": "Döner Ocak",
     "capacityTon": 8,
     "type": "Cüruf geri kazanım",
     "rotary": true,
-    "status": "Beklemede"
+    "status": "Çalışıyor",
+    "machineId": "MCH-20",
+    "plantId": "P2"
   }
 ]

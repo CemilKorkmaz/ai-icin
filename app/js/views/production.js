@@ -1,4 +1,4 @@
-import { D, store, material, matName, furnace, recipe, lot, uid, nowISO, moveStock, addActivity, addNotification, billetTonnage } from '../store.js';
+import { D, store, material, matName, furnace, recipe, lot, uid, nowISO, moveStock, addActivity, addNotification, billetTonnage, machinesOfType, activePlantId } from '../store.js';
 import { icon } from '../icons.js';
 import { esc, fmtNum, fmtDateTime, fmtDate, pill, dot, field, input, select, formData, modal, confirmDialog, toast, progress } from '../ui.js';
 import { STAGES } from '../seed.js';
@@ -58,7 +58,7 @@ export const productionView = {
       <div class="stat-strip">
         <div><span>Aktif döküm kodu</span><strong>${active.length}</strong></div>
         <div><span>Toplam tonaj</span><strong>${fmtNum(totalTon, 1)} t</strong></div>
-        <div><span>Ocak</span><strong>${d.furnaces.length}</strong></div>
+        <div><span>Ocak</span><strong>${machinesOfType('FURNACE', d).length}</strong></div>
         <div><span>Aktif alarm</span><strong class="text-danger">${alarms}</strong></div>
         <div><span>Aşama</span><strong>${STAGES.length}</strong></div>
       </div>
@@ -81,7 +81,7 @@ export const productionView = {
       modal({
         title: 'Yeni Döküm Başlat', subtitle: 'Sistem benzersiz bir döküm kodu üretir ve sayaç başlar.', size: 'wide',
         body: `<div class="form-grid">
-          ${field('Ocak', select('furnaceId', D().furnaces.filter((f) => !f.rotary).map((f) => ({ value: f.id, label: `${f.name} · ${f.capacityTon} ton` }))))}
+          ${field('Ocak', select('machineId', [{ value: '', label: 'Ocak yok' }, ...machinesOfType('FURNACE', D()).map((f) => ({ value: f.id, label: `${f.name} · ${f.capacityTon} ton` }))]))}
           ${field('Alaşım Reçetesi', select('recipeId', ergitme.map((r) => ({ value: r.id, label: r.name }))))}
           ${field('Biyet Çapı (mm)', input('diameterMm', 178, { type: 'number', min: 50, step: 1 }))}
           ${field('Biyet Boyu (m)', input('lengthM', 6, { type: 'number', min: 0.5, step: 0.1 }))}
@@ -95,8 +95,8 @@ export const productionView = {
             const r = recipe(f.recipeId);
             const code = `DK-${new Date().getFullYear()}-${String(D().lots.length + 139).padStart(4, '0')}`;
             store.change((d) => {
-              d.lots.unshift({ id: code, code, alloy: r ? r.alloy : '6063', diameterMm: Number(f.diameterMm), lengthM: Number(f.lengthM), billetCount: 0, weightTon: Number(f.weightTon), furnaceId: f.furnaceId, recipeId: f.recipeId, stage: 'Ergitme', status: 'Devam ediyor', startedAt: nowISO(), stageStartedAt: nowISO(), paused: false, scrapTon: 0, remainingMetalTon: null, remainingDecision: null, alerts: [], history: [{ stage: 'Ergitme', at: nowISO() }] });
-              addActivity(`${code} dökümü başlatıldı (${furnace(f.furnaceId)?.name || ''}, ${f.weightTon} t)`, 'play');
+              d.lots.unshift({ id: code, code, alloy: r ? r.alloy : '6063', diameterMm: Number(f.diameterMm), lengthM: Number(f.lengthM), billetCount: 0, weightTon: Number(f.weightTon), machineId: f.machineId, recipeId: f.recipeId, stage: 'Ergitme', status: 'Devam ediyor', startedAt: nowISO(), stageStartedAt: nowISO(), paused: false, scrapTon: 0, remainingMetalTon: null, remainingDecision: null, alerts: [], history: [{ stage: 'Ergitme', at: nowISO() }] });
+              addActivity(`${code} dökümü başlatıldı (${furnace(f.machineId)?.name || ''}, ${f.weightTon} t)`, 'play');
               addNotification({ type: 'info', title: 'Yeni döküm başlatıldı', body: `${code} · ${r?.name || ''} · sayaç çalışıyor.`, source: 'Ergitme' });
             });
             close(); toast(`${code} döküm kodu oluşturuldu`); window.App.refresh();
@@ -164,7 +164,7 @@ export const productionView = {
     function openLot(id) {
       const l = lot(id); if (!l) return;
       const r = recipe(l.recipeId);
-      const f = furnace(l.furnaceId);
+      const f = furnace(l.machineId);
       const elapsed = elapsedMin(l.stageStartedAt || l.startedAt);
       const recipeItems = r ? r.items.map((it) => {
         const suggested = Number((it.perTon * l.weightTon).toFixed(1));
@@ -304,7 +304,7 @@ export const recipesView = {
       const rows = r.items.map((it) => `<tr><td>${esc(it.label || matName(it.materialId))}</td><td class="num">${fmtNum(it.perTon, 2)}</td><td>${esc(it.unit)} / ton</td><td class="num">${fmtNum(it.perTon * (r.capacityTon || 20), 1)} ${esc(it.unit)}</td></tr>`).join('');
       const steps = (r.steps || []).map((s) => `<div class="step-row"><span class="step-time">${icon('clock', 13)} ${s.atMin}. dk</span><span>${esc(s.label)}</span>${s.suggestedQty ? `<strong>${fmtNum(s.suggestedQty)} kg</strong>` : ''}</div>`).join('') || '<p class="muted">Zamanlı adım tanımlanmamış.</p>';
       return `<div class="recipe-card" data-recipe="${esc(r.id)}">
-        <div class="recipe-head"><div><span class="recipe-type">${esc(r.type)}</span><h3>${esc(r.name)}</h3><p>${r.alloy ? `Alaşım ${esc(r.alloy)}` : ''} ${r.furnaceId ? `· ${esc(furnace(r.furnaceId)?.name || '')}` : ''} ${r.capacityTon ? `· ${r.capacityTon} ton` : ''} ${r.diameterMm ? `· Ø${r.diameterMm} mm` : ''}</p></div><span class="recipe-badge">${icon('sliders', 16)}</span></div>
+        <div class="recipe-head"><div><span class="recipe-type">${esc(r.type)}</span><h3>${esc(r.name)}</h3><p>${r.alloy ? `Alaşım ${esc(r.alloy)}` : ''} ${r.machineId ? `· ${esc(furnace(r.machineId)?.name || '')}` : ''} ${r.capacityTon ? `· ${r.capacityTon} ton` : ''} ${r.diameterMm ? `· Ø${r.diameterMm} mm` : ''}</p></div><span class="recipe-badge">${icon('sliders', 16)}</span></div>
         <div class="recipe-metrics"><span>${icon('flame', 14)} ${r.tempC || '—'} °C</span><span>${icon('clock', 14)} ${r.durationMin || '—'} dk</span>${r.coolingMin ? `<span>${icon('gauge', 14)} Soğutma ${r.coolingMin} dk</span>` : ''}<span>${icon('box', 14)} ${r.items.length} kalem</span></div>
         <div class="table-wrap"><table class="data compact"><thead><tr><th>Malzeme</th><th class="num">Birim / Ton</th><th>Tip</th><th class="num">Örnek Şarj</th></tr></thead><tbody>${rows}</tbody></table></div>
         <div class="recipe-steps"><h4>${icon('clock', 14)} Zamanlı Uyarılar</h4>${steps}</div>
@@ -328,7 +328,7 @@ export const recipesView = {
           ${field('Reçete Türü', select('type', ['Ergitme', 'Döküm', 'Homojenizasyon'], recipeTab))}
           ${field('Reçete Adı', input('name', '', { required: true, placeholder: 'Örn. 6063 / 20 Ton Ocak' }))}
           ${field('Alaşım', input('alloy', '6063'))}
-          ${field('Ocak', select('furnaceId', [{ value: '', label: 'Yok' }, ...D().furnaces.map((f) => ({ value: f.id, label: f.name }))]))}
+          ${field('Ocak', select('machineId', [{ value: '', label: 'Yok' }, ...machinesOfType('FURNACE', D()).map((f) => ({ value: f.id, label: f.name }))]))}
           ${field('Kapasite (ton)', input('capacityTon', 20, { type: 'number', min: 0, step: 1 }))}
           ${field('Çap (mm)', input('diameterMm', 178, { type: 'number', min: 0, step: 1 }))}
           ${field('Sıcaklık (°C)', input('tempC', 750, { type: 'number', min: 0 }))}
@@ -341,7 +341,7 @@ export const recipesView = {
             const f = formData(el);
             if (!f.name) { toast('Reçete adı zorunludur', 'danger'); return; }
             store.change((d) => {
-              d.recipes.push({ id: uid('RCP'), type: f.type, name: f.name, alloy: f.alloy, furnaceId: f.furnaceId || null, capacityTon: Number(f.capacityTon) || null, tempC: Number(f.tempC), durationMin: Number(f.durationMin), diameterMm: Number(f.diameterMm) || null, coolingMin: Number(f.coolingMin), items: [], steps: [] });
+              d.recipes.push({ id: uid('RCP'), type: f.type, name: f.name, alloy: f.alloy, machineId: f.machineId || null, capacityTon: Number(f.capacityTon) || null, tempC: Number(f.tempC), durationMin: Number(f.durationMin), diameterMm: Number(f.diameterMm) || null, coolingMin: Number(f.coolingMin), items: [], steps: [] });
               addActivity(`Yeni reçete oluşturuldu: ${f.name}`, 'sliders');
             });
             recipeTab = f.type; close(); toast('Reçete oluşturuldu'); refresh();
@@ -353,7 +353,7 @@ export const recipesView = {
       const r = recipe(card.dataset.recipe); if (!r) return;
       const mo = modal({
         title: r.name, subtitle: `${r.type} · ${r.alloy || ''} · ${r.items.length} kalem`, size: 'wide',
-        body: `<div class="detail-grid"><div class="detail-item"><span>Sıcaklık</span><strong>${r.tempC || '—'} °C</strong></div><div class="detail-item"><span>Süre</span><strong>${r.durationMin || '—'} dk</strong></div><div class="detail-item"><span>Soğutma</span><strong>${r.coolingMin || '—'} dk</strong></div><div class="detail-item"><span>Ocak</span><strong>${esc(furnace(r.furnaceId)?.name || '—')}</strong></div></div>
+        body: `<div class="detail-grid"><div class="detail-item"><span>Sıcaklık</span><strong>${r.tempC || '—'} °C</strong></div><div class="detail-item"><span>Süre</span><strong>${r.durationMin || '—'} dk</strong></div><div class="detail-item"><span>Soğutma</span><strong>${r.coolingMin || '—'} dk</strong></div><div class="detail-item"><span>Ocak</span><strong>${esc(furnace(r.machineId)?.name || '—')}</strong></div></div>
           <div class="detail-section"><h4>Reçete Kalemleri</h4>${r.items.map((it) => `<div class="mini-row"><span>${esc(it.label || matName(it.materialId))}</span><span>${fmtNum(it.perTon, 2)} ${esc(it.unit)}/ton</span><strong>${esc(it.materialId)}</strong></div>`).join('') || '<p class="muted">Kalem yok</p>'}</div>
           <div class="detail-section"><h4>Kalem Ekle</h4><div class="cons-form">${select('newItemMaterial', D().materials.map((m) => ({ value: m.id, label: m.name })))}${input('newItemPerTon', '', { type: 'number', min: 0, step: 0.1, placeholder: 'Birim / ton' })}<button type="button" class="btn btn-ghost btn-sm" id="recipe-add-item">${icon('plus', 14)} Ekle</button></div></div>`,
         actions: [{ label: 'Kapat', kind: 'primary', onClick: (_e, close) => close() }]

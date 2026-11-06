@@ -1,5 +1,8 @@
 [
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-01",
     "plantId": "P1",
     "type": "FURNACE",
@@ -11,6 +14,9 @@
     "installedAt": "2021-04-12"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-02",
     "plantId": "P1",
     "type": "FURNACE",
@@ -22,6 +28,9 @@
     "installedAt": "2021-04-12"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-03",
     "plantId": "P1",
     "type": "FURNACE",
@@ -33,6 +42,9 @@
     "installedAt": "2022-08-03"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-04",
     "plantId": "P1",
     "type": "FURNACE",
@@ -44,6 +56,9 @@
     "installedAt": "2023-02-19"
   },
   {
+    "status": "Devre Dışı",
+    "decommissionedAt": "2025-06-11T00:00:00+03:00",
+    "decommissionReason": "Bakıma alındı, parktan çıkarıldı",
     "id": "MCH-05",
     "plantId": "P1",
     "type": "FURNACE",
@@ -55,6 +70,9 @@
     "installedAt": "2025-06-11"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-06",
     "plantId": "P1",
     "type": "CAST_TABLE",
@@ -66,6 +84,9 @@
     "installedAt": "2021-04-12"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-07",
     "plantId": "P1",
     "type": "CAST_TABLE",
@@ -77,6 +98,9 @@
     "installedAt": "2022-08-03"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-08",
     "plantId": "P1",
     "type": "SAW",
@@ -88,6 +112,9 @@
     "installedAt": "2021-05-02"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-09",
     "plantId": "P1",
     "type": "SAW",
@@ -99,6 +126,9 @@
     "installedAt": "2023-01-18"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-10",
     "plantId": "P1",
     "type": "HOMO_FURNACE",
@@ -110,6 +140,9 @@
     "installedAt": "2021-04-12"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-11",
     "plantId": "P1",
     "type": "HOMO_FURNACE",
@@ -121,6 +154,9 @@
     "installedAt": "2021-04-12"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-12",
     "plantId": "P1",
     "type": "HOMO_FURNACE",
@@ -132,6 +168,9 @@
     "installedAt": "2022-09-14"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-13",
     "plantId": "P1",
     "type": "HOMO_FURNACE",
@@ -143,6 +182,9 @@
     "installedAt": "2024-03-07"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-14",
     "plantId": "P1",
     "type": "CONT_HOMO",
@@ -154,6 +196,9 @@
     "installedAt": "2024-11-20"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-15",
     "plantId": "P2",
     "type": "FURNACE",
@@ -165,6 +210,9 @@
     "installedAt": "2019-03-05"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-16",
     "plantId": "P2",
     "type": "FURNACE",
@@ -176,6 +224,9 @@
     "installedAt": "2019-03-05"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-17",
     "plantId": "P2",
     "type": "CAST_TABLE",
@@ -187,6 +238,9 @@
     "installedAt": "2019-03-05"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-18",
     "plantId": "P2",
     "type": "SAW",
@@ -198,6 +252,9 @@
     "installedAt": "2020-07-22"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-19",
     "plantId": "P2",
     "type": "HOMO_FURNACE",
@@ -209,6 +266,9 @@
     "installedAt": "2020-07-22"
   },
   {
+    "status": "Aktif",
+    "decommissionedAt": null,
+    "decommissionReason": "",
     "id": "MCH-20",
     "plantId": "P2",
     "type": "ROTARY",

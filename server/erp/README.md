@@ -6,7 +6,7 @@ Firma içi sunucuda (Windows Server, Linux veya NAS) `C:\ERP` / `/srv/erp` altı
 
 | Klasör | İçerik | Bu depoda |
 | --- | --- | --- |
-| `data/` | 53 JSON dosyası: 52 koleksiyon + `manifest.json` | ✅ Gerçek dosyalar var |
+| `data/` | 59 JSON dosyası: 58 koleksiyon + `manifest.json` (`schema_version: 4`) | ✅ Gerçek dosyalar var |
 | `scripts/` | Yedekleme, giden kutu, doğrulama, olay işçisi, PLC denetçisi | ✅ Çalışan scriptler var |
 | `inbox/` | Arayüzden gelen olay kuyruğu | ✅ README + örnek kayıtlar var |
 | `archive/` | Döküm kodu bazlı olay günlüğü | ✅ README + örnek `events.jsonl` var |
@@ -83,6 +83,8 @@ Tetikleyici: Her gün 03:00 ve her saat başı (artımlı)
 ---
 
 ## Ticari ve finansal koleksiyonlar (Sürüm 1.1)
+
+Sürüm 1.2'de altı modüler kurulum koleksiyonu daha eklenmiştir; ayrıntı `../data/README.md` ve `docs/12` içindedir.
 
 `docs/11` karşılaştırmasıyla `data/` altına 18 koleksiyon eklendi. Bunlar üretim olaylarının finansal karşılığıdır; ayrı bir veritabanı veya servis gerektirmezler.
 

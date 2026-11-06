@@ -1,0 +1,58 @@
+[
+  {
+    "id": "SD-1",
+    "step": 1,
+    "updatedAt": "2026-11-04T09:00:00+03:00",
+    "note": "Yarım kalan saha kurulumu örneği",
+    "values": {
+      "code": "FIRM4",
+      "name": "Yeni Fabrika",
+      "city": "İzmir",
+      "mode": "MANUAL",
+      "note": "",
+      "counts": {
+        "FURNACE": 1,
+        "CAST_TABLE": 1,
+        "SAW": 1,
+        "HOMO_FURNACE": 1,
+        "CONT_HOMO": 0,
+        "ROTARY": 0
+      },
+      "defaultCapacity": {
+        "FURNACE": 20,
+        "CAST_TABLE": 1,
+        "SAW": 0,
+        "HOMO_FURNACE": 25,
+        "CONT_HOMO": 12,
+        "ROTARY": 8
+      },
+      "holdTon": 1,
+      "connection": {
+        "name": "Fırın hattı PLC",
+        "ip": "192.168.1.50",
+        "protocol": "OPC UA",
+        "port": 4840,
+        "pollSeconds": 3,
+        "adapter": "simulated"
+      },
+      "modules": {
+        "CORE": true,
+        "PURCHASING": true,
+        "INVENTORY": true,
+        "PRODUCTION": true,
+        "MACHINES": true,
+        "ROTARY": false,
+        "PLC": false,
+        "SALES": true,
+        "FINANCE": true,
+        "WAREHOUSE": true,
+        "HR": true,
+        "SHIPPING": true,
+        "REPORTS": true,
+        "INTEGRATION": true,
+        "VENDOR": true
+      },
+      "lastTest": null
+    }
+  }
+]

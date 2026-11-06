@@ -53,7 +53,7 @@ node tools/export_seed.mjs
 - Ondalık ayırıcı nokta; miktar `quantity` + `unit` ikilisiyle yazılır.
 - Tüm bağlantılar **ID** iledir; malzeme adı değişse geçmiş kayıtlar bozulmaz.
 - Stok bakiyesi JSON'da anlık fotoğraftır; gerçek kurulumda `movements` kayıtlarından türetilir.
-- `schemaVersion: 3` ile saha görüşmesi (17) ve genel ERP karşılaştırması (18) koleksiyonları eklenmiştir; toplam 53 dosya, 52 koleksiyon dizisi ve 1 `settings.json` nesnesi vardır; olayların **kalıcı** hâli `../archive/YYYY/MM/{döküm kodu}/events.jsonl` içindedir, `events.json` prototipin okuma görünümüdür.
+- `schemaVersion: 3` ile saha görüşmesi (17) ve genel ERP karşılaştırması (18) koleksiyonları, `schemaVersion: 4` ile modüler saha kurulumu (6) eklenmiştir; toplam 59 dosya, 58 koleksiyon dizisi ve 1 `settings.json` nesnesi vardır; olayların **kalıcı** hâli `../archive/YYYY/MM/{döküm kodu}/events.jsonl` içindedir, `events.json` prototipin okuma görünümüdür.
 - Olay satırı silinmez, üzerine yazılmaz; düzeltme ters işlem içeren yeni satır olarak eklenir.
 - Muhasebe fişinde borç toplamı alacak toplamına eşittir; `clientId` benzersizdir; düzeltme ters fişle yapılır.
 - Faturada `vat = net × vatRate / 100` ve `gross = net + vat`; maliyette beş kalem toplamı `totalCost` ile aynıdır.
@@ -62,3 +62,7 @@ node tools/export_seed.mjs
 - UTF-8, girintili (2 boşluk) JSON; dosya sonunda satır sonu vardır.
 
 Bütünlük kontrolü: `python3 server/erp/scripts/validate_data.py` (52 koleksiyon + `settings`, mizan ve finansal kurallar dahil)
+
+## `schemaVersion: 4` — modüler saha kurulumu
+
+`furnaces.json` artık bağımsız bir ocak kartı değil, `machines.json` içindeki `FURNACE` ve `ROTARY` kayıtlarının projeksiyonudur; kimlikleri makine kimlikleridir. `recipes.json` ve `lots.json` alanı `furnaceId` yerine `machineId` kullanır. Yeni altı koleksiyon `machine-aliases.json`, `module-registry.json`, `plant-modules.json`, `setup-drafts.json`, `adapter-contracts.json` ve `profile-packages.json` dosyalarıdır. `profile-packages.json` içindeki her `payload` bir fabrika profil paketidir ve `docs/12` Bölüm 5'teki kurallarla doğrulanır. `validate_data.py` projeksiyon eşitliğini, modül kodlarını, adaptör yeteneklerini, devre dışı makinelerin korunmasını ve paket içi yol referanslarını denetler.

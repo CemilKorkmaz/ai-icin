@@ -219,8 +219,8 @@ Depo kökünde `README.md` genel bakışı ve çalıştırma adımlarını verir
 | Klasör | İçerik |
 | --- | --- |
 | `docs/` | `00`–`11` Markdown dokümanlar + `Dokumhane-ERP-Plan.docx` |
-| `app/` | PWA: kabuk, 32 ekran, `calc.js` + `posting.js`, tasarım sistemi, ikonlar |
-| `server/erp/data/` | 53 JSON dosyası (52 koleksiyon + `manifest.json`), `README.md` |
+| `app/` | PWA: kabuk, 34 ekran, `calc.js` + `posting.js` + `modularity.js` + `adapters.js`, tasarım sistemi, ikonlar |
+| `server/erp/data/` | 59 JSON dosyası (58 koleksiyon + `manifest.json`), `README.md` |
 | `server/erp/scripts/` | Yedekleme, giden kutu, 52 koleksiyonu doğrulama, olay işçisi, PLC denetçisi |
 | `server/erp/inbox/` | Olay kuyruğu ve örnek kayıtlar |
 | `server/erp/archive/` | Append-only olay günlüğü ve örnek `events.jsonl` |

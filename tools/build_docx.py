@@ -33,6 +33,7 @@ FILES = [
     ('09-olay-tabanli-json-arsivleme.md', 'BÖLÜM 9 — Olay Tabanlı JSON Arşivleme'),
     ('10-kurulum-ve-yol-haritasi-v2.md', 'BÖLÜM 10 — Kurulum ve Yol Haritası (Sürüm 2)'),
     ('11-genel-erp-karsilastirma-ve-bosluk-analizi.md', 'BÖLÜM 11 — Genel ERP Karşılaştırması ve Boşluk Analizi'),
+    ('12-saha-kurulum-ve-modul-yasam-dongusu.md', 'BÖLÜM 12 — Saha Kurulum ve Modül Yaşam Döngüsü'),
 ]
 
 W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'

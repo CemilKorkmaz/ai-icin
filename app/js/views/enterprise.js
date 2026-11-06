@@ -5,8 +5,9 @@
 
 import {
   D, store, uid, nowISO, todayISO, addActivity, addNotification, moveStock,
-  appendJournal, customer, customerName, matName, accountName, warehouseName, supplierName
+  appendJournal, customer, customerName, matName, accountName, warehouseName, supplierName, activePlantId
 } from '../store.js';
+import { isModuleEnabled } from '../modularity.js';
 import { icon } from '../icons.js';
 import {
   esc, fmtNum, fmtMoney, fmtDate, fmtDateTime, pill, field, input, select,
@@ -911,7 +912,9 @@ export const integrationView = {
 
   render() {
     const d = D();
-    const rules = d.integrationRules || INTEGRATION_MATRIX;
+    // Kurallar modül kaydına bağlıdır: kapalı modülün kuralı da gösterilmez (docs/12 Bölüm 5).
+    const rules = (d.integrationRules || INTEGRATION_MATRIX)
+      .filter((r) => !r.moduleCode || isModuleEnabled(d, r.moduleCode));
     const eligible = (d.shipments || []).filter((s) => s.managerApproved && s.accountingApproved && !s.postingDone);
     const kpi = kpiSnapshot(d);
 
@@ -1002,7 +1005,7 @@ export const integrationView = {
         const t = byId(data.shipments, shipment.id);
         if (t) { t.postingDone = true; t.invoiceNo = invoiceNo; t.archived = true; t.status = 'Arşivlendi'; }
         data.events.unshift({
-          id: uid('EV'), seq: lastSeq + 1, lotId, plantId: data.settings.activePlantId || 'P1',
+          id: uid('EV'), seq: lastSeq + 1, lotId, plantId: activePlantId(data),
           machineId: null, type: 'SHIPMENT', at: nowISO(), actor: 'U11', source: 'WORKER',
           grossTon: lastBal, deltaTon: 0, balanceTon: lastBal,
           materialId: null, fate: 'product', ref: invoiceNo,

@@ -628,3 +628,29 @@ td.num, .money-num { font-variant-numeric: tabular-nums; }
   .data tfoot td { font-size: 11px; }
   .chip-row { gap: 4px; }
 }
+
+/* ------------------------------------------------------------------
+   v1.2 — Modüler saha kurulumu (docs/12)
+   Sihirbaz adımları, modül kaydı ve bağımlılık raporu yardımcıları.
+   ------------------------------------------------------------------ */
+.wizard-steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.wizard-step { display: flex; align-items: flex-start; gap: 9px; text-align: left; padding: 11px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); color: var(--text); cursor: pointer; transition: border-color .15s, background .15s; }
+.wizard-step:hover { border-color: var(--primary); }
+.wizard-step.current { border-color: var(--primary); background: linear-gradient(120deg, rgba(79,70,229,.14), rgba(6,182,212,.09)); }
+.wizard-step.done { border-color: rgba(16,185,129,.5); }
+.wizard-num { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 22px; height: 22px; border-radius: 50%; background: var(--surface-3); font-size: 11px; font-weight: 700; color: var(--muted); }
+.wizard-step.current .wizard-num { background: var(--primary); color: #fff; }
+.wizard-step.done .wizard-num { background: var(--ok); color: #fff; }
+.wizard-step strong { display: block; font-size: 11.5px; font-weight: 650; line-height: 1.3; }
+.wizard-step small { display: block; margin-top: 3px; font-size: 10px; color: var(--muted); line-height: 1.35; }
+.check-row span { display: flex; flex-direction: column; gap: 2px; }
+.check-row span small { font-size: 10px; color: var(--muted); line-height: 1.4; }
+.check-row.compact { padding: 4px 7px; margin: 0; border: 0; font-size: 11px; }
+.check-row input:disabled { opacity: .55; cursor: not-allowed; }
+.form-grid .check-row { margin-bottom: 0; }
+@media (max-width: 900px) {
+  .wizard-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .wizard-steps { grid-template-columns: 1fr; }
+}

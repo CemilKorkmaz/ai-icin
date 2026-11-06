@@ -1,0 +1,23 @@
+[
+  {
+    "id": "MA-01",
+    "legacyCode": "F20",
+    "machineId": "MCH-01",
+    "plantId": "P1",
+    "note": "Eski 20 ton ocak kodu"
+  },
+  {
+    "id": "MA-02",
+    "legacyCode": "F35",
+    "machineId": "MCH-02",
+    "plantId": "P1",
+    "note": "Eski 35 ton ocak kodu"
+  },
+  {
+    "id": "MA-03",
+    "legacyCode": "FD",
+    "machineId": "MCH-20",
+    "plantId": "P2",
+    "note": "Eski döner ocak kodu"
+  }
+]

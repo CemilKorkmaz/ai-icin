@@ -1,0 +1,68 @@
+[
+  {
+    "id": "PM-01",
+    "plantId": "P1",
+    "enabled": {
+      "CORE": true,
+      "PURCHASING": true,
+      "INVENTORY": true,
+      "PRODUCTION": true,
+      "MACHINES": true,
+      "ROTARY": false,
+      "PLC": true,
+      "SALES": true,
+      "FINANCE": true,
+      "WAREHOUSE": true,
+      "HR": true,
+      "SHIPPING": true,
+      "REPORTS": true,
+      "INTEGRATION": true,
+      "VENDOR": true
+    },
+    "note": "PLC modlu, döner ocaksız fabrika"
+  },
+  {
+    "id": "PM-02",
+    "plantId": "P2",
+    "enabled": {
+      "CORE": true,
+      "PURCHASING": true,
+      "INVENTORY": true,
+      "PRODUCTION": true,
+      "MACHINES": true,
+      "ROTARY": true,
+      "PLC": false,
+      "SALES": true,
+      "FINANCE": true,
+      "WAREHOUSE": true,
+      "HR": true,
+      "SHIPPING": true,
+      "REPORTS": true,
+      "INTEGRATION": true,
+      "VENDOR": true
+    },
+    "note": "MANUAL modlu, döner ocaklı fabrika"
+  },
+  {
+    "id": "PM-03",
+    "plantId": "P3",
+    "enabled": {
+      "CORE": true,
+      "PURCHASING": true,
+      "INVENTORY": true,
+      "PRODUCTION": true,
+      "MACHINES": true,
+      "ROTARY": false,
+      "PLC": true,
+      "SALES": true,
+      "FINANCE": true,
+      "WAREHOUSE": true,
+      "HR": true,
+      "SHIPPING": true,
+      "REPORTS": true,
+      "INTEGRATION": true,
+      "VENDOR": true
+    },
+    "note": "Pasif demo profili"
+  }
+]

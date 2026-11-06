@@ -19,6 +19,12 @@ const {
   amounts, salesEntry, purchaseEntry, buildEntry, trialBalance, isBalanced,
   lotCost, salesMargin, creditCheck, kpiSnapshot, postingEffects, INTEGRATION_MATRIX
 } = await import('../app/js/posting.js');
+const {
+  MODULES, MACHINE_TYPES, FOUR_SIGNALS, visibleNav, machineRefs, buildPlantPackage,
+  validatePackage, applyPlantPackage, decommissionMachine, recommissionMachine,
+  defaultSetupDraft, setupMachinesFromDraft, activePlantId
+} = await import('../app/js/modularity.js');
+const { ADAPTERS, testConnection, readFourSignals } = await import('../app/js/adapters.js');
 
 let failures = 0;
 const check = (cond, msg) => { if (!cond) { console.error('  ✗', msg); failures++; } };
@@ -86,8 +92,8 @@ const dur = durationCheck({ startedAt: '2026-11-01T22:00:00+03:00', endedAt: '20
 check(dur.overrunMinutes === 60 && dur.status === 'Süre Aşımı', '8/9 saat homojenizasyon sapması yanlış');
 console.log(`✓ Hesap motoru: talaş ${cut.unitSawdustKg} kg/kesim · kafa ${cut.unitHeadKg} kg · net ${cut.netBilletTon} t`);
 
-// 6) Saha görüşmesi koleksiyonları (docs/05, schemaVersion 3)
-check(SEED.schemaVersion === 3, 'Şema sürümü 3 olmalı');
+// 6) Saha görüşmesi koleksiyonları (docs/05, schemaVersion 4)
+check(SEED.schemaVersion === 4, 'Şema sürümü 4 olmalı');
 for (const key of ['plants', 'machineTypes', 'machines', 'castingPaths', 'plcConnections', 'plcTags',
   'signalStates', 'homogenizationRecipes', 'homogenizationBatches', 'coolingBatches',
   'oilRules', 'bladeRules', 'maintenanceEvents', 'byProductFates', 'events', 'inboxQueue', 'vendorUpdates']) {
@@ -169,6 +175,89 @@ store.change((data) => { appendJournal(dupe); appendJournal(dupe); });
 check(d.journalEntries.length === before + 1, 'Aynı clientId ile çift muhasebe fişi yazıldı');
 check(!isBalanced({ lines: [{ debit: 100, credit: 0 }] }), 'Dengesiz fiş kabul edildi');
 console.log(`✓ ${d.accounts.length} hesap · ${d.journalEntries.length} fiş · ${d.invoices.length} fatura · ${d.integrationRules.length} kural · mizan dengeli`);
+
+// 8) Modüler saha kurulumu (docs/12): tek kaynak, 1 fırınlı profil, güvenli çıkarma, adaptör
+for (const key of ['machineAliases', 'moduleRegistry', 'plantModules', 'setupDrafts',
+  'adapterContracts', 'profilePackages']) {
+  check(Array.isArray(d[key]) && d[key].length > 0, `${key} koleksiyonu eksik/boş`);
+}
+check(Object.keys(VIEWS).length === 34 && navIds.length === 34, '34 ekran / 34 menü öğesi beklenir');
+const covered = new Set(MODULES.flatMap((m) => m.views));
+check(Object.keys(VIEWS).every((id) => covered.has(id)), 'Modül kaydı kapsamayan ekran var');
+check(new Set(MODULES.map((m) => m.code)).size === MODULES.length, 'Yinelenen modül kodu var');
+
+// furnaces, machines'in salt-okunur projeksiyonu olmalı (tek kaynak)
+const projected = d.machines.filter((m) => m.type === 'FURNACE' || m.type === 'ROTARY').map((m) => m.id).sort();
+check(JSON.stringify(d.furnaces.map((f) => f.id).sort()) === JSON.stringify(projected),
+  'furnaces, machines projeksiyonu değil (çift kaynak)');
+check(d.machineAliases.every((a) => d.machines.some((m) => m.id === a.machineId)), 'Eski kod eşlemesi geçersiz');
+check(d.recipes.every((r) => !r.machineId || d.machines.some((m) => m.id === r.machineId)), 'Reçete ocak kimliği geçersiz');
+check(d.lots.every((l) => !l.machineId || d.machines.some((m) => m.id === l.machineId)), 'Döküm kodu ocak kimliği geçersiz');
+check(d.adapterContracts.every((a) => ['connect', 'test', 'readFourSignals', 'disconnect'].every((f) => a.capabilities.includes(f))),
+  'Adaptör sözleşmesi eksik');
+check(d.settings.adapterMode && d.adapterContracts.some((a) => a.code === d.settings.adapterMode), 'Varsayılan adaptör kayıtlı değil');
+
+// Profil paketi: doğrulama ve 5 fırın → 1 fırın kopyası
+const pkg = buildPlantPackage(d, 'P1');
+check(validatePackage(pkg).ok, 'P1 profil paketi doğrulanamadı: ' + validatePackage(pkg).errors.join(', '));
+check(validatePackage({ ...pkg, schemaVersion: 3 }).ok === false, 'Eski şema sürümü reddedilmedi');
+check(validatePackage({ ...pkg, castingPaths: [{ id: 'X', fromMachineId: 'YOK', tableId: 'YOK' }] }).ok === false,
+  'Paket dışı makineye bağlı yol kabul edildi');
+const clone = JSON.parse(JSON.stringify(d));
+const out1 = applyPlantPackage(clone, pkg, { code: 'FIRM-TEK', name: 'Tek Fırınlı Fabrika', furnaceCount: 1 });
+check(out1.furnaceCount === 1, `1 fırınlı profilde ${out1.furnaceCount} fırın üretildi`);
+check(out1.pathCount === 1, 'Kaldırılan fırına ait döküm yolu hâlâ kopyalandı');
+check(out1.machineCount === pkg.machines.length - 4, 'Fırın azaltımı yalnızca fırınları etkilemeli');
+check(clone.plants.some((p) => p.id === out1.plantId), 'Yeni fabrika kartı oluşmadı');
+check(clone.settings.activePlantId === out1.plantId, 'Yeni fabrika aktif hale gelmedi');
+// Mevcut veride koleksiyonlar arası aynı kimlikler (M01, CR-001) zaten vardır;
+// ölçüt, kopyanın ürettiği yeni kimliklerin hem benzersiz hem de özgün olmasıdır.
+const beforeIds = new Set(Object.values(d).filter(Array.isArray).flat().map((x) => x && x.id).filter(Boolean));
+const addedIds = Object.values(clone).filter(Array.isArray).flat().map((x) => x && x.id).filter((id) => id && !beforeIds.has(id));
+check(addedIds.length > 20 && new Set(addedIds).size === addedIds.length,
+  'Profil kopyası yinelenen veya mevcut bir kimlik üretti');
+const out2 = applyPlantPackage(clone, pkg, { code: 'FIRM-CIFT', name: 'İki Fırınlı Fabrika', furnaceCount: 2 });
+check(out2.furnaceCount === 2 && out2.pathCount === 3, '2 fırınlı profil doğru yolları üretmedi');
+check(clone.castingPaths.filter((p) => p.plantId === out2.plantId).length === 3, '2 fırınlı profil yol sayısı yanlış');
+
+// Makine çıkarma: silinmez, bağımlılık raporu verilir, geri alınabilir
+const clone2 = JSON.parse(JSON.stringify(d));
+const refs = machineRefs(clone2, 'MCH-01');
+check(refs.length > 0, 'MCH-01 için bağımlılık raporu boş');
+const dec = decommissionMachine(clone2, 'MCH-01', 'Test: ocak söküldü');
+check(dec.ok && dec.refs.length === refs.length, 'Çıkarma bağımlılıkları raporlamadı');
+check(clone2.machines.some((m) => m.id === 'MCH-01'), 'Makine silindi (silinmemeliydi)');
+check(clone2.machines.find((m) => m.id === 'MCH-01').active === false, 'Makine aktif kaldı');
+check(!!clone2.machines.find((m) => m.id === 'MCH-01').decommissionedAt, 'Devre dışı tarihi yazılmadı');
+check(clone2.castingPaths.filter((p) => p.fromMachineId === 'MCH-01').length === 1, 'Bağımlı döküm yolu silindi');
+check(recommissionMachine(clone2, 'MCH-01') && clone2.machines.find((m) => m.id === 'MCH-01').active === true,
+  'Geri alma çalışmıyor');
+
+// Modül kaydı menüyü filtreliyor, adaptör sözleşmesi MANUAL yedeğe düşüyor
+const navP1 = visibleNav(NAV, d);
+check(navP1.flatMap((g) => g.items.map((i) => i.id)).includes('plc'), 'PLC modlu fabrikada PLC ekranı gizlendi');
+const noPlc = JSON.parse(JSON.stringify(d));
+noPlc.plantModules.find((x) => x.plantId === activePlantId(noPlc)).enabled.PLC = false;
+check(!visibleNav(NAV, noPlc).flatMap((g) => g.items.map((i) => i.id)).includes('plc'), 'Kapalı PLC modülü menüde kaldı');
+const manualPlant = JSON.parse(JSON.stringify(d));
+manualPlant.settings.activePlantId = 'P2';
+check(!visibleNav(NAV, manualPlant).flatMap((g) => g.items.map((i) => i.id)).includes('plc'),
+  'MANUAL fabrikada PLC ekranı görünmemeli');
+const sim = testConnection({ connection: { protocol: 'OPC UA', ip: '192.168.1.50', port: 4840, mode: 'PLC' },
+  tags: FOUR_SIGNALS.map((signal) => ({ signal })), adapterCode: 'simulated' });
+check(sim.ok && sim.tagCount === 4 && sim.missingSignals.length === 0, 'Simülasyon adaptörü bağlantıyı doğrulayamadı');
+const real = testConnection({ connection: { protocol: 'OPC UA', mode: 'PLC' },
+  tags: FOUR_SIGNALS.map((signal) => ({ signal })), adapterCode: 'opcua' });
+check(real.implemented === false && real.fallback === 'MANUAL (operatör veri girişi)', 'Gerçek sürücü yokken MANUAL yedeğe düşülmedi');
+const sig = readFourSignals({ connection: { protocol: 'Modbus' }, tags: [] });
+check(sig.length === 4 && sig.every((x) => FOUR_SIGNALS.includes(x.signal)), 'Dört sinyal okuması eksik');
+check(ADAPTERS.length === 3, 'Adaptör kaydı 3 sözleşme içermeli');
+const draft = defaultSetupDraft(d);
+draft.values.counts.FURNACE = 1;
+check(setupMachinesFromDraft(draft).filter((m) => m.type === 'FURNACE').length === 1, 'Sihirbaz 1 fırın üretemedi');
+draft.values.counts.FURNACE = 2;
+check(setupMachinesFromDraft(draft).filter((m) => m.type === 'FURNACE').length === 2, 'Sihirbaz 2 fırın üretemedi');
+console.log(`✓ ${MODULES.length} modül · ${ADAPTERS.length} adaptör · 1 ve 2 fırınlı profil · ${refs.length} bağımlı kayıt korundu`);
 
 console.log(`\nSonuç: ${failures ? failures + ' HATA' : 'TÜM TESTLER GEÇTİ'}`);
 process.exit(failures ? 1 : 0);
