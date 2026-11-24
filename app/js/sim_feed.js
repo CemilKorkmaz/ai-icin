@@ -114,7 +114,7 @@ async function poll() {
 
     // Simülasyon yeniden başladıysa kimlik 1'e döner; tıkanmayı aç ve
     // bir sonraki turda sıfırdan oku (bu turda eski `after` ile boş geldik).
-    if (latest && latest < lastId) { lastId = 0; saveLastId(0); return; }
+    if (lastId > 0 && latest < lastId) { lastId = 0; saveLastId(0); return; }
 
     // İlk açılışta tüm geçmişi değil, son 5 olayı bildirim olarak göster.
     const stored = (() => {
