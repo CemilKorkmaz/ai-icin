@@ -18,6 +18,7 @@ import hashlib
 import hmac
 import json
 import mimetypes
+import shutil
 import sys
 import threading
 import time
@@ -25,14 +26,20 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-VERSION = '1.4.0'
+VERSION = '1.4.1'
 
-ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_CONFIG = ROOT / 'server' / 'sim_bridge' / 'config.json'
-DEFAULT_DB = ROOT / 'server' / 'sim_bridge' / 'data' / 'ingest.db'
+# İki yerleşim desteklenir:
+#  1. Depo içinden çalıştırma: statik dosyalar ve yapılandırma depo kökünde.
+#  2. PyInstaller ile üretilmiş tek dosya exe: `app/` içeriği exe'nin içinde
+#     (_MEIPASS), yapılandırma ve SQL ise exe'nin yanında (yazılabilir).
+FROZEN = bool(getattr(sys, 'frozen', False))
+ASSET_ROOT = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parents[2])).resolve()
+BASE_DIR = Path(sys.executable).resolve().parent if FROZEN else ASSET_ROOT
+DEFAULT_CONFIG = (BASE_DIR / 'config.json') if FROZEN else ASSET_ROOT / 'server' / 'sim_bridge' / 'config.json'
+DEFAULT_DB = (BASE_DIR / 'data' / 'ingest.db') if FROZEN else ASSET_ROOT / 'server' / 'sim_bridge' / 'data' / 'ingest.db'
 
 # Eşleme çekirdeği edge ajanıyla aynıdır (tek kaynak).
-sys.path.insert(0, str(ROOT / 'edge'))
+sys.path.insert(0, str(ASSET_ROOT / 'edge'))
 from erp_edge.sim_map import build_map  # noqa: E402
 
 from .sim_client import SimClient, SimResponseError, SimUnavailable  # noqa: E402
@@ -52,24 +59,30 @@ def deep_merge(base: dict, override: dict) -> dict:
 
 
 class BridgeState:
-    def __init__(self, root: Path = ROOT, config_path: Path = DEFAULT_CONFIG,
-                 db_path: Path | None = None, sim_url: str | None = None,
-                 demo: bool = False):
-        self.root = Path(root).resolve()
-        self.config_path = Path(config_path)
+    def __init__(self, asset_root: Path | None = None, base_dir: Path | None = None,
+                 config_path: Path | None = None, db_path: Path | None = None,
+                 sim_url: str | None = None, demo: bool = False):
+        self.asset_root = Path(asset_root or ASSET_ROOT).resolve()
+        self.base_dir = Path(base_dir or BASE_DIR).resolve()
+        # Exe yerleşimi: statik dosyalar içeride, ayar/veri dışarıda.
+        self.runtime_layout = self.asset_root != self.base_dir
+        self.config_path = Path(config_path) if config_path else (
+            self.base_dir / 'config.json' if self.runtime_layout else DEFAULT_CONFIG)
         self.demo = demo
         self.started_at = time.time()
         self.lock = threading.RLock()
         self.last_live: dict | None = None
         self.last_ok_at = ''
+        profile_rel = 'config/ornek-fabrika-profili.json' if self.runtime_layout             else 'edge/config/ornek-fabrika-profili.json'
         defaults = {
             'version': VERSION,
             'simBaseUrl': 'http://127.0.0.1:8000',
             'simLabel': 'Kullanıcı simülasyonu (erp_backend)',
             'timeoutSeconds': 3,
             'liveRefreshMs': 2500,
-            'profilePath': 'edge/config/ornek-fabrika-profili.json',
-            'ingestDb': 'server/sim_bridge/data/ingest.db',
+            'profilePath': profile_rel,
+            'ingestDb': 'data/ingest.db' if self.runtime_layout
+                        else 'server/sim_bridge/data/ingest.db',
             'autoMap': True,
             'furnaceMap': {},
             'edge': {'secret': 'degistirin-bu-gizli-anahtari', 'token': '',
@@ -86,13 +99,52 @@ class BridgeState:
             self.config['simBaseUrl'] = sim_url.rstrip('/')
         self.client = SimClient(self.config['simBaseUrl'],
                                 self.config.get('timeoutSeconds', 3))
-        db = Path(db_path) if db_path else self.root / self.config.get('ingestDb', DEFAULT_DB)
+        db = Path(db_path) if db_path else self.path_of(self.config.get('ingestDb', ''))
         self.store = IngestStore(db)
         self._profile_cache: tuple[float, dict] | None = None
+        self.ensure_runtime_files()
+
+    # ------------------------------------------------------------------ yollar
+    def path_of(self, value: str) -> Path:
+        path = Path(value or '')
+        return path if path.is_absolute() else self.base_dir / path
+
+    def ensure_runtime_files(self):
+        """Exe ilk açıldığında yanına config ve profil kopyalar.
+
+        Tek dosya exe'nin içi salt okunurdur; `config.json`, profil ve SQL
+        exe'nin bulunduğu klasörde tutulur. Depo yerleşiminde hiçbir şey
+        kopyalanmaz, mevcut dosyalar kullanılır.
+        """
+        if not self.runtime_layout:
+            return
+        if not self.config_path.exists():
+            self.config_path.parent.mkdir(parents=True, exist_ok=True)
+            self.config_path.write_text(
+                json.dumps(self.config, ensure_ascii=False, indent=2) + '\n',
+                encoding='utf-8')
+        raw = self.config.get('profilePath', 'config/ornek-fabrika-profili.json')
+        target = self.path_of(raw)
+        if target.exists():
+            return
+        for source in (self.asset_root / 'config/ornek-fabrika-profili.json',
+                       self.asset_root / 'edge/config/ornek-fabrika-profili.json'):
+            if source.exists():
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(source, target)
+                return
+
+    def profile_path(self) -> Path:
+        raw = self.config.get('profilePath', '')
+        primary = self.path_of(raw)
+        if primary.exists() or Path(raw).is_absolute():
+            return primary
+        fallback = self.asset_root / raw
+        return fallback if fallback.exists() else primary
 
     # ------------------------------------------------------------------ profil
     def profile(self) -> dict:
-        path = self.root / self.config.get('profilePath', '')
+        path = self.profile_path()
         try:
             mtime = path.stat().st_mtime
         except OSError:
@@ -259,8 +311,8 @@ class BridgeHandler(BaseHTTPRequestHandler):
         if any(part in ('.', '..') or part.startswith('.') for part in parts):
             self._plain(403, 'Gizli veya kök dışı yol')
             return
-        target = (self.state.root / rel).resolve()
-        root = self.state.root
+        target = (self.state.asset_root / rel).resolve()
+        root = self.state.asset_root
         if target != root and root not in target.parents:
             self._plain(403, 'Kök dışı yol')
             return
@@ -285,7 +337,8 @@ class BridgeHandler(BaseHTTPRequestHandler):
                 self._json({'ok': True, 'version': VERSION, 'uptimeSec': int(time.time() - state.started_at)})
             elif path == '/api/bridge/info':
                 self._json({
-                    'ok': True, 'version': VERSION, 'root': str(state.root),
+                    'ok': True, 'version': VERSION, 'root': str(state.asset_root),
+                    'baseDir': str(state.base_dir), 'runtimeLayout': state.runtime_layout,
                     'demo': state.demo, 'uptimeSec': int(time.time() - state.started_at),
                     'config': state.public_config(),
                     'profile': {k: v for k, v in state.profile().items() if k != 'machines'},

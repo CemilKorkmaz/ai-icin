@@ -1,7 +1,8 @@
-"""Köprüyü başlatır: `python3 server/sim_bridge/run.py`.
+"""Köprüyü başlatır: `python3 server/sim_bridge/run.py` veya çift tık `Baslat.bat`.
 
 Örnekler:
   python3 server/sim_bridge/run.py                     # sim :8000, ERP :8080
+  python3 server/sim_bridge/run.py --open              # tarayıcıyı sim ekranında açar
   python3 server/sim_bridge/run.py --demo              # simülasyon kapalıysa demo kopya
   python3 server/sim_bridge/run.py --sim-url http://192.168.1.20:8000
   python3 server/sim_bridge/run.py --check             # yalnızca bağlantıyı sınar
@@ -13,21 +14,25 @@ import sys
 import webbrowser
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+FROZEN = bool(getattr(sys, 'frozen', False))
+ROOT = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parents[2])).resolve()
+BASE_DIR = Path(sys.executable).resolve().parent if FROZEN else ROOT
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from server.sim_bridge.app import DEFAULT_CONFIG, VERSION, BridgeState, make_server  # noqa: E402
+from server.sim_bridge.app import VERSION, BridgeState, make_server  # noqa: E402
 from server.sim_bridge.demo_sim import DemoSim  # noqa: E402
 
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description='ERP Studio ↔ simülasyon köprüsü')
-    parser.add_argument('--host', default='0.0.0.0', help='ERP arayüz adresi (varsayılan 0.0.0.0)')
+    parser.add_argument('--host', default='127.0.0.1' if FROZEN else '0.0.0.0',
+                        help='ERP arayüz adresi (exe: 127.0.0.1, kaynak: 0.0.0.0)')
     parser.add_argument('--port', type=int, default=8080, help='ERP arayüz portu (varsayılan 8080)')
     parser.add_argument('--sim-url', default=None,
                         help='Simülasyon adresi (varsayılan http://127.0.0.1:8000)')
-    parser.add_argument('--config', default=str(DEFAULT_CONFIG), help='Köprü yapılandırması')
+    parser.add_argument('--config', default=None,
+                        help='Köprü yapılandırması (varsayılan: depo veya exe yanı)')
     parser.add_argument('--db', default=None, help='Ingest SQLite dosyası')
     parser.add_argument('--demo', action='store_true',
                         help='Yerleşik demo simülasyon kopyasını da başlat (önizleme/test)')
@@ -35,19 +40,33 @@ def main(argv=None) -> int:
     parser.add_argument('--demo-speed', type=float, default=10.0,
                         help='Demo simülasyon hız çarpanı (varsayılan 10x)')
     parser.add_argument('--check', action='store_true', help='Yalnızca simülasyon bağlantısını sına')
-    parser.add_argument('--open', action='store_true', help='Tarayıcıyı aç')
+    parser.add_argument('--open', action='store_true',
+                        help='Tarayıcıyı doğrudan simülasyon ekranında aç')
     args = parser.parse_args(argv)
 
     demo = None
     sim_url = args.sim_url
     if args.demo:
-        demo = DemoSim(host='127.0.0.1', port=args.demo_port, speed=args.demo_speed).start()
+        try:
+            demo = DemoSim(host='127.0.0.1', port=args.demo_port,
+                           speed=args.demo_speed).start()
+        except OSError as exc:
+            print(f'Demo simülasyon {args.demo_port} portunu açamadı: {exc}')
+            print('Bu portta kendi simülasyonunuz açık olabilir. --demo-port 8001 deneyin.')
+            return 2
         sim_url = sim_url or demo.url
         print(f'[demo] Simülasyon kopyası: {demo.url} ({args.demo_speed:g}x)')
 
-    state = BridgeState(config_path=Path(args.config),
-                        db_path=Path(args.db) if args.db else None,
-                        sim_url=sim_url, demo=bool(demo))
+    try:
+        state = BridgeState(asset_root=ROOT, base_dir=BASE_DIR,
+                            config_path=Path(args.config) if args.config else None,
+                            db_path=Path(args.db) if args.db else None,
+                            sim_url=sim_url, demo=bool(demo))
+    except OSError as exc:
+        print(f'Köprü çalışma dosyalarını oluşturamadı: {exc}')
+        print('ERP-Sim-Bridge.exe dosyasını yazılabilir bir klasöre kopyalayın')
+        print('(Masaüstü veya C:\\ERP-Sim gibi); Program Files altında yazma izni yoktur.')
+        return 3
 
     if args.check:
         health = state.client.health()
@@ -63,23 +82,37 @@ def main(argv=None) -> int:
         print(f"  ✗ {health['error']}")
         return 1
 
-    httpd = make_server(state, args.host, args.port)
+    try:
+        httpd = make_server(state, args.host, args.port)
+    except OSError as exc:
+        print(f'{args.port} portu açılamadı: {exc}')
+        print('Muhtemelen eski köprü penceresi hâlâ açık. Onu kapatın veya:')
+        print(f'  python3 server/sim_bridge/run.py --port {args.port + 1}')
+        return 2
+    url = f'http://localhost:{args.port}/app/#/sim'
     print(f'ERP Studio + simülasyon köprüsü v{VERSION}')
-    print(f'  Arayüz : http://localhost:{args.port}/app/')
-    print(f'  Sim    : {state.config["simBaseUrl"]}')
-    print(f'  Ingest : http://localhost:{args.port}/api/edge/ingest (HMAC)')
-    print(f'  Veri   : {state.store.path}')
+    print(f'  ERP Studio : {url}')
+    print(f'  Simülasyon : {state.config["simBaseUrl"]}  (sizin çalıştırdığınız)')
+    print(f'  Ingest     : http://localhost:{args.port}/api/edge/ingest (HMAC)')
+    print(f'  Veri       : {state.store.path}')
+    if state.runtime_layout:
+        print(f'  Ayar       : {state.config_path}')
+    print('  Bu pencere açık kaldıkça köprü çalışır. Kapatmak için Ctrl+C veya pencereyi kapatın.')
     health = state.client.health()
     if health['ok']:
         print(f'  ✓ Simülasyon açık · {health["furnaceCount"]} fırın · {health["latencyMs"]} ms')
         mapping = state.mapping(state.client.furnaces())
         print(f'  ✓ Eşleme: {mapping["matched"]}/{mapping["furnaces"]} fırın')
     else:
-        print(f'  ! Simülasyon kapalı: {health["error"]}')
-        print('    Simülasyonu başlatın (./start.sh 10) veya --demo ile demo kopyayı kullanın.')
-    print('  Durdurmak için Ctrl+C')
-    if args.open:
-        webbrowser.open(f'http://localhost:{args.port}/app/')
+        print(f'  ! Simülasyon henüz kapalı: {health["error"]}')
+        print('    Kendi simülasyonunuzu başlatın (./start.sh 10) ve tarayıcıda Yeniden Bağlan deyin.')
+        print('    Yalnızca önizleme için: --demo ile yerleşik kopya.')
+    # Exe'ye çift tıklandığında tarayıcı kendiliğinden açılır.
+    if args.open or FROZEN:
+        try:
+            webbrowser.open(url)
+        except Exception:
+            pass
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

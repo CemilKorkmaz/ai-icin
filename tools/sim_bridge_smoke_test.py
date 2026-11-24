@@ -376,10 +376,95 @@ class ClientTests(unittest.TestCase):
         print('  ✓ istemci: sözlük/liste yanıtı · Türkçe alanlar · durum normalizasyonu')
 
 
+class RuntimeLayoutTests(unittest.TestCase):
+    """Exe yerleşimi: statik dosyalar içeride, ayar/profil/SQL exe yanında."""
+
+    def test_runtime_files_are_created_next_to_exe(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            state = BridgeState(asset_root=ROOT, base_dir=base)
+            self.assertTrue(state.runtime_layout)
+            self.assertTrue((base / 'config.json').exists(), 'config.json exe yanında oluşmadı')
+            profile = base / 'config' / 'ornek-fabrika-profili.json'
+            self.assertTrue(profile.exists(), 'profil exe yanına kopyalanmadı')
+            cfg = json.loads((base / 'config.json').read_text(encoding='utf-8'))
+            self.assertEqual(cfg['profilePath'], 'config/ornek-fabrika-profili.json')
+            self.assertEqual(cfg['ingestDb'], 'data/ingest.db')
+            self.assertGreater(len(state.profile()['machines']), 0)
+            self.assertTrue(str(state.store.path).startswith(str(base)))
+            self.assertEqual(state.mapping([])['profilePath'], str(profile))
+            state.set_sim_url('http://127.0.0.1:8000')
+            saved = json.loads((base / 'config.json').read_text(encoding='utf-8'))
+            self.assertEqual(saved['simBaseUrl'], 'http://127.0.0.1:8000')
+            self.assertEqual(saved['edge']['secret'], SECRET)
+            print('  ✓ exe yerleşimi: config + profil + SQL exe yanında, statik app içeride')
+
+    def test_bridge_info_reports_layout(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            state = BridgeState(asset_root=ROOT, base_dir=Path(tmp), sim_url='http://127.0.0.1:9')
+            httpd = make_server(state, '127.0.0.1', 0)
+            thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+            thread.start()
+            try:
+                base = f'http://127.0.0.1:{httpd.server_address[1]}'
+                with urllib.request.urlopen(base + '/app/', timeout=3) as res:
+                    self.assertEqual(res.status, 200)
+                    self.assertIn('ERP Studio', res.read().decode('utf-8'))
+                with urllib.request.urlopen(base + '/api/bridge/info', timeout=3) as res:
+                    info = json.loads(res.read().decode('utf-8'))
+                self.assertTrue(info['runtimeLayout'])
+                self.assertEqual(info['root'], str(ROOT))
+                self.assertNotEqual(info['root'], info['baseDir'])
+                with urlopen_error(base + '/config.json') as code:
+                    self.assertEqual(code, 404, 'Exe yanındaki config sunulmamalı')
+            finally:
+                httpd.shutdown()
+                httpd.server_close()
+            print('  ✓ exe yerleşimi HTTP: /app/ 200 · runtimeLayout · config dışarıda')
+
+    def test_windows_launcher_and_spec(self):
+        launcher = ROOT / 'Baslat.bat'
+        spec = ROOT / 'server' / 'sim_bridge' / 'erp-sim-bridge.spec'
+        build = ROOT / 'server' / 'sim_bridge' / 'build_exe.bat'
+        entry = ROOT / 'server' / 'sim_bridge' / 'exe_entry.py'
+        for path in (launcher, spec, build, entry):
+            self.assertTrue(path.exists(), f'{path.name} yok')
+        text = launcher.read_text(encoding='utf-8')
+        for needle in ('server\\sim_bridge\\run.py', 'localhost:8080', 'localhost:8000',
+                       'ERP-Sim-Bridge.exe', '--open'):
+            self.assertIn(needle, text)
+        spec_text = spec.read_text(encoding='utf-8')
+        for needle in ("name='ERP-Sim-Bridge'", "'app'", "ornek-fabrika-profili.json",
+                       'erp_edge', 'exe_entry.py', 'console=True'):
+            self.assertIn(needle, spec_text)
+        self.assertIn('PyInstaller', build.read_text(encoding='utf-8'))
+        print('  ✓ Windows: Baslat.bat · build_exe.bat · ERP-Sim-Bridge.exe spec')
+
+
+def urlopen_error(url):
+    try:
+        urllib.request.urlopen(url, timeout=3)
+    except urllib.error.HTTPError as exc:
+        return _Code(exc.code)
+    return _Code(200)
+
+
+class _Code:
+    def __init__(self, code):
+        self.code = code
+
+    def __enter__(self):
+        return self.code
+
+    def __exit__(self, *args):
+        return False
+
+
 if __name__ == '__main__':
     print('Simülasyon köprüsü — duman testi\n')
     suite = unittest.TestLoader().loadTestsFromTestCase(BridgeTests)
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(ClientTests))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(RuntimeLayoutTests))
     result = unittest.TextTestRunner(verbosity=0).run(suite)
     print('\nSonuç:', 'TÜM TESTLER GEÇTİ' if result.wasSuccessful()
           else f'{len(result.failures) + len(result.errors)} HATA')

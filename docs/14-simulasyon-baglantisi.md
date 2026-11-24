@@ -2,6 +2,8 @@
 
 **Amaç:** Kullanıcının `erp_backend` / `erp_simulation` olarak çalıştırdığı fırın simülasyonunu ERP Studio'ya bağlamak; gerçek fabrika testi başlamadan önce fırın sıcaklığı, alarm, üretim emri ve edge ajanı zincirini uçtan uca burada sınamak.
 
+**Sürüm 1.4.1:** Windows'ta çift tıkla başlatma (`Baslat.bat`) ve tek dosya `ERP-Sim-Bridge.exe` üretimi eklendi; protokol ve veri modeli değişmedi.
+
 **Kapsam:** Bir simülasyon sunucusu (`:8000`), bir köprü (`:8080`) ve isteğe bağlı edge ajanı (`:8787`). Simülasyonun kendi kaynak kodu değiştirilmez; yalnızca belgelenen REST uçları kullanılır.
 
 ---
@@ -52,7 +54,7 @@ Tarayıcı yalnızca `8080` ile konuşur. Simülasyon kapalıysa köprü son ba�
 
 ---
 
-## 4. Kurulum — üç adım
+## 4. Kurulum — simülasyon, köprü ve edge
 
 ### 4.1 Kullanıcı simülasyonu
 
@@ -64,7 +66,30 @@ Kendi simülasyon klasöründe:
 
 `10` hız çarpanıdır; verilmezse gerçek zamanlı çalışır. Terminalde `Uvicorn running on http://0.0.0.0:8000` satırı görülmelidir. Windows'ta `start.sh 10` veya `bash start.sh 10` kullanılır.
 
-### 4.2 Köprü + ERP Studio
+### 4.2 Windows'ta çift tık — köprüyü elle başlatmaya gerek yok
+
+Simülasyon her zamanki gibi `localhost:8000` üzerinde çalışırken depo kökündeki **`Baslat.bat`** dosyasına çift tıklanır. Betik köprüyü başlatır ve tarayıcıyı doğrudan **`http://localhost:8080/app/#/sim`** adresinde açar; adres yazmak veya ayrı komut ezberlemek gerekmez. Açılan siyah pencere köprünün kendisidir: **pencere açık kaldıkça** ERP simülasyona bağlıdır, kapatılınca köprü durur.
+
+`Baslat.bat` sırasıyla şunları dener:
+
+| Durum | Davranış |
+| --- | --- |
+| `dist\ERP-Sim-Bridge.exe` varsa | Doğrudan exe çalışır; Python aranmaz |
+| Exe yok, Python varsa | `python3 server/sim_bridge/run.py --host 127.0.0.1 --port 8080 --open` çalışır |
+| 8080 doluysa | Türkçe hata verir, pencereyi kapatmaz; eski pencere kapatılıp yeniden denenir |
+| Simülasyon kapalıysa | Köprü yine açılır, ekran "köprü çalışmıyor / bayat veri" gösterir; çökmez |
+
+`Baslat.bat` köprüyü yalnızca bu bilgisayardan erişilecek biçimde (`127.0.0.1:8080`) açar; `ERP-Sim-Bridge.exe` doğrudan çift tıklanırsa da aynı davranır ve tarayıcıyı kendisi açar.
+
+**Adres neden `8080`?** 80 portu Windows'ta yönetici hakkı ister ve başka programlarla çakışır; bu yüzden köprü 8080'de çalışır. Tarayıcı zaten otomatik açıldığı için adres yazılmaz; sonradan elle girmek gerekirse `http://localhost:8080/app/#/sim` yer imine eklenir.
+
+#### Tek seferlik exe üretimi (isteğe bağlı)
+
+Python kurulu olmayan bir bilgisayarda veya tek dosya taşımak için `server\sim_bridge\build_exe.bat` bir kez çalıştırılır. Betik PyInstaller'ı kurar ve **`dist\ERP-Sim-Bridge.exe`** üretir; sonraki çalıştırmalarda `Baslat.bat` bu exe'yi otomatik kullanır. Exe'nin içinde ERP Studio'nun `app/` dosyaları, varsayılan ayar ve örnek fabrika profili taşınır; `config.json`, `config/ornek-fabrika-profili.json` ve `data/ingest.db` **exe'nin yanında** oluşur. Bu yüzden exe yazılabilir bir klasöre (Masaüstü, `C:\ERP-Sim` gibi) kopyalanmalıdır; `Program Files` altında ayar yazılamaz.
+
+> Windows ikilisi bu Linux geliştirme ortamında üretilemez (PyInstaller hedef işletim sisteminde çalışır). Depoda exe yerine onu üreten `erp-sim-bridge.spec` ve `build_exe.bat` vardır; exe yerleşimi (`_MEIPASS` içindeki varlıklar, exe yanındaki yazılabilir dosyalar) testlerle doğrulanmıştır.
+
+### 4.3 Komut satırından çalıştırma (geliştirici)
 
 Bu depoda:
 
@@ -72,7 +97,7 @@ Bu depoda:
 python3 server/sim_bridge/run.py
 ```
 
-Varsayılanlar simülasyon `http://127.0.0.1:8000`, ERP `http://0.0.0.0:8080`. Tarayıcıda `http://localhost:8080/app/` açılır; **Entegrasyon → Simülasyon Bağlantısı** ekranına gidilir.
+Varsayılanlar simülasyon `http://127.0.0.1:8000`; ERP kaynaktan çalışırken `http://0.0.0.0:8080`, exe'de `http://127.0.0.1:8080`. `--open` eklenirse tarayıcı kendiliğinden **Simülasyon Bağlantısı** ekranında (`http://localhost:8080/app/#/sim`) açılır; eklenmezse `http://localhost:8080/app/` adresinden **Entegrasyon → Simülasyon Bağlantısı** seçilir.
 
 Simülasyon kapalıyken arayüzü yine görmek için yerleşik demo kopya kullanılabilir:
 
@@ -90,7 +115,7 @@ python3 server/sim_bridge/run.py --sim-url http://192.168.1.20:8000
 
 Adres, arayüzdeki **Adresi Değiştir** düğmesiyle de güncellenebilir; bu işlem `server/sim_bridge/config.json` dosyasını yazar.
 
-### 4.3 Edge ajanı (isteğe bağlı)
+### 4.4 Edge ajanı (isteğe bağlı)
 
 `edge/config/edge-config.json` içinde `adapter` değeri `simulation`, `simulation.baseUrl` simülasyon adresidir. Ajan:
 
@@ -104,15 +129,15 @@ Ajan `8787`'de açılır. **Bağlantıyı Test Et** düğmesi hem simülasyonu h
 
 ## 5. Yapılandırma
 
-`server/sim_bridge/config.json`:
+`server/sim_bridge/config.json` (kaynaktan çalışırken) veya exe'nin yanındaki `config.json`:
 
 | Alan | Varsayılan | Anlam |
 | --- | --- | --- |
 | `simBaseUrl` | `http://127.0.0.1:8000` | Simülasyon kök adresi; yalnızca sunucu tarafında kullanılır |
 | `timeoutSeconds` | `3` | Her REST çağrısının zaman aşımı |
 | `liveRefreshMs` | `2500` | Arayüzün önerilen yenileme aralığı (bilgi amaçlı) |
-| `profilePath` | `edge/config/ornek-fabrika-profili.json` | Makine eşlemesinin kaynağı |
-| `ingestDb` | `server/sim_bridge/data/ingest.db` | Batch, okuma ve olay kayıt defteri |
+| `profilePath` | `edge/config/ornek-fabrika-profili.json`; exe'de `config/ornek-fabrika-profili.json` | Makine eşlemesinin kaynağı |
+| `ingestDb` | `server/sim_bridge/data/ingest.db`; exe'de `data/ingest.db` | Batch, okuma ve olay kayıt defteri |
 | `autoMap` | `true` | Ada göre otomatik eşleme |
 | `furnaceMap` | `{}` | Açık eşleme: `{ "Fırın adı": "MCH-01" }` |
 | `edge.secret` | `degistirin-bu-gizli-anahtari` | Edge ajanıyla **aynı** HMAC anahtarı |
@@ -214,7 +239,7 @@ Davranış kuralları:
 Sırayla:
 
 1. Kullanıcı simülasyonu `./start.sh 10` ile açılır.
-2. Köprü `python3 server/sim_bridge/run.py` ile açılır; konsolda eşlemenin `3/3` olduğu görülür.
+2. Köprü Windows'ta `Baslat.bat` çift tıkla (veya `python3 server/sim_bridge/run.py`) açılır; tarayıcı Simülasyon ekranında açılır, konsolda eşlemenin `3/3` olduğu görülür.
 3. Arayüzde `Homojenizasyon Fırını`, hedef `60 °C`, süre `0.2` dk ile emir oluşturulur ve başlatılır. Kart `ISINIYOR` → `BEKLETIYOR` → `TAMAMLANDI` olur; süre hedefe ulaştıktan sonra işler.
 4. `Aluminyum Eritme Fırını`, hedef `900 °C` (güvenlik sınırı 850 °C) ile alarm denenir; kart `ALARM` olur, brülör kapanır.
 5. Edge ajanı `8787`'de **Bağlantıyı Test Et** → simülasyon ve ERP köprüsü yeşil; **Şimdi Oku** → 15 okuma (3 fırın × 4 sinyal + 3 telemetri); **Toplu Gönder** → kuyruk `sent`.
@@ -223,12 +248,12 @@ Sırayla:
 Bu depodaki otomatik doğrulama:
 
 ```bash
-python3 tools/sim_bridge_smoke_test.py    # 12 test
+python3 tools/sim_bridge_smoke_test.py    # 15 test
 python3 tools/edge_smoke_test.py          # 13 test
 node tools/smoke_test.mjs                 # 35 ekran
 ```
 
-Sonuçlar: köprü 12/12, edge 13/13, ekranlar 35/35. Köprü testi gerçek FastAPI gerektirmez; demo motoru ve sahte istemcilerle ağ davranışını sınar. Ayrıca `linkedom` ile yapılan DOM denetiminde sim ekranı canlı köprüye bağlandı: 3 fırın kartı, emir tablosu, edge sayacı, eşleme tablosu, fırın seçiminde sıcaklık grafiği ve yeni emir modalı çizildi; ağ kesildiğinde sayfa yenilenmeden "Köprü çalışmıyor" uyarısı göründü.
+Sonuçlar: köprü 15/15, edge 13/13, ekranlar 35/35. Köprü testi gerçek FastAPI gerektirmez; demo motoru ve sahte istemcilerle ağ davranışını sınar. Ayrıca `linkedom` ile yapılan DOM denetiminde sim ekranı canlı köprüye bağlandı: 3 fırın kartı, emir tablosu, edge sayacı, eşleme tablosu, fırın seçiminde sıcaklık grafiği ve yeni emir modalı çizildi; ağ kesildiğinde sayfa yenilenmeden "Köprü çalışmıyor" uyarısı göründü.
 
 ---
 
@@ -251,7 +276,8 @@ Sonuçlar: köprü 12/12, edge 13/13, ekranlar 35/35. Köprü testi gerçek Fast
 4. **Kapı ve döküm sinyalleri simülasyonda yoktur.** `unknown` olarak işaretlenir; gerçek PLC bağlandığında `opcua` / `modbus` adaptörü bu sinyalleri okur.
 5. **Tek köprü / tek ajan.** İkinci bir saha bilgisayarı eklenirse `siteCode` ayrılmalı ve her ajan kendi `clientId` alanıyla gelmelidir.
 6. **Gerçek tarayıcı testi** yapılmamıştır; ekran Node duman testi, `linkedom` DOM denetimi ve HTTP istekleriyle doğrulanmıştır. Dokunmatik/tablet davranışı sahada görülmelidir.
-7. **Simülasyon emirleri kalıcı değildir.** Kullanıcı simülasyonu kendi kurallarıyla çalışır; köprü yeniden başlatıldığında yalnızca kendi kayıt defteri korunur.
+7. **Windows exe'si depoda hazır değildir.** `Baslat.bat` Python ile hemen çalışır; tek dosya isteniyorsa Windows'ta `build_exe.bat` bir kez çalıştırılır. Linux'ta exe üretilmez, yalnızca yerleşim test edilir.
+8. **Simülasyon emirleri kalıcı değildir.** Kullanıcı simülasyonu kendi kurallarıyla çalışır; köprü yeniden başlatıldığında yalnızca kendi kayıt defteri korunur.
 
 ---
 
