@@ -259,5 +259,58 @@ draft.values.counts.FURNACE = 2;
 check(setupMachinesFromDraft(draft).filter((m) => m.type === 'FURNACE').length === 2, 'Sihirbaz 2 fırın üretemedi');
 console.log(`✓ ${MODULES.length} modül · ${ADAPTERS.length} adaptör · 1 ve 2 fırınlı profil · ${refs.length} bağımlı kayıt korundu`);
 
+// 15) Canlı simülasyon modu — ana ekranlar demo yerine köprü verisini gösterir
+const live = await import('../app/js/live.js');
+const sampleLive = {
+  ok: true, stale: false, baseUrl: 'http://127.0.0.1:8000', mode: 'DEMO',
+  checkedAt: '2026-11-02T10:00:00+03:00',
+  furnaces: [
+    { name: 'Aluminyum Eritme Fırını', temperatureC: 745.2, targetC: 750, maxC: 850, status: 'CALISIYOR', alarmActive: false },
+    { name: 'Homojenizasyon Fırını', temperatureC: 540, targetC: 550, maxC: 600, status: 'ISINIYOR', alarmActive: false },
+    { name: 'Yaşlandırma Fırını', temperatureC: 181, targetC: 175, maxC: 200, status: 'ALARM', alarmActive: true, alarm: 'Sıcaklık sınırı' }
+  ],
+  orders: [{ id: 'WO-20261102-0001', product: '6063', furnace: 'Aluminyum Eritme Fırını', targetC: 750, durationMin: 120, state: 'RUNNING', remainingMin: 33 }],
+  mapping: {
+    pairs: [
+      { furnace: 'Aluminyum Eritme Fırını', machineId: 'MCH-01', machineName: 'A Fırını', machineType: 'FURNACE', source: 'auto' },
+      { furnace: 'Homojenizasyon Fırını', machineId: 'MCH-10', machineName: 'Homojen 1', machineType: 'HOMO_FURNACE', source: 'auto' },
+      { furnace: 'Yaşlandırma Fırını', machineId: 'MCH-02', machineName: 'B Fırını', machineType: 'FURNACE', source: 'auto' }
+    ], matched: 3, furnaces: 3
+  },
+  edge: { batches: 12, readings: 340 }, health: {}
+};
+live.applyLiveSnapshot(sampleLive, 'on');
+check(live.liveEnabled(), 'Canlı mod açılmadı');
+const lstats = live.liveStats(sampleLive);
+check(lstats.furnaceCount === 3 && lstats.alarms === 1 && lstats.running === 1, 'Canlı özet yanlış');
+check(Math.round(lstats.avgTemp) === 489, 'Ortalama sıcaklık yanlış');
+const liveFurnaces = live.mapLiveFurnaces(sampleLive, d.machines);
+check(liveFurnaces.length === 3 && liveFurnaces.every((f) => f.mapped), 'Fırın → makine eşlemesi eksik');
+check(liveFurnaces.find((f) => f.id === 'MCH-01').name === 'A Fırını', 'Profil makine adı kullanılmadı');
+const liveDash = VIEWS.dashboard.render();
+check(liveDash.includes('Aluminyum Eritme Fırını') && liveDash.includes('745'), 'Panel canlı fırınları göstermiyor');
+check(liveDash.includes('WO-20261102-0001'), 'Panel simülasyon emrini göstermiyor');
+check(!liveDash.includes('Son 7 Gün Üretim'), 'Canlı panelde demo grafiği kaldı');
+const liveMachines = VIEWS.machines.render();
+check(liveMachines.includes('MCH-01') && liveMachines.includes('CANLI'), 'Makine Parkı canlı değil');
+const livePlc = VIEWS.plc.render();
+check(livePlc.includes('Bilinmiyor') && livePlc.includes('Arıza Var'), 'PLC ekranı dört sinyali canlı göstermiyor');
+const liveProd = VIEWS.production.render();
+check(liveProd.includes('WO-20261102-0001') && !liveProd.includes('Yeni Döküm Başlat'), 'Üretim akışı canlı/salt okunur değil');
+// Canlı mod açıkken köprü yoksa dört ekran da çökmemeli, açıklayıcı boş durum göstermeli.
+live.applyLiveSnapshot(null, 'on');
+for (const key of live.LIVE_VIEWS) {
+  const html = VIEWS[key].render();
+  check(html.includes('Simülasyon bağlantısı yok'), `${key}: bağlantı yok durumu gösterilmiyor`);
+}
+live.applyLiveSnapshot(null, 'off');
+check(!live.liveEnabled() && VIEWS.dashboard.render().includes('Son 7 Gün Üretim'), 'Demo moduna dönüş bozuk');
+// Service worker canlı API yanıtlarını önbelleğe almamalı; yoksa 3 sn'lik tazeleme donar.
+const { readFileSync } = await import('node:fs');
+const swSource = readFileSync(new URL('../app/sw.js', import.meta.url), 'utf8');
+check(swSource.includes("url.pathname.startsWith('/api/')"), 'Service worker /api yanıtlarını önbelleğe alıyor');
+check(swSource.includes('./js/live.js'), 'Service worker live.js dosyasını önbelleğe almıyor');
+console.log('✓ canlı mod: 3 fırın · 1 alarm · emirler Panel/Üretim/Makine/PLC ekranlarında · demo moduna dönüş');
+
 console.log(`\nSonuç: ${failures ? failures + ' HATA' : 'TÜM TESTLER GEÇTİ'}`);
 process.exit(failures ? 1 : 0);

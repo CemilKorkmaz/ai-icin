@@ -5,4 +5,4 @@ onun REST uçlarını ERP arayüzüne taşır ve edge ajanının imzalı batch'l
 kabul eder. İşletme tablolarına yazım yapmaz.
 """
 
-__version__ = '1.4.0'
+__version__ = '1.5.0'

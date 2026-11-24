@@ -14,6 +14,7 @@ import {
   FATES, DEFAULT_DIAMETER_MM, DEFAULT_CAST_MM, DEFAULT_PRODUCT_MM,
   DEFAULT_HEAD_MM, DEFAULT_BLADE_MM, DEFAULT_DENSITY
 } from '../calc.js';
+import { liveEnabled, liveSnapshot, liveStats, mapLiveFurnaces, statusLabel, statusTone } from '../live.js';
 
 let activePlant = null;
 let vendorTab = 'Fabrikalar';
@@ -39,11 +40,57 @@ const currentPlant = () => {
 /* 1. MAKİNE PARKI                                                      */
 /* ==================================================================== */
 
+function liveMachinesRender() {
+  const d = D();
+  const snap = liveSnapshot();
+  if (!snap) return `<section class="card">${emptyState('Simülasyon bağlantısı yok. Köprüyü başlatıp Yeniden Dene deyin.', 'wifiOff')}</section>`;
+  const stats = liveStats(snap);
+  const rows = mapLiveFurnaces(snap, d.machines);
+  const used = new Set(rows.map((r) => r.id));
+  const others = d.machines.filter((m) => m.plantId === activePlantId(d) && m.active && !m.decommissionedAt && !used.has(m.id));
+  return `
+    <div class="stat-strip">
+      <div><span>Simüle Fırın</span><strong>${stats.furnaceCount}</strong></div>
+      <div><span>Profil Eşleşmesi</span><strong>${stats.mappedCount}/${stats.furnaceCount}</strong></div>
+      <div><span>Aktif Alarm</span><strong class="text-danger">${stats.alarms}</strong></div>
+      <div><span>Diğer Profil Makinesi</span><strong>${others.length}</strong></div>
+      <div><span>Veri Kaynağı</span><strong>${esc(snap.mode === 'DEMO' ? 'Demo sim' : 'Simülasyon')}</strong></div>
+    </div>
+    <div class="info-banner">${icon('activity', 18)}<span><strong>Bu ekran ana ERP makine parkıdır.</strong> Fırınlar simülasyondan canlı gelir; her kartta sıcaklık, hedef, alarm ve durum görünür. Makine ekleme/devre dışı bırakma işlemleri için demo moduna geçin; canlı mod salt okunurdur.</span></div>
+    <section class="card">
+      <div class="card-head"><div><h3>Canlı fırınlar</h3><p>Fırın adı → profil makine kimliği eşlemesi ve anlık durum.</p></div><span class="card-tag">${icon('activity', 14)} ${esc(snap.checkedAt ? fmtDateTime(snap.checkedAt) : 'canlı')}</span></div>
+      <div class="grid-3">
+        ${rows.map((m) => {
+          const l = m.live || {};
+          const alarm = l.alarmActive || String(l.status || '').toUpperCase() === 'ALARM';
+          return `<div class="data-card ${alarm ? 'live-alarm' : ''}">
+            <div class="data-ico">${icon('flame', 20)}</div>
+            <div class="cell-strong">${esc(m.name)}</div>
+            <div class="cell-sub">${esc(m.id)} · ${esc(m.simName || '')}${m.mapped ? '' : ' · eşleşmedi'}</div>
+            <div class="live-temp-row"><strong>${l.temperatureC === null || l.temperatureC === undefined ? '—' : fmtNum(l.temperatureC, 1)}</strong><small>°C</small><span>hedef ${l.targetC === null || l.targetC === undefined ? '—' : fmtNum(l.targetC, 0)} °C</span></div>
+            <div class="toolbar" style="margin:10px 0 0">
+              ${pill(statusLabel(l.status), statusTone(l.status))}
+              ${pill(m.mapped ? 'Profil eşleşti' : 'Eşleşmedi', m.mapped ? 'ok' : 'warn')}
+              <span class="toolbar-spacer"></span>
+              ${pill('CANLI', 'cyan')}
+            </div>
+            ${alarm ? `<div class="sim-alarm" style="margin-top:8px">${icon('alert', 13)} ${esc(l.alarm || 'Güvenlik sınırı aşıldı')}</div>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-head"><div><h3>Profilde tanımlı diğer makineler</h3><p>Tabla, testere ve homojenizasyon makineleri simülasyonda yok; profil paketinden gelir.</p></div><span class="card-tag">${others.length} makine</span></div>
+      ${others.length ? `<div class="table-wrap"><table class="data"><thead><tr><th>Kimlik</th><th>Makine</th><th>Tip</th><th>Kapasite</th><th>Mod</th></tr></thead><tbody>${others.slice(0, 12).map((m) => `<tr><td class="cell-strong">${esc(m.id)}</td><td>${esc(m.name)}</td><td>${esc(machineType(m.type))}</td><td>${m.capacityTon ? fmtNum(m.capacityTon) + ' t' : '—'}</td><td>${pill(m.mode === 'PLC' ? 'PLC' : 'Manuel', m.mode === 'PLC' ? 'cyan' : 'neutral')}</td></tr>`).join('')}</tbody></table></div>` : '<div class="muted pad">Başka makine tanımlı değil.</div>'}
+    </section>`;
+}
+
 export const machinesView = {
   title: 'Makine Parkı',
   subtitle: 'Modüler kurulum: fabrika profili, makine tipleri ve iki çalışma modu',
 
   render() {
+    if (liveEnabled()) return liveMachinesRender();
     const d = D();
     const pid = currentPlant();
     const plant = d.plants.find((p) => p.id === pid) || d.plants[0] || {};
@@ -817,11 +864,55 @@ const SIGNAL_VALUES = {
   running: [{ value: 'running', label: 'Çalışıyor' }, { value: 'stopped', label: 'Durdu' }]
 };
 
+function livePlcRender() {
+  const d = D();
+  const snap = liveSnapshot();
+  if (!snap) return `<section class="card">${emptyState('Simülasyon bağlantısı yok. Köprüyü başlatıp Yeniden Dene deyin.', 'wifiOff')}</section>`;
+  const rows = mapLiveFurnaces(snap, d.machines);
+  const stats = liveStats(snap);
+  return `
+    <div class="stat-strip">
+      <div><span>İzlenen Fırın</span><strong>${rows.length}</strong></div>
+      <div><span>Alarm</span><strong class="text-danger">${stats.alarms}</strong></div>
+      <div><span>Ortalama Sıcaklık</span><strong>${stats.avgTemp === null ? '—' : fmtNum(stats.avgTemp, 1) + ' °C'}</strong></div>
+      <div><span>Kaynak</span><strong>SIM REST</strong></div>
+      <div><span>Yenileme</span><strong>3 sn</strong></div>
+    </div>
+    <div class="info-banner">${icon('cpu', 18)}<span><strong>Dört sinyal kuralı korunuyor.</strong> Kapı ve döküm sinyalleri simülasyonda yayınlanmadığı için “Bilinmiyor” görünür; alarm ve çalışma durumu fırın durumundan türetilir. Sıcaklık beşinci sinyal değildir, ayrı telemetri olarak gösterilir. Bu ekran <strong>salt okunurdur</strong>.</span></div>
+    ${rows.map((m) => {
+      const l = m.live || {};
+      const status = String(l.status || '').toUpperCase();
+      const alarm = l.alarmActive || status === 'ALARM';
+      const running = ['CALISIYOR', 'ISINIYOR', 'BEKLETIYOR'].includes(status);
+      const values = {
+        door: { label: 'Bilinmiyor', kind: 'neutral' },
+        casting: { label: 'Bilinmiyor', kind: 'neutral' },
+        alarm: alarm ? { label: 'Arıza Var', kind: 'danger' } : { label: 'Arıza Yok', kind: 'ok' },
+        running: running ? { label: 'Çalışıyor', kind: 'ok' } : { label: 'Durdu', kind: 'neutral' }
+      };
+      return `<section class="card">
+        <div class="card-head"><div><strong>${esc(m.name)}</strong><span class="muted"> · ${esc(m.simName || '')} · ${esc(m.id)}</span></div>${pill(statusLabel(status), statusTone(status))}</div>
+        <div class="grid-2">${Object.keys(SIGNAL_LABELS).map((sig) => `<div class="data-card">
+          <div class="cell-sub">${esc(SIGNAL_LABELS[sig])}</div>
+          <div class="cell-strong" style="margin:6px 0">${pill(values[sig].label, values[sig].kind)}</div>
+          <div class="micro muted">${sig === 'door' || sig === 'casting' ? 'Simülasyonda yayınlanmıyor' : 'Fırın durumundan türetildi'} · SIM</div>
+        </div>`).join('')}</div>
+        <div class="live-telemetry">
+          <span>${icon('activity', 14)} Telemetri (dört sinyalden ayrı)</span>
+          <strong>${l.temperatureC === null || l.temperatureC === undefined ? '—' : fmtNum(l.temperatureC, 1)} °C</strong>
+          <span>hedef ${l.targetC === null || l.targetC === undefined ? '—' : fmtNum(l.targetC, 0)} °C</span>
+          <span>maks ${l.maxC === null || l.maxC === undefined ? '—' : fmtNum(l.maxC, 0)} °C</span>
+        </div>
+      </section>`;
+    }).join('')}`;
+}
+
 export const plcView = {
   title: 'PLC Durum',
   subtitle: 'Yalnızca dört temel sinyal: sade, kalabalık olmayan makine izleme',
 
   render() {
+    if (liveEnabled()) return livePlcRender();
     const d = D();
     const machineIds = [...new Set(d.signalStates.map((s) => s.machineId))];
     const faults = d.signalStates.filter((s) => s.signal === 'alarm' && s.value === 'fault').length;

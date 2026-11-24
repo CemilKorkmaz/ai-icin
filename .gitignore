@@ -15,6 +15,13 @@ edge/*.spec.bak
 # Simülasyon köprüsünün çalışma zamanı kayıtları
 server/sim_bridge/data/
 
+# Windows exe çıktıları (build_exe.bat → dist\ERP-Sim-Bridge.exe)
+/dist/
+/build/
+# Exe depo kökünde çalıştırılırsa yanında oluşan çalışma zamanı dosyaları
+/config.json
+/data/ingest.db
+
 # Genel
 __pycache__/
 *.py[cod]

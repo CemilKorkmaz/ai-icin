@@ -3,6 +3,10 @@ import { icon } from './icons.js';
 import { esc, fmtDateTime, pill, modal, toast } from './ui.js';
 import { VIEWS, NAV, GROUP_OF } from './views/index.js';
 import { visibleNav } from './modularity.js';
+import {
+  initLive, liveEnabled, liveLabel, liveSnapshot, liveStale, liveError,
+  liveLoading, toggleLive, retryLive, LIVE_VIEWS, getLiveMode
+} from './live.js';
 
 let current = 'dashboard';
 let installPrompt = null;
@@ -19,7 +23,7 @@ function shell() {
       <div class="sidebar-scroll">${nav}</div>
       <div class="sidebar-foot">
         <div class="server-chip"><span class="server-dot ${d.settings.online ? '' : 'off'}"></span><div><strong>${esc(d.settings.serverUrl)}</strong><span>${d.settings.online ? 'LAN + WAN bağlı' : 'Kapalı çevrim · LAN'}</span></div></div>
-        <span class="side-version">v1.4 · Saha + Simülasyon</span>
+        <span class="side-version">v1.5 · Canlı Simülasyon</span>
       </div>
     </aside>
     <div class="shell-main">
@@ -28,6 +32,7 @@ function shell() {
         <div class="breadcrumb"><span>ERP</span>${icon('chevron', 13)}<span id="crumb-group">—</span>${icon('chevron', 13)}<strong id="crumb-view">—</strong></div>
         <div class="topbar-right">
           <button class="search-trigger" data-search-open>${icon('search', 16)}<span>Ara…</span><kbd>⌘K</kbd></button>
+          <button class="live-chip ${liveEnabled() ? 'on' : ''}" data-live-toggle aria-pressed="${liveEnabled()}" title="Simülasyon canlı verisini aç/kapat">${icon('activity', 15)}<span data-live-label>${esc(liveLabel())}</span></button>
           <button class="conn-chip ${d.settings.online ? 'online' : 'offline'}" data-online-toggle title="Bağlantı durumunu değiştir">${icon(d.settings.online ? 'wifi' : 'wifiOff', 15)}<span>${d.settings.online ? 'Çevrimiçi' : 'Çevrimdışı'}</span></button>
           <button class="icon-btn" data-theme-toggle title="Temayı değiştir">${icon(d.settings.theme === 'dark' ? 'sun' : 'moon', 18)}</button>
           <button class="icon-btn bell" data-notif-open title="Bildirimler">${icon('bell', 18)}${unread ? `<em>${unread}</em>` : ''}</button>
@@ -38,6 +43,31 @@ function shell() {
       <main class="content" id="main"></main>
     </div>
     <div class="sidebar-overlay" data-menu-close></div>`;
+}
+
+function liveBanner() {
+  if (current === 'sim') return '';      // teşhis ekranının kendi bağlantı paneli var
+  if (!liveEnabled() && getLiveMode() !== 'on') return '';
+  const liveView = LIVE_VIEWS.includes(current);
+  if (liveLoading() && !liveSnapshot()) {
+    return `<div class="live-banner"><span class="live-dot"></span><div><strong>Simülasyon aranıyor…</strong><span>Köprüye bağlanılıyor; ana ekranlar hazır olduğunda canlı veriye geçecek.</span></div></div>`;
+  }
+  if (!liveSnapshot()) {
+    return `<div class="live-banner off"><span class="live-dot"></span><div><strong>Simülasyon bağlantısı yok</strong><span>${esc(liveError() || 'Köprü çalışmıyor. Baslat.bat / Baslat.command ile açın.')}</span></div><button class="btn btn-ghost btn-sm" data-live-retry>${icon('refresh', 14)} Yeniden Dene</button></div>`;
+  }
+  if (liveStale()) {
+    return `<div class="live-banner stale"><span class="live-dot"></span><div><strong>Son bilinen simülasyon verisi</strong><span>${esc(liveError() || 'Simülasyon kapalı')} · ${esc(liveSnapshot().baseUrl || '')}. Sayfa yenilenmez, bağlantı gelince tazelenir.</span></div></div>`;
+  }
+  return `<div class="live-banner"><span class="live-dot"></span><div><strong>Ana ERP canlı simülasyonla çalışıyor</strong><span>${liveView ? 'Bu ekran fırın, emir, sıcaklık ve alarm verisini köprüden okur.' : 'Bu ekran demo kayıtları gösterir; simülasyon yalnızca fırın/emir/telemetri üretir.'}</span></div><button class="btn btn-ghost btn-sm" data-nav="sim">${icon('link', 14)} Teşhis</button></div>`;
+}
+
+function syncLiveChip() {
+  const btn = document.querySelector('[data-live-toggle]');
+  if (!btn) return;
+  btn.classList.toggle('on', liveEnabled());
+  btn.setAttribute('aria-pressed', String(liveEnabled()));
+  const label = btn.querySelector('[data-live-label]');
+  if (label) label.textContent = liveLabel();
 }
 
 function renderView() {
@@ -51,7 +81,13 @@ function renderView() {
   document.getElementById('crumb-group').textContent = GROUP_OF[current] || 'GENEL';
   document.getElementById('crumb-view').textContent = view.title;
   document.querySelectorAll('.nav-item').forEach((a) => a.classList.toggle('active', a.dataset.view === current));
-  main.innerHTML = `<div class="page"><div class="page-head"><div><h1>${esc(view.title)}</h1><p>${esc(view.subtitle)}</p></div><div class="page-head-actions"><span class="date-chip">${icon('calendar', 14)} ${new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' })}</span></div></div>${view.render()}</div>`;
+  const liveView = LIVE_VIEWS.includes(current);
+  const source = liveView && liveEnabled()
+    ? `<span class="source-tag live">${icon('activity', 12)} CANLI SİMÜLASYON</span>`
+    : current === 'sim'
+      ? `<span class="source-tag">${icon('link', 12)} KÖPRÜ TEŞHİS</span>`
+      : `<span class="source-tag">DEMO VERİ</span>`;
+  main.innerHTML = `<div class="page">${liveBanner()}<div class="page-head"><div><h1>${esc(view.title)}</h1><p>${esc(view.subtitle)}</p></div><div class="page-head-actions">${source}<span class="date-chip">${icon('calendar', 14)} ${new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' })}</span></div></div>${view.render()}</div>`;
   if (view.mount) view.mount(main);
   main.scrollTop = scroll;
   document.title = `${view.title} · ERP Studio`;
@@ -147,6 +183,19 @@ document.addEventListener('click', (e) => {
     navigate(nav.dataset.nav);
     return;
   }
+  if (e.target.closest('[data-live-toggle]')) {
+    const wasOn = liveEnabled();
+    toggleLive().then((on) => {
+      fullRender();
+      syncLiveChip();
+      toast(on ? 'Ana ekranlar simülasyon verisiyle besleniyor' : 'Demo veriye dönüldü', on ? 'success' : 'info');
+    }).catch(() => {
+      fullRender();
+      toast(wasOn ? 'Simülasyon verisi kapatıldı' : 'Köprüye ulaşılamadı', 'danger');
+    });
+    return;
+  }
+  if (e.target.closest('[data-live-retry]')) { retryLive(); return; }
   if (e.target.closest('[data-online-toggle]')) { toggleOnline(); return; }
   if (e.target.closest('[data-theme-toggle]')) { toggleTheme(); return; }
   if (e.target.closest('[data-notif-open]')) { openNotifications(); return; }
@@ -162,6 +211,14 @@ document.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openSearch(); }
   if (e.key === 'Escape') document.getElementById('app').classList.remove('sidebar-open');
+});
+
+window.addEventListener('erp:live', () => {
+  syncLiveChip();
+  if (!liveEnabled()) return;
+  if (!LIVE_VIEWS.includes(current)) return;
+  if (document.querySelector('.modal-backdrop, .drag-ghost')) return;
+  renderView();
 });
 
 window.addEventListener('hashchange', () => {
@@ -190,6 +247,7 @@ window.App = {
 document.documentElement.dataset.theme = D().settings.theme || 'light';
 current = fromHash();
 fullRender();
+initLive();
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => { /* önbellek opsiyonel */ });

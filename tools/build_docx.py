@@ -36,6 +36,7 @@ FILES = [
     ('12-saha-kurulum-ve-modul-yasam-dongusu.md', 'BÖLÜM 12 — Saha Kurulum ve Modül Yaşam Döngüsü'),
     ('13-edge-veri-toplama-ajani.md', 'BÖLÜM 13 — Edge Veri Toplama Ajanı (exe, SQL ve ERP Köprüsü)'),
     ('14-simulasyon-baglantisi.md', 'BÖLÜM 14 — Simülasyon Bağlantısı ve Fabrika Öncesi Doğrulama'),
+    ('15-erp-sistemi-kapsamli-ozet.md', 'BÖLÜM 15 — ERP Sistemi Kapsamlı Özeti'),
 ]
 
 W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
