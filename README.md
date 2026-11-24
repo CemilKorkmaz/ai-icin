@@ -2,7 +2,7 @@
 
 Bu depo, sohbette tarif edilen **alüminyum biyet dökümhanesi** için uçtan uca ERP planını, çalışan bir web prototipini ve firma sunucusundaki `ERP/` klasörünün dosya tabanlı modelini içerir. Genel dökümhane planı değil; sürekli döküm, ergitme, testere, homojenizasyon, soğutma, paketleme ve iki onaylı sevkiyat akışı esas alınır.
 
-**Sürüm:** 1.4.2 · Simülasyon Köprüsü (Windows + macOS çift tık) · `schemaVersion: 4` · **35 ekran + 1 saha arayüzü + 1 simülasyon köprüsü** · **59 varlık** · **15 doküman**
+**Sürüm:** 1.4.2 · Simülasyon Köprüsü (Windows + macOS çift tık) · `schemaVersion: 4` · **35 ekran + 1 saha arayüzü + 1 simülasyon köprüsü** · **59 varlık** · **16 doküman**
 
 ---
 
@@ -25,7 +25,8 @@ Bu depo, sohbette tarif edilen **alüminyum biyet dökümhanesi** için uçtan u
 | `docs/12-saha-kurulum-ve-modul-yasam-dongusu.md` | **Gerçek fabrikaya kolay bağlanma**: profil paketi, 1 / 2 / 5 fırın, kurulum sihirbazı, makine ekleme-çıkarma, modül kaydı, adaptör sözleşmesi |
 | `docs/13-edge-veri-toplama-ajani.md` | **Fabrikadaki tek bilgisayar için exe**: sıcaklık/alarm/sensör okuma, yerel SQLite, imzalı ERP gönderimi, Türkçe canlı arayüz |
 | `docs/14-simulasyon-baglantisi.md` | **Fabrika testinden önce simülasyon**: köprü mimarisi, fırın → makine eşlemesi, canlı ekran, imzalı ingest, güvenlik ve sınırlar |
-| `docs/Dokumhane-ERP-Plan.docx` | **15 dokümanın tamamını** birleştiren tek **Word** dosyası ("AI'a atılacak" çıktı) |
+| `docs/15-erp-sistemi-kapsamli-ozet.md` | **Tek parça sistem özeti**: 35 ekran, 59 varlık, iş akışları, hesaplar, dört sinyal, edge ve köprü |
+| `docs/Dokumhane-ERP-Plan.docx` | **16 dokümanın tamamını** birleştiren tek **Word** dosyası ("AI'a atılacak" çıktı) |
 | `app/` | Çalışan PWA prototipi: bağımlılık yok, saf HTML/CSS/JS, **35 ekran**, `calc.js` + `posting.js` + `modularity.js` + `adapters.js`, canlı simülasyon ekranı |
 | `server/erp/` | Firma sunucusundaki `ERP/` klasörünün modeli: **59 JSON dosyası**, olay kuyruğu, arşiv, worker'lar |
 | `edge/` | **Fabrikadaki tek bilgisayar**: `ERP-Edge-Collector.exe` kaynağı, SQLite şeması, adaptörler (`simulation` dahil), yerel web arayüzü, PyInstaller spec ve kurulum betikleri |
@@ -143,10 +144,10 @@ python3 tools/edge_smoke_test.py                       # exe ajanı: 13 test
 python3 tools/sim_bridge_smoke_test.py                 # simülasyon köprüsü: 16 test
 python3 edge/main.py --dry-run                         # tek döngü, yazmadan
 python3 edge/main.py --bind 0.0.0.0 --port 8787       # saha arayüzü (önizleme)
-python3 tools/build_docx.py                           # 15 dokümanı tek Word'e derle
+python3 tools/build_docx.py                           # 16 dokümanı tek Word'e derle
 ```
 
-Son doğrulama sonuçları: 35 menü / 35 ekran eşleşiyor, mizan borç = alacak, 1 ve 2 fırınlı profil testleri geçti, 58 koleksiyonda 0 hata ve 1 bilgilendirici uyarı, **edge ajanının 13 testi**, **simülasyon köprüsünün 16 testi** ve 11 JSON ucu geçti, 15 doküman geçerli OOXML Word çıktısında birleşti.
+Son doğrulama sonuçları: 35 menü / 35 ekran eşleşiyor, mizan borç = alacak, 1 ve 2 fırınlı profil testleri geçti, 58 koleksiyonda 0 hata ve 1 bilgilendirici uyarı, **edge ajanının 13 testi**, **simülasyon köprüsünün 16 testi** ve 11 JSON ucu geçti, 16 doküman geçerli OOXML Word çıktısında birleşti.
 
 > **Sınır:** Bu bir plan doğrulama prototipidir. Gerçek API/veritabanı, RBAC/VPN, OPC UA/Modbus sürücüsü, SMTP/SMS sağlayıcısı ve PLC donanımı bağlı değildir. Simülasyon köprüsü de üretim ingest worker'ı değildir: imzalı batch'i doğrular ve kendi kayıt defterine yazar, işletme tablolarını değiştirmez. Canlı kurulumda doğruluk kaynağı işlemsel veritabanı, JSON dosyaları arşiv ve aktarım görünümüdür.
 
