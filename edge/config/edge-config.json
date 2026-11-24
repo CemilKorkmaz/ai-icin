@@ -6,7 +6,7 @@
   "sqlPath": "data/edge.db",
   "pollSeconds": 3,
   "retentionDays": 90,
-  "adapter": "simulated",
+  "adapter": "simulation",
   "connection": {
     "name": "Fırın hattı PLC",
     "ip": "192.168.1.50",
@@ -71,5 +71,11 @@
       "simSpan": 6,
       "note": "Yağ ömrü sayacıyla ilişkili telemetri"
     }
-  ]
+  ],
+  "simulation": {
+    "baseUrl": "http://127.0.0.1:8000",
+    "timeoutSeconds": 3,
+    "autoMap": true,
+    "furnaceMap": {}
+  }
 }

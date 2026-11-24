@@ -895,12 +895,13 @@ export const SEED = {
     "label": "Entegrasyon",
     "group": "Yönetim",
     "views": [
-      "integration"
+      "integration",
+      "sim"
     ],
     "defaultEnabled": true,
     "requiresMachineType": null,
     "requiresMode": null,
-    "note": "Tek kayıt çok etki matrisi"
+    "note": "Tek kayıt çok etki matrisi + simülasyon köprüsü"
   },
   {
     "id": "MOD-VENDOR",

@@ -1,4 +1,4 @@
-# 13 — Edge Veri Toplama Ajanı: Fabrikadaki Tek Bilgisayar, exe, SQL ve ERP Köprüsü (Sürüm 1.3)
+# 13 — Edge Veri Toplama Ajanı: Fabrikadaki Tek Bilgisayar, exe, SQL ve ERP Köprüsü (Sürüm 1.3 · 1.4 eki: simülasyon adaptörü)
 
 **İstek.** Fabrikaya bir bilgisayar kurulacak. Bu bilgisayarda çalışacak bir **exe programı**, fırının içindeki sıcaklık, alarm bilgileri ve benzeri sensörlerden gelen verileri okuyacak, bu verileri yaptığımız ERP sistemine gönderecek ve aynı zamanda kendi **SQL tabanlı veritabanına** kaydedecek. Programın bir de **arayüzü** olacak.
 
@@ -129,13 +129,16 @@ Yerel JSON uçları: `/api/status`, `/api/config`, `/api/profile`, `/api/reading
 
 ## 8. Adaptör sözleşmesi
 
-`app/js/adapters.js` içindeki üç adaptörün aynısı Python tarafında da vardır. Sözleşme `connect`, `test`, `readFourSignals`, `disconnect` ve buna ek olarak `readTelemetry` işlevlerinden oluşur.
+`app/js/adapters.js` içindeki üç fabrika adaptörünün aynısı Python tarafında da vardır; Sürüm 1.4 ile test amaçlı dördüncü bir adaptör (`simulation`) eklenmiştir. Sözleşme `connect`, `test`, `readFourSignals`, `disconnect` ve buna ek olarak `readTelemetry` işlevlerinden oluşur.
 
 | Kod | Durum | Davranış |
 | --- | --- | --- |
 | `simulated` | Hazır | Ağ olmadan dört sinyal + telemetri üretir; `SIMULATED` kalitesi |
 | `opcua` | Sözleşmeye hazır | Sürücü sonraki aşamada; şu an `MANUAL` yedeğe düşer |
 | `modbus` | Sözleşmeye hazır | Sürücü sonraki aşamada; şu an `MANUAL` yedeğe düşer |
+| `simulation` | Hazır (test) | Kullanıcı simülasyonunun REST uçlarını okur; fabrika testinden önce uçtan uca sınama içindir |
+
+`simulation` adaptörü `simulation.baseUrl` adresine bağlanır; fırın adları `furnaceMap` veya ada göre kural ile profil makinelerine eşlenir. Simülasyon kapalıysa ajan yine `simulated` yedeğine düşer. Köprü, arayüz ve eşleme ayrıntıları `docs/14` içindedir.
 
 Sürücü yüklü değilse ajan hata verip kapanmaz. `resolve_adapter` simulated'a geçer, bunu `fallback` alanına yazar, `app_log` tablosuna uyarı düşer ve arayüzde sarı rozet gösterilir. Bu, `docs/08` Bölüm 3'teki "`MANUAL` eksik bir sürüm değil, birinci sınıf çalışma biçimidir" kararının kod karşılığıdır. Gerçek OPC UA / Modbus sürücüsü takıldığında üst katman, SQL şeması ve ERP sözleşmesi değişmez.
 
@@ -192,7 +195,8 @@ Yeni bir fabrikaya gidildiğinde yapılacak iş **exe değiştirmek değil**, o 
 
 | Komut | Sonuç |
 | --- | --- |
-| `python3 tools/edge_smoke_test.py` | 12 test: yapılandırma, profil, adaptör yedeği, dört sinyal + telemetri, idempotency, eşik bantları, durum değişimi ve eşik geçişi olayları, imzalı batch, çevrimdışı kuyruk, SQL şeması, `--dry-run`, yerel arayüzün 11 JSON ucu ve `/api/poll`, exe üretim dosyaları → **TÜM TESTLER GEÇTİ** |
+| `python3 tools/edge_smoke_test.py` | 13 test: yapılandırma, profil, adaptör yedeği, dört sinyal + telemetri, idempotency, eşik bantları, durum değişimi ve eşik geçişi olayları, imzalı batch, çevrimdışı kuyruk, SQL şeması, `--dry-run`, yerel arayüzün 11 JSON ucu ve `/api/poll`, **simülasyon adaptörü (3 eşleşen fırın + kapalıyken yedek)**, exe üretim dosyaları → **TÜM TESTLER GEÇTİ** |
+| `python3 tools/sim_bridge_smoke_test.py` | 12 test: köprü statik sunucusu, canlı anlık görüntü, eşleme kuralları, emir oluştur/başlat, HMAC ingest ve idempotency, yanlış imza, simülasyon kapalıyken son veri, demo motorunda alarm/tamamlanma → **TÜM TESTLER GEÇTİ** |
 | `python3 edge/main.py --dry-run` | Tek döngü, hiçbir yere yazmadan okuma sayısı ve adaptör özeti |
 | `python3 edge/main.py --once` | Tek döngü, SQLite `readings` + `outbox` yazımı |
 | `python3 edge/main.py --bind 0.0.0.0 --port 8787 --no-browser` | Canlı arayüz; HTML/CSS/JS ve tüm JSON uçları 200 |
@@ -205,7 +209,7 @@ Yeni bir fabrikaya gidildiğinde yapılacak iş **exe değiştirmek değil**, o 
 
 ## 13. Sınırlar ve açık kalan işler
 
-1. **Gerçek OPC UA / Modbus sürücüsü yoktur.** `opcua` ve `modbus` adaptörleri sözleşmeye hazırdır; `opcua` / `pymodbus` kütüphaneleri, VPN ve MFA ile birlikte `docs/10` aşama 9'da eklenir. Şu an veri `SIMULATED` kalitesiyle üretilir.
+1. **Gerçek OPC UA / Modbus sürücüsü yoktur.** `opcua` ve `modbus` adaptörleri sözleşmeye hazırdır; `opcua` / `pymodbus` kütüphaneleri, VPN ve MFA ile birlikte `docs/10` aşama 9'da eklenir. Sürüm 1.4'te test için `simulation` adaptörü eklenmiştir; üretim verisi yine `SIMULATED` kalitesiyle işaretlenir.
 2. **ERP tarafında `/api/edge/ingest` worker'ı prototip düzeyindedir.** Bu depodaki ERP PWA'sı statik dosya sunar; canlı API, işlemsel veritabanı, JWT/RBAC ve gerçek transaction sınırı aşama 8'de kurulacaktır (`docs/12` Bölüm 12). Ajanın sözleşmesi bu worker için hazırdır.
 3. **Windows `.exe` ikilisi depoda yoktur.** Linux ortamında üretilemediği için kaynak + tek komutluk üretim betiği verilmiştir.
 4. **Sıcaklık eşikleri örnektir.** Sensör noktası, tipi, ölçüm aralığı, tarama sıklığı ve eşikler sahada doğrulanmalıdır. `docs/06` içindeki sekiz açık soru ve anlaşılamayan terimler hâlâ açıktır.

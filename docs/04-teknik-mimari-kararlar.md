@@ -308,6 +308,7 @@ Finansal kayıtlar üretim gibi çevrimdışıyken de oluşur. Dışa gönderilm
 | Doğrulama | Referans ve kütle dengesi | Ayrıca borç = alacak, KDV, maliyet, sayım, dönem |
 | Şema | `schemaVersion: 2` | `schemaVersion: 4`, sürüme bağlı yerel anahtar; tek makine kaynağı, profil paketi, modül kaydı ve adaptör sözleşmesi (`docs/12`) |
 | Saha exe'si | ERP arayüzü için exe reddedildi | ERP arayüzü PWA kalır; **farklı bir yazılım** olarak fabrikadaki tek veri toplama bilgisayarında `ERP-Edge-Collector.exe` çalışır (`docs/13`) |
+| Simülasyon köprüsü | Tarayıcı doğrudan simülasyona bağlanacaktı | Araya aynı kökende bir köprü girer: CORS/ağ sorunu çözülür, WebSocket yenileme döngüsü oluşmaz, imzalı edge batch'i kabul edilir (`docs/14`) |
 
 Bu doküman, `docs/Dokumhane-ERP-Plan.docx` içinde de yer alır ve "yapay zekâya verilip genel yazılım altyapı şemasının oluşturulması" için gereken teknik girdiyi sağlar.
 

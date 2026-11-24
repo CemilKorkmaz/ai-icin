@@ -181,7 +181,7 @@ Altı yeni koleksiyon: `machineAliases` (3), `moduleRegistry` (15), `plantModule
 
 | Komut | Sonuç |
 | --- | --- |
-| `node tools/smoke_test.mjs` | 34 menü / 34 ekran, hesap motoru, mizan, idempotency, 1 ve 2 fırınlı profil, 20 bağımlı kaydın korunması, geri alma, adaptör yedeği: **TÜM TESTLER GEÇTİ** |
+| `node tools/smoke_test.mjs` | Sürüm 1.2 anlık görüntüsü: 34 menü / 34 ekran, hesap motoru, mizan, idempotency, 1 ve 2 fırınlı profil, 20 bağımlı kaydın korunması, geri alma, adaptör yedeği. Sürüm 1.4'te bu sayı **35 ekran**tır. |
 | `python3 server/erp/scripts/validate_data.py` | 58 koleksiyon, `schema_version: 4`, 15 modül, 3 adaptör, 2 profil paketi, 1 devre dışı makine: **0 hata, 1 uyarı** |
 | `node tools/export_seed.mjs` | 59 JSON dosyası ve manifest üretildi |
 | `python3 tools/build_docx.py` | 13 doküman tek geçerli OOXML Word dosyasında birleşti (Sürüm 1.2 anlık görüntüsü; 1.3'te 14) |
@@ -202,6 +202,6 @@ Bu sürüm **prototip düzeyinde modülerlik** sağlar. Aşağıdakiler bilinçl
 5. Standart maliyet ile ağırlıklı ortalama / FIFO karşılaştırması, 17 tondan 14 tona dağıtım kuralı ve `docs/06` içindeki sekiz açık soru.
 6. Gerçek tarayıcı ve tablet testi; şu ana kadarki DOM denetimi linkedom üzerinde yapılmıştır.
 
-Sürüm 1.3'te bu yapıya **fabrikadaki tek bilgisayarda çalışan exe ajan** eklenmiştir (`docs/13`). Ajan bu dokümandaki fabrika profil paketini okur, aynı adaptör sözleşmesini kullanır, dört sinyale ek olarak sıcaklık telemetrisi üretir ve veriyi yerel SQLite + ERP kuyruğuna yazar. Profil değişince ajanın kodu değişmez.
+Sürüm 1.3'te bu yapıya **fabrikadaki tek bilgisayarda çalışan exe ajan** eklenmiştir (`docs/13`); Sürüm 1.4'te bu ajanın `simulation` adaptörü ve ERP simülasyon köprüsü eklenmiştir (`docs/14`). Ajan bu dokümandaki fabrika profil paketini okur, aynı adaptör sözleşmesini kullanır, dört sinyale ek olarak sıcaklık telemetrisi üretir ve veriyi yerel SQLite + ERP kuyruğuna yazar. Profil değişince ajanın kodu değişmez.
 
 Bu sınırlar, kullanıcının istediği "kolayca bağlama" hedefini engellemez: sahada yapılan iş veri girişi, profil kopyası ve bağlantı testidir; kod derlemesi veya veritabanı taşıması değildir. Sürücü ve sunucu katmanı eklendiğinde aynı profil paketi, aynı modül kaydı ve aynı adaptör sözleşmesi kullanılmaya devam eder.

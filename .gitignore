@@ -12,6 +12,9 @@ edge/dist/
 edge/build/
 edge/*.spec.bak
 
+# Simülasyon köprüsünün çalışma zamanı kayıtları
+server/sim_bridge/data/
+
 # Genel
 __pycache__/
 *.py[cod]

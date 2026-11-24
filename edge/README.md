@@ -14,6 +14,8 @@ python3 edge/main.py --once             # tek döngü, SQLite + kuyruk
 python3 edge/main.py --bind 0.0.0.0 --port 8787 --no-browser
 ```
 
+Fabrika testinden önce ajan, kullanıcı fırın simülasyonuna bağlanabilir: `config/edge-config.json` içinde `adapter: "simulation"` ve `simulation.baseUrl: "http://127.0.0.1:8000"`. Bu modda dört sinyal ve sıcaklık simülasyonun REST uçlarından okunur; simülasyon kapalıysa ajan `simulated` yedeğine düşer. Köprü ve arayüz ayrıntıları `docs/14` içindedir.
+
 Arayüz `http://127.0.0.1:8787` adresinde açılır. `--bind 0.0.0.0` yalnızca uzaktan önizleme içindir; üretimde arayüz `127.0.0.1`'e bağlı kalmalıdır.
 
 ## 2. Windows'ta .exe üretimi
@@ -65,13 +67,13 @@ Sıcaklık, konuşmadaki "firinin icindeki sicaklik bilgisi" isteğidir. **Beşi
 | SQL Veritabanı | Tablo şemaları, satır sayıları, `readings` son kayıtları, saklama temizliği |
 | ERP Kuyruğu | Batch durumları, deneme sayıları, "Şimdi Gönder", gönderim sözleşmesi |
 | Fabrika Profili | Profil özeti, adaptör sözleşmeleri, telemetri şablonları |
-| Ayarlar | IP/port, adaptör, ERP URL, gizli anahtar, tarama aralığı, saklama süresi |
+| Ayarlar | IP/port, adaptör, simülasyon adresi, ERP URL, gizli anahtar, tarama aralığı, saklama süresi |
 
 Üst çubuktaki **Bağlantıyı Test Et**, adaptörü ve ERP uç noktasını ayrı ayrı dener; **Şimdi Oku** tek döngü çalıştırır; **Durdur/Başlat** tarama işçisini kontrol eder.
 
 ## 7. Adaptörler
 
-`simulated` hazırdır ve ağ olmadan dört sinyal + telemetri üretir; veriler `SIMULATED` kalitesiyle işaretlenir. `opcua` ve `modbus` **sözleşmeye hazırdır**: `connect / test / readFourSignals / readTelemetry / disconnect` arayüzünü taşır, sürücüleri sonraki aşamada takılır. Sürücü yoksa ajan hata verip kapanmaz, `MANUAL` yedeğe düşer ve bunu arayüzde sarı uyarı olarak gösterir. Bu, `app/js/adapters.js` ile aynı sözleşmedir.
+`simulated` hazırdır ve ağ olmadan dört sinyal + telemetri üretir; veriler `SIMULATED` kalitesiyle işaretlenir. `simulation` (Sürüm 1.4) kullanıcı simülasyonunun REST uçlarını okur; fırın adları `simulation.furnaceMap` veya ada göre kural ile profil makinelerine eşlenir, eşleşmeyen fırın için veri üretilmez. Simülasyonda kapı/döküm sinyali olmadığı için bu iki sinyal `unknown` yazılır. `opcua` ve `modbus` **sözleşmeye hazırdır**: `connect / test / readFourSignals / readTelemetry / disconnect` arayüzünü taşır, sürücüleri sonraki aşamada takılır. Sürücü yoksa ajan hata verip kapanmaz, `MANUAL` yedeğe düşer ve bunu arayüzde sarı uyarı olarak gösterir. Bu, `app/js/adapters.js` ile aynı sözleşmedir.
 
 ## 8. Güvenlik ve işletme
 
@@ -87,7 +89,7 @@ Sıcaklık, konuşmadaki "firinin icindeki sicaklik bilgisi" isteğidir. **Beşi
 python3 tools/edge_smoke_test.py
 ```
 
-12 test: konfigürasyon birleştirme, profil türetme ve dört sinyalin tamamlanması, adaptör yedeği, SQLite idempotency, durum değişimi ve eşik geçişi olayları, imzalı batch, çevrimdışı kuyruk, SQL şeması, `--dry-run`, exe üretim dosyaları ve yerel arayüzün 11 JSON ucu doğrulanır. Sonuç: `TÜM TESTLER GEÇTİ`.
+13 test: konfigürasyon birleştirme, profil türetme ve dört sinyalin tamamlanması, adaptör yedeği, SQLite idempotency, durum değişimi ve eşik geçişi olayları, imzalı batch, çevrimdışı kuyruk, SQL şeması, `--dry-run`, exe üretim dosyaları, yerel arayüzün 11 JSON ucu ve simülasyon adaptörü (3 eşleşen fırın + kapalıyken yedek) doğrulanır. Sonuç: `TÜM TESTLER GEÇTİ`.
 
 ## 10. Dosyalar
 
@@ -96,7 +98,8 @@ python3 tools/edge_smoke_test.py
 | `main.py` | Giriş noktası, CLI, yaşam döngüsü |
 | `erp_edge/config.py` | Tek JSON yapılandırma + profil okuma |
 | `erp_edge/db.py` | SQLite şeması, WAL, idempotency, kuyruk |
-| `erp_edge/adapters.py` | Üç adaptör ve ortak sözleşme |
+| `erp_edge/adapters.py` | Dört adaptör ve ortak sözleşme |
+| `erp_edge/sim_map.py` | Fırın adı → profil makinesi eşlemesi (köprüyle ortak, saf modül) |
 | `erp_edge/collector.py` | Tarama, durum/eşik olayı, batch üretimi |
 | `erp_edge/transport.py` | İmzalı gönderim, yeniden deneme |
 | `erp_edge/server.py` | Yerel arayüz ve JSON API |

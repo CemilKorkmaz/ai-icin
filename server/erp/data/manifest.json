@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "generated_at": "2026-11-06T19:18:45.325Z",
+  "generated_at": "2026-11-24T10:53:20.144Z",
   "source": "app/js/seed.js (node tools/export_seed.mjs)",
   "note": "Koleksiyon dosyaları doğrudan kayıt dizisidir (settings.json tek nesnedir). schemaVersion 4: modüler saha kurulumuyla fabrika profil paketleri, modül kaydı, makine eşlemeleri, adaptör sözleşmeleri, kurulum taslakları ve devre dışı bırakma alanları eklendi; furnaces.json machines.json projeksiyonudur. Önceki sürümde (schemaVersion 3) genel ERP karşılaştırmasıyla müşteri/cari, satış siparişi, talep ve teklif, fatura, borç-alacak fişi, ödeme, depo, rezervasyon, sayım, maliyet, personel, vardiya, bütçe, dönem kapanışı ve entegrasyon kuralları eklendi. Olayların kalıcı hâli server/erp/archive/ altındadır.",
   "stages": [

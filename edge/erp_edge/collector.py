@@ -110,7 +110,11 @@ class Collector:
             self.db.log('warn', 'ADAPTER', fallback)
         # Adaptör her döngüde yeniden kurulur; sayaç collector'dan taşınır ki
         # sinyal değerleri döngüyle birlikte değişsin (STATE_CHANGE üretilebilsin).
+        # `simulation` adaptörü profil makine listesine ihtiyaç duyar; site her
+        # bağlantıda bağlanır (sabit makine kimliği yok).
         adapter.cycle = self.cycle
+        adapter.configure(cfg_data)
+        adapter.bind_site(self.site)
         try:
             adapter.connect()
         except DriverNotInstalled as exc:
@@ -119,6 +123,19 @@ class Collector:
             self.fallback = (fallback or '') + ' | ' + str(exc)
             self.db.log('warn', 'ADAPTER', self.fallback)
             adapter.cycle = self.cycle
+            adapter.configure(cfg_data)
+            adapter.bind_site(self.site)
+            adapter.connect()
+        except Exception as exc:
+            # Simülasyon kapalıysa üretim durmaz: simulated / MANUAL yedeği.
+            detail = f'{type(exc).__name__}: {exc}'
+            errors.append(detail)
+            adapter, _ = resolve_adapter({**cfg_data, 'adapter': 'simulated'})
+            self.fallback = f'{detail} → simulated / MANUAL yedeği'
+            self.db.log('warn', 'ADAPTER', self.fallback)
+            adapter.cycle = self.cycle
+            adapter.configure(cfg_data)
+            adapter.bind_site(self.site)
             adapter.connect()
 
         at = now_iso()

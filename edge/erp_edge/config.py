@@ -116,6 +116,11 @@ class Config:
             merged[key] = max(1, int(merged.get(key) or 1))
         merged['erp']['timeoutSeconds'] = max(1, int(merged['erp'].get('timeoutSeconds') or 5))
         merged['erp']['batchSize'] = max(1, int(merged['erp'].get('batchSize') or 50))
+        simulation = merged.setdefault('simulation', {})
+        try:
+            simulation['timeoutSeconds'] = max(1, int(simulation.get('timeoutSeconds') or 3))
+        except (TypeError, ValueError):
+            simulation['timeoutSeconds'] = 3
         self.data = merged
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.path.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

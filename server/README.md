@@ -56,4 +56,6 @@ Bu katman sunucuda yeni bir servis gerektirmez; veri `data/` altında, hesap man
 
 ## Fabrikadaki veri toplama bilgisayarı
 
+`server/sim_bridge/` klasöründeki köprü, ERP Studio'yu fabrika testinden önce kullanıcı fırın simülasyonuna bağlar; statik arayüzü sunar, simülasyon REST uçlarını proxy'ler ve imzalı edge batch'lerini kendi SQLite kayıt defterine yazar (`docs/14`). İşletme koleksiyonlarına yazmaz.
+
 `edge/` klasöründeki `ERP-Edge-Collector.exe` sensör verisini **doğrudan bu JSON dosyalarına yazmaz**. Önce kendi yerel SQLite veritabanına kaydeder, ardından imzalı `POST /api/edge/ingest` isteğiyle ERP'ye iletir; sunucu tarafındaki worker doğrulayıp koleksiyonları üretir. Bu ayrım, arşiv dosyalarının yarış koşuluna girmesini ve ham PLC verisinin işletme kayıtlarına karışmasını engeller. Ayrıntı `docs/13` Bölüm 3 ve 6'dadır.

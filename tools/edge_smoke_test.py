@@ -19,10 +19,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 EDGE = ROOT / 'edge'
 sys.path.insert(0, str(EDGE))
+sys.path.insert(0, str(ROOT))
 
 from erp_edge import FOUR_SIGNALS, SCHEMA_VERSION  # noqa: E402
 from erp_edge.adapters import (DriverNotInstalled, OpcUaAdapter, SimulatedAdapter,  # noqa: E402
+                               SimulationAdapter, SimulationUnavailable,
                                contract_rows, resolve_adapter, adapter_for_protocol)
+from server.sim_bridge.demo_sim import DemoSim  # noqa: E402
 from erp_edge.collector import Collector, build_site, dump_profile, threshold_band  # noqa: E402
 from erp_edge.config import Config, deep_merge, load_config, load_profile  # noqa: E402
 from erp_edge.db import EdgeDB  # noqa: E402
@@ -41,6 +44,7 @@ class EdgeTests(unittest.TestCase):
         cfg.data['erp']['url'] = 'http://127.0.0.1:9/api/edge/ingest'  # kapalı port
         cfg.data['erp']['timeoutSeconds'] = 1
         cfg.data['erp']['enabled'] = True
+        cfg.data['adapter'] = 'simulated'  # v1.3 davranışı; simulation ayrı testte
         cfg.data['ui']['openBrowser'] = False
         cfg.data['ui']['port'] = 0
         cfg.data['profilePath'] = str(EDGE / 'config' / 'ornek-fabrika-profili.json')
@@ -83,7 +87,10 @@ class EdgeTests(unittest.TestCase):
 
     def test_03_adapter_contract_and_fallback(self):
         rows = contract_rows()
-        self.assertEqual(len(rows), 3)
+        self.assertEqual(len(rows), 4)
+        roles = {r['code']: r['role'] for r in rows}
+        self.assertEqual(roles['simulation'], 'test')
+        self.assertTrue(next(r for r in rows if r['code'] == 'simulation')['implemented'])
         self.assertTrue(all(set(('connect', 'test', 'readFourSignals', 'disconnect')) <= set(r['capabilities']) for r in rows))
         self.assertTrue(adapter_for_protocol('OPC UA').code == 'opcua')
         self.assertTrue(adapter_for_protocol('Modbus TCP').code == 'modbus')
@@ -97,7 +104,7 @@ class EdgeTests(unittest.TestCase):
         self.assertIn('MANUAL', fallback)
         sim = SimulatedAdapter({}).test([{'signal': s} for s in FOUR_SIGNALS])
         self.assertTrue(sim['ok'] and sim['missingSignals'] == [])
-        print('  ✓ 3 adaptör · connect/test/readFourSignals/disconnect · MANUAL yedeği')
+        print('  ✓ 4 adaptör (simulation = test) · connect/test/readFourSignals/disconnect · MANUAL yedeği')
 
     def test_04_collector_writes_four_signals_and_telemetry(self):
         s = self.collector.run_once()
@@ -219,6 +226,8 @@ class EdgeTests(unittest.TestCase):
             raw['sqlPath'] = str(Path(tmp.name) / 'ev.db')
             raw['profilePath'] = str(EDGE / 'config' / 'ornek-fabrika-profili.json')
             raw['erp']['enabled'] = False
+            # Ortamda bir simülasyon açık olsa bile bu test deterministik kalmalı.
+            raw['adapter'] = 'simulated'
             # Örnek eşikleri simülasyon değerinin altına çek: kritik bant garanti.
             for tpl in raw['telemetryProfiles']:
                 if tpl['type'] == 'FURNACE':
@@ -250,6 +259,64 @@ class EdgeTests(unittest.TestCase):
             db.close()
         finally:
             tmp.cleanup()
+
+
+    def test_13_simulation_adapter_reads_demo(self):
+        """ERP simülasyonu adaptörü: dört sinyal + sıcaklık, sonra bağlantı kopunca yedek."""
+        sim = DemoSim(host='127.0.0.1', port=0, speed=1.0).start()
+        db = None
+        try:
+            data = json.loads(json.dumps(self.cfg.data))
+            data['adapter'] = 'simulation'
+            data['simulation'] = {'baseUrl': sim.url, 'timeoutSeconds': 2,
+                                  'autoMap': True, 'furnaceMap': {}}
+            data['sqlPath'] = str(self.base / 'simulation.db')
+            data['erp']['enabled'] = False
+            path = self.base / 'simulation-config.json'
+            path.write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
+            cfg = load_config(path)
+            cfg.base_dir = EDGE
+            cfg.data['profilePath'] = str(EDGE / 'config' / 'ornek-fabrika-profili.json')
+
+            db = EdgeDB(Path(cfg.data['sqlPath']))
+            col = Collector(cfg, db)
+            summary = col.run_once()
+            self.assertEqual(summary['adapter'], 'simulation')
+            self.assertIsNone(summary['fallback'])
+            self.assertGreater(summary['readings'], 0)
+            rows = db.latest_readings()
+            self.assertEqual({r['signal'] for r in rows if r['kind'] == 'signal'},
+                             set(FOUR_SIGNALS))
+            machines = {r['machine_id'] for r in rows}
+            self.assertEqual(machines, {'MCH-01', 'MCH-02', 'MCH-10'},
+                             'Yalnızca eşlenen fırınlardan veri alınmalı')
+            telemetry = [r for r in rows if r['kind'] == 'telemetry']
+            self.assertTrue(any(r['signal'] in ('temperatureC', 'chamberTempC') for r in telemetry))
+            self.assertTrue(all(r['source'] == 'ERP-SIM' for r in rows))
+
+            adapter = SimulationAdapter({})
+            adapter.configure(cfg.data)
+            adapter.bind_site(build_site(load_profile(cfg), cfg))
+            self.assertTrue(adapter.test([{'signal': s} for s in FOUR_SIGNALS])['ok'])
+            self.assertEqual(len(adapter.connect() and adapter.mapping['pairs']), 3)
+
+            sim.stop()
+            db.close()
+            db = EdgeDB(Path(cfg.data['sqlPath']))
+            fallback_col = Collector(cfg, db)
+            fallback = fallback_col.run_once()
+            self.assertEqual(fallback['adapter'], 'simulated')
+            self.assertIn('simulated', fallback['fallback'])
+            self.assertEqual(fallback['machines'], 13)
+            print('  ✓ simülasyon adaptörü: 3 eşleşen fırın · dört sinyal + sıcaklık · '
+                  'kapalıyken simulated yedeği')
+        finally:
+            if db is not None:
+                db.close()
+            try:
+                sim.stop()
+            except Exception:
+                pass
 
     def test_11_build_files(self):
         for name in ('build_exe.bat', 'erp-edge.spec', 'install-task.ps1', 'requirements.txt', 'main.py'):

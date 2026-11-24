@@ -181,7 +181,7 @@ for (const key of ['machineAliases', 'moduleRegistry', 'plantModules', 'setupDra
   'adapterContracts', 'profilePackages']) {
   check(Array.isArray(d[key]) && d[key].length > 0, `${key} koleksiyonu eksik/boş`);
 }
-check(Object.keys(VIEWS).length === 34 && navIds.length === 34, '34 ekran / 34 menü öğesi beklenir');
+check(Object.keys(VIEWS).length === 35 && navIds.length === 35, '35 ekran / 35 menü öğesi beklenir');
 const covered = new Set(MODULES.flatMap((m) => m.views));
 check(Object.keys(VIEWS).every((id) => covered.has(id)), 'Modül kaydı kapsamayan ekran var');
 check(new Set(MODULES.map((m) => m.code)).size === MODULES.length, 'Yinelenen modül kodu var');

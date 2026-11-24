@@ -1,0 +1,380 @@
+"""Kullanıcı simülasyonunun birebir çalışan, bağımlılıksız bir kopyası (önizleme).
+
+Gerçek simülasyon kullanıcının makinesindedir (FastAPI + Uvicorn, `:8000`).
+Buradaki kopya yalnızca iki iş için vardır:
+
+1. Bu depoda önizleme/test yaparken gerçek simülasyon kapalıyken de arayüzün
+   canlı veri göstermesi,
+2. `tools/sim_bridge_smoke_test.py` içinde ağ davranışının sınanması.
+
+Belgelenen sözleşmeyi uygular: `GET /api/furnaces`, `GET /api/orders`,
+`POST /api/orders`, `POST /api/orders/{id}/start`, `GET /api/readings/{ad}`.
+WebSocket yoktur; köprü bilinçli olarak REST ile 2,5 sn'de bir okur. Kopya
+olduğu her yanıtta `mode: demo` ve arayüzde “Demo kopya” etiketiyle bellidir.
+"""
+from __future__ import annotations
+
+import json
+import threading
+import time
+import urllib.parse
+from datetime import datetime
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+AMBIENT = 25.0
+
+DEFAULT_FURNACES = [
+    {'name': 'Aluminyum Eritme Fırını', 'max_temp': 850.0, 'heat_rate': 1.25, 'cool_rate': 0.90,
+     'note': 'Ergitme ocağı · güvenlik sınırı 850 °C'},
+    {'name': 'Homojenizasyon Fırını', 'max_temp': 600.0, 'heat_rate': 0.85, 'cool_rate': 0.50,
+     'note': '575 °C / 8 saat reçetesi'},
+    {'name': 'Yaşlandırma Fırını', 'max_temp': 220.0, 'heat_rate': 0.60, 'cool_rate': 0.35,
+     'note': 'Düşük sıcaklık tavlama'},
+]
+
+
+class FurnaceEngine:
+    """Saf durum makinesi: HTTP'den bağımsız, testte doğrudan adım atılabilir."""
+
+    def __init__(self, speed: float = 1.0, furnaces=None):
+        self.speed = max(0.1, float(speed or 1.0))
+        self.furnaces: dict[str, dict] = {}
+        for spec in (furnaces or DEFAULT_FURNACES):
+            self.furnaces[spec['name']] = {
+                'name': spec['name'], 'temperature': AMBIENT, 'target': 0.0,
+                'max_temp': float(spec['max_temp']), 'heat_rate': float(spec['heat_rate']),
+                'cool_rate': float(spec['cool_rate']), 'status': 'KAPALI',
+                'burner': False, 'alarm': '', 'gas': 0.0, 'energy': 0.0,
+                'busy_order': None, 'started_at': None, 'note': spec.get('note', '')
+            }
+        self.orders: dict[str, dict] = {}
+        self.readings: dict[str, list[dict]] = {name: [] for name in self.furnaces}
+        self.seq = 0
+        self.sim_time = 0.0
+        self._last = time.monotonic()
+
+    # ------------------------------------------------------------- emirler
+    def create_order(self, product: str, furnace: str, target: float, duration_min: float) -> dict:
+        if furnace not in self.furnaces:
+            raise ValueError(f'Fırın bulunamadı: {furnace}')
+        product = (product or '').strip()
+        if not product:
+            raise ValueError('Ürün adı zorunlu')
+        try:
+            target = float(target)
+            duration_min = float(duration_min)
+        except (TypeError, ValueError):
+            raise ValueError('Hedef sıcaklık ve süre sayı olmalı')
+        if target <= 0 or target > 1200:
+            raise ValueError('Hedef sıcaklık 0–1200 °C aralığında olmalı')
+        if duration_min <= 0 or duration_min > 24 * 60:
+            raise ValueError('Süre 0–1440 dakika aralığında olmalı')
+        self.seq += 1
+        order = {
+            'id': f"WO-{datetime.now().strftime('%Y%m%d')}-{self.seq:04d}",
+            'product': product, 'furnace': furnace, 'target_temp': target,
+            'duration_min': duration_min, 'state': 'CREATED',
+            'created_at': datetime.now().astimezone().isoformat(timespec='seconds'),
+            'started_at': None, 'completed_at': None, 'remaining_min': duration_min,
+            'summary': None, 'note': ''
+        }
+        self.orders[order['id']] = order
+        return order
+
+    def start_order(self, order_id: str) -> dict:
+        order = self.orders.get(order_id)
+        if not order:
+            raise KeyError(order_id)
+        if order['state'] != 'CREATED':
+            raise RuntimeError(f"Emir {order['state']} durumunda; yalnızca CREATED başlatılabilir")
+        furnace = self.furnaces[order['furnace']]
+        if furnace['busy_order'] or furnace['status'] in ('ISINIYOR', 'BEKLETIYOR', 'ALARM'):
+            raise RuntimeError(f"{furnace['name']} meşgul ({furnace['status']})")
+        order['state'] = 'RUNNING'
+        order['started_at'] = datetime.now().astimezone().isoformat(timespec='seconds')
+        order['remaining_min'] = order['duration_min']
+        furnace['busy_order'] = order['id']
+        furnace['target'] = order['target_temp']
+        furnace['status'] = 'ISINIYOR'
+        furnace['burner'] = True
+        furnace['started_at'] = order['started_at']
+        return order
+
+    # ------------------------------------------------------------- zaman
+    def tick(self, dt_real: float | None = None) -> None:
+        now = time.monotonic()
+        if dt_real is None:
+            dt_real = max(0.0, now - self._last)
+        self._last = now
+        self.step(dt_real * self.speed)
+
+    def step(self, sim_seconds: float) -> None:
+        """Simüle edilen saniye kadar ilerletir (testlerde doğrudan çağrılır)."""
+        sim_seconds = max(0.0, float(sim_seconds))
+        self.sim_time += sim_seconds
+        for furnace in self.furnaces.values():
+            self._tick_furnace(furnace, sim_seconds)
+
+    def advance(self, sim_seconds: float, step: float = 1.0) -> None:
+        """Büyük sıçramaları küçük adımlara böler; ısınma eğrisi bozulmaz."""
+        remaining = max(0.0, float(sim_seconds))
+        while remaining > 0:
+            delta = min(max(0.05, step), remaining)
+            self.step(delta)
+            remaining -= delta
+
+    def _tick_furnace(self, f: dict, dt: float) -> None:
+        order = self.orders.get(f['busy_order']) if f['busy_order'] else None
+        if f['status'] == 'ALARM':
+            self._cool(f, dt)
+            if f['temperature'] <= f['max_temp'] - 30:
+                f['status'] = 'KAPALI'
+                f['alarm'] = ''
+                f['target'] = 0.0
+                f['busy_order'] = None
+                if order and order['state'] == 'RUNNING':
+                    order['state'] = 'CANCELLED'
+                    order['note'] = 'Güvenlik alarmı; brülör kapatıldı'
+            self._record(f)
+            return
+
+        if f['burner'] and f['target']:
+            f['temperature'] += f['heat_rate'] * dt
+            f['gas'] += 0.0011 * dt
+            f['energy'] += 0.018 * dt
+            if f['temperature'] >= f['max_temp']:
+                f['temperature'] = f['max_temp']
+                f['burner'] = False
+                f['status'] = 'ALARM'
+                f['alarm'] = f"Güvenlik sınırı aşıldı ({f['max_temp']:.0f} °C); brülör kapatıldı"
+                self._record(f)
+                return
+            if f['temperature'] >= f['target'] - 0.5:
+                f['status'] = 'BEKLETIYOR'
+                f['burner'] = False
+        elif f['status'] == 'BEKLETIYOR':
+            if f['temperature'] < f['target'] - 3:
+                f['status'] = 'ISINIYOR'
+                f['burner'] = True
+        elif f['status'] in ('KAPALI', 'TAMAMLANDI'):
+            self._cool(f, dt)
+            if f['status'] == 'TAMAMLANDI' and f['temperature'] <= AMBIENT + 5:
+                f['status'] = 'KAPALI'
+            self._record(f)
+            return
+
+        if order and order['state'] == 'RUNNING' and f['status'] == 'BEKLETIYOR':
+            order['remaining_min'] = max(0.0, float(order['remaining_min']) - dt / 60.0)
+            if order['remaining_min'] <= 0:
+                self._complete(f, order)
+        self._record(f)
+
+    def _cool(self, f: dict, dt: float) -> None:
+        f['burner'] = False
+        f['temperature'] = max(AMBIENT, f['temperature'] - f['cool_rate'] * dt)
+
+    def _complete(self, f: dict, order: dict) -> None:
+        order['state'] = 'COMPLETED'
+        order['completed_at'] = datetime.now().astimezone().isoformat(timespec='seconds')
+        order['remaining_min'] = 0.0
+        order['summary'] = {
+            'furnaceAvg': round(f['temperature'], 1),
+            'energyKwh': round(f['energy'], 3),
+            'gasM3': round(f['gas'], 4)
+        }
+        f['status'] = 'TAMAMLANDI'
+        f['busy_order'] = None
+        f['target'] = 0.0
+        f['burner'] = False
+
+    def _record(self, f: dict) -> None:
+        rows = self.readings.setdefault(f['name'], [])
+        if rows and self.sim_time - rows[-1]['_t'] < 1.0:
+            return
+        rows.append({
+            '_t': self.sim_time,
+            'at': datetime.now().astimezone().isoformat(timespec='seconds'),
+            'temperature': round(f['temperature'], 1),
+            'target_temp': round(f['target'], 1),
+            'status': f['status']
+        })
+        del rows[:-900]
+
+    # ------------------------------------------------------------- görünüm
+    def furnace_state(self, f: dict) -> dict:
+        order = self.orders.get(f['busy_order']) if f['busy_order'] else None
+        return {
+            'name': f['name'],
+            'temperature': round(f['temperature'], 1),
+            'anlik_sicaklik': round(f['temperature'], 1),
+            'target_temp': round(f['target'], 1),
+            'hedef_sicaklik': round(f['target'], 1),
+            'max_temp': f['max_temp'],
+            'maks_sicaklik': f['max_temp'],
+            'status': f['status'],
+            'durum': f['status'],
+            'brulor_acik': f['burner'],
+            'alarm': f['alarm'] or None,
+            'gaz_tuketimi': round(f['gas'], 4),
+            'enerji_toplam': round(f['energy'], 3),
+            'evrim_suresi': _elapsed_sec(f['started_at']),
+            'busy_order': f['busy_order'],
+            'active_order': order['id'] if order else None,
+            'note': f['note']
+        }
+
+    def furnace_states(self) -> dict:
+        return {name: self.furnace_state(f) for name, f in self.furnaces.items()}
+
+    def readings_for(self, name: str, limit: int = 200) -> list[dict]:
+        rows = self.readings.get(name, [])
+        return [{k: v for k, v in r.items() if k != '_t'} for r in rows[-max(1, min(900, limit)):]]
+
+    def snapshot(self) -> dict:
+        return {
+            'mode': 'demo', 'speed': self.speed, 'simTime': round(self.sim_time, 1),
+            'furnaces': self.furnace_states(), 'orders': list(self.orders.values()),
+            'orderCount': len(self.orders)
+        }
+
+
+def _elapsed_sec(started_at: str | None) -> int:
+    if not started_at:
+        return 0
+    try:
+        return max(0, int((datetime.now().astimezone() - datetime.fromisoformat(started_at)).total_seconds()))
+    except ValueError:
+        return 0
+
+
+class DemoHandler(BaseHTTPRequestHandler):
+    protocol_version = 'HTTP/1.1'
+    server_version = 'ERP-Sim-Demo/1.0'
+
+    # ------------------------------------------------------------- yardımcı
+    def log_message(self, fmt, *args):
+        pass
+
+    def _json(self, payload, status: int = 200):
+        raw = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(raw)))
+        self.send_header('Cache-Control', 'no-store')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(raw)
+
+    def _body(self) -> dict:
+        length = int(self.headers.get('Content-Length') or 0)
+        if not length:
+            return {}
+        try:
+            return json.loads(self.rfile.read(length).decode('utf-8'))
+        except (ValueError, UnicodeDecodeError):
+            return {}
+
+    @property
+    def engine(self) -> FurnaceEngine:
+        return self.server.engine  # type: ignore[attr-defined]
+
+    # ------------------------------------------------------------- GET
+    def do_GET(self):
+        path = urllib.parse.unquote(self.path.split('?')[0])
+        query = urllib.parse.parse_qs(self.path.split('?', 1)[1]) if '?' in self.path else {}
+        if path == '/api/furnaces':
+            self._json(self.engine.furnace_states())
+        elif path.startswith('/api/furnaces/'):
+            name = path.split('/api/furnaces/', 1)[1]
+            if name not in self.engine.furnaces:
+                self._json({'detail': 'Fırın bulunamadı'}, 404)
+                return
+            self._json(self.engine.furnace_state(self.engine.furnaces[name]))
+        elif path == '/api/orders':
+            self._json(list(self.engine.orders.values()))
+        elif path.startswith('/api/readings/'):
+            name = path.split('/api/readings/', 1)[1]
+            if name not in self.engine.furnaces:
+                self._json({'detail': 'Fırın bulunamadı'}, 404)
+                return
+            try:
+                limit = int((query.get('limit') or ['200'])[0])
+            except ValueError:
+                limit = 200
+            self._json(self.engine.readings_for(name, limit))
+        elif path == '/api/health':
+            self._json({'ok': True, **self.engine.snapshot()})
+        elif path == '/api/ws':
+            self._json({'detail': 'Demo kopyada WebSocket yok; köprü REST kullanır'}, 426)
+        else:
+            self._json({'detail': 'Bilinmeyen uç'}, 404)
+
+    # ------------------------------------------------------------- POST
+    def do_POST(self):
+        path = urllib.parse.unquote(self.path.split('?')[0])
+        body = self._body()
+        try:
+            if path == '/api/orders':
+                order = self.engine.create_order(
+                    body.get('product', ''), body.get('furnace', ''),
+                    body.get('target_temp'), body.get('duration_min'))
+                self._json(order, 201)
+            elif path.startswith('/api/orders/') and path.endswith('/start'):
+                order_id = path[len('/api/orders/'):-len('/start')]
+                order = self.engine.start_order(order_id)
+                self._json(order)
+            else:
+                self._json({'detail': 'Bilinmeyen uç'}, 404)
+        except KeyError:
+            self._json({'detail': 'Emir bulunamadı'}, 404)
+        except ValueError as exc:
+            self._json({'detail': str(exc)}, 400)
+        except RuntimeError as exc:
+            self._json({'detail': str(exc)}, 409)
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
+
+
+class DemoSim:
+    """Demo kopyayı arka planda çalıştırır (port 0 → işletim sistemi seçer)."""
+
+    def __init__(self, host: str = '127.0.0.1', port: int = 8000, speed: float = 10.0):
+        self.engine = FurnaceEngine(speed=speed)
+        self.httpd = ThreadingHTTPServer((host, port), DemoHandler)
+        self.httpd.daemon_threads = True
+        self.httpd.engine = self.engine  # type: ignore[attr-defined]
+        self.thread = None
+        self.running = False
+
+    @property
+    def port(self) -> int:
+        return self.httpd.server_address[1]
+
+    @property
+    def url(self) -> str:
+        host = self.httpd.server_address[0]
+        return f'http://{host}:{self.port}'
+
+    def start(self):
+        if self.running:
+            return self
+        self.running = True
+        self.thread = threading.Thread(target=self.httpd.serve_forever, name='demo-sim', daemon=True)
+        self.thread.start()
+        threading.Thread(target=self._loop, name='demo-sim-clock', daemon=True).start()
+        return self
+
+    def _loop(self):
+        while self.running:
+            self.engine.tick()
+            time.sleep(0.5)
+
+    def stop(self):
+        self.running = False
+        self.httpd.shutdown()
+        self.httpd.server_close()

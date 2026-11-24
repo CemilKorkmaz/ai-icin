@@ -5,6 +5,7 @@ import { stockView, receiptsView, crusherView, movementsView } from './inventory
 import { productionView, recipesView } from './production.js';
 import { shipmentsView, archiveView } from './shipping.js';
 import { reportsView } from './reports.js';
+import { simView } from './sim.js';
 import { notificationsView, settingsView } from './system.js';
 import {
   machinesView, pathsView, cuttingView, maintenanceView,
@@ -45,6 +46,7 @@ export const VIEWS = {
   archive: archiveView,
   reports: reportsView,
   integration: integrationView,
+  sim: simView,
   vendor: vendorView,
   notifications: notificationsView,
   settings: settingsView,

@@ -2,7 +2,7 @@
 // Saf modüldür: DOM, localStorage veya store'a bağımlı değildir; Node tarafında test edilir.
 // Gereksinim kaynağı: docs/08 (modüler makine), docs/12 (saha kurulum ve modül yaşam döngüsü).
 
-/** Menüdeki 34 ekranı mantıksal modüllere bağlayan kayıt. `views` listesi veridir, kod değildir. */
+/** Menüdeki 35 ekranı mantıksal modüllere bağlayan kayıt. `views` listesi veridir, kod değildir. */
 export const MODULES = [
   { code: 'CORE', label: 'Çekirdek', group: 'Genel / Sistem', views: ['dashboard', 'notifications', 'settings'], defaultEnabled: true, requiresMachineType: null, requiresMode: null, note: 'Panel, bildirim ve ayarlar her fabrikada açıktır' },
   { code: 'PURCHASING', label: 'Satın Alma', group: 'Ticari', views: ['materials', 'orders', 'prices', 'suppliers', 'requests'], defaultEnabled: true, requiresMachineType: null, requiresMode: null, note: 'Değişken malzeme kartları ve talep/teklif akışı' },
@@ -17,7 +17,7 @@ export const MODULES = [
   { code: 'HR', label: 'Personel & Vardiya', group: 'Lojistik', views: ['hr'], defaultEnabled: true, requiresMachineType: null, requiresMode: null, note: 'Bordro harici; yalnızca operatör izi' },
   { code: 'SHIPPING', label: 'Sevkiyat', group: 'Lojistik', views: ['shipments', 'archive'], defaultEnabled: true, requiresMachineType: null, requiresMode: null, note: 'İki kademeli onay ve arşiv' },
   { code: 'REPORTS', label: 'Raporlama', group: 'Yönetim', views: ['reports'], defaultEnabled: true, requiresMachineType: null, requiresMode: null, note: 'Günlük / haftalık / aylık çıktılar' },
-  { code: 'INTEGRATION', label: 'Entegrasyon', group: 'Yönetim', views: ['integration'], defaultEnabled: true, requiresMachineType: null, requiresMode: null, note: 'Tek kayıt çok etki matrisi' },
+  { code: 'INTEGRATION', label: 'Entegrasyon', group: 'Yönetim', views: ['integration', 'sim'], defaultEnabled: true, requiresMachineType: null, requiresMode: null, note: 'Tek kayıt çok etki matrisi + simülasyon köprüsü' },
   { code: 'VENDOR', label: 'Merkezi Yönetim', group: 'Yönetim', views: ['vendor', 'setup', 'modules'], defaultEnabled: true, requiresMachineType: null, requiresMode: null, note: 'Yalnızca geliştirici ekibi; operatör ekranı değildir' }
 ];
 
