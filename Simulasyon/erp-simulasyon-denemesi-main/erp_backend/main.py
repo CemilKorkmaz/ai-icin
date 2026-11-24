@@ -29,6 +29,7 @@ from pydantic import BaseModel
 from simulator.plant import Plant
 from simulator.opcua_server import run_opcua_server
 from simulator.furnace import FurnaceParams
+from simulator.scenarios import BUSINESS_EVENT_DEFS, SCENARIO_DEFS
 from erp_backend.database import Database
 
 # ------------------------------------------------------------------ ayarlar
@@ -172,6 +173,7 @@ async def simulation_loop() -> None:
             "ts": time.time(),
             "furnaces": states,
             "orders": orders,
+            "latestEventId": plant.latest_event_id(),
         })
 
 
@@ -185,6 +187,17 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="ERP Fabrika Simülasyonu", lifespan=lifespan)
+
+# Test ortamı sürümü; köprü ve dokümanlar bunu okuyabilir.
+SIM_VERSION = "1.6.0"
+
+
+@app.get("/api/health")
+async def health():
+    return {
+        "ok": True, "version": SIM_VERSION, "speed": SIM_SPEED,
+        "furnaces": len(plant.furnaces), "latestEventId": plant.latest_event_id(),
+    }
 
 # Arayüz klasörü: normal çalışmada repo kökündeki "frontend",
 # paketlenmiş (exe) çalışmada _MEIPASS içindeki kopya.
@@ -280,6 +293,70 @@ async def set_speed(data: SpeedIn):
 @app.get("/api/readings/{furnace}")
 async def get_readings(furnace: str, limit: int = 200):
     return DB.get_readings(furnace, limit)
+
+
+# ---------------------------------------------------------------- ERP test olayları
+# Bu uçlar ERP test ortamı içindir. Fırın senaryoları gerçek simülasyon
+# durumunu değiştirir; iş akışı testleri yalnızca bildirim olayı üretir.
+
+class ScenarioIn(BaseModel):
+    scenario: str
+    furnace: str | None = None
+
+
+class BusinessEventIn(BaseModel):
+    scenario: str
+
+
+@app.get("/api/scenarios")
+async def scenario_catalog():
+    return {
+        "ok": True,
+        "scenarios": SCENARIO_DEFS,
+        "business": BUSINESS_EVENT_DEFS,
+        "furnaces": list(plant.furnaces.keys()),
+    }
+
+
+@app.post("/api/scenarios")
+async def apply_scenario(data: ScenarioIn):
+    scenario = (data.scenario or "").strip()
+    if not scenario:
+        raise HTTPException(status_code=400, detail="scenario zorunlu")
+    # İş akışı testleri fırın gerektirmez.
+    if scenario in {item["id"] for item in BUSINESS_EVENT_DEFS}:
+        try:
+            result = plant.apply_business_event(scenario)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return {"ok": True, **result, "latestEventId": plant.latest_event_id()}
+    furnace = (data.furnace or "").strip()
+    if not furnace:
+        raise HTTPException(status_code=400, detail="furnace zorunlu")
+    try:
+        result = plant.apply_scenario(furnace, scenario)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, **result, "latestEventId": plant.latest_event_id()}
+
+
+@app.post("/api/scenarios/business")
+async def apply_business_event(data: BusinessEventIn):
+    try:
+        result = plant.apply_business_event((data.scenario or "").strip())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, **result, "latestEventId": plant.latest_event_id()}
+
+
+@app.get("/api/events")
+async def list_events(after: int = 0, limit: int = 100):
+    return {
+        "ok": True,
+        "events": plant.events_since(after, limit),
+        "latestId": plant.latest_event_id(),
+        "unsupported": False,
+    }
 
 
 @app.websocket("/api/ws")

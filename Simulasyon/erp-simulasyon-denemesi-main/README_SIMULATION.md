@@ -24,6 +24,21 @@ ERP, sıcaklığı üretmez. Sıcaklıkları sanal fabrika üretir, ERP OPC UA �
 
 Her fırın: sıcaklık, hedef, durum (KAPALI/ISINIYOR/BEKLETIYOR/ALARM), brülör, gaz tüketimi, çevrim süresi, alarm.
 
+## ERP test senaryoları
+
+Arayüzün en üstündeki **ERP Test Senaryoları** panelinde her fırın için şu düğmeler vardır:
+
+| Düğme | Etki |
+| --- | --- |
+| Sensör | Sensör arızası; kalite `BAD`, sıcaklık son değerde donar, alarm kalır |
+| Aşırı sıcaklık | Güvenlik sınırının üstüne çıkar, brülör kapanır |
+| Brülör | Brülör devre dışı; ısıtma yapılamaz |
+| Kapı | Kapı açık sinyali; brülör güvenlik gereği kapanır |
+| Döküm | Döküm/devrilme sinyali etkin |
+| Senaryoyu sıfırla | Tüm arızaları ve alarmı temizler |
+
+Düğmeye basıldığında olay sunucuda `/api/events` günlüğüne yazılır. ERP köprüsü bu günlüğü okur ve ERP'de **bildirim merkezi + kritik uyarı bandı + PLC ekranı** güncellenir. Ayrıntılı oynatma kitabı: depo kökünde `docs/16-erp-test-ortami.md`.
+
 ## Kurulum ve çalıştırma
 
 ### Mac mini M2
@@ -74,8 +89,8 @@ asyncio.run(main())
 
 ## Gerçek fabrika geçişi
 
-- `erp_simulation/furnace.py` ve `plant.py`'deki `heat_rate`, `cool_rate`, `max_temp` değerlerini gerçek fırın reçetesine göre ayarla.
-- `opcua_server.py`'yi kendi PLC'nin OPC UA endpoint'ine yönlendir (veya Modbus/S7 istemcisi ekle).
+- `simulator/furnace.py` ve `simulator/plant.py`'deki `heat_rate`, `cool_rate`, `max_temp` değerlerini gerçek fırın reçetesine göre ayarla.
+- `simulator/opcua_server.py`'yi kendi PLC'nin OPC UA endpoint'ine yönlendir (veya Modbus/S7 istemcisi ekle).
 - ERP tarafındaki `erp_adapter.py`'deki OPC UA okuma kısmını gerçek PLC'le değiştir.
 
 ## Veritabanı

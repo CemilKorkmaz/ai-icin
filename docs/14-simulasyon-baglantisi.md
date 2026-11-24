@@ -1,4 +1,4 @@
-# 14 — Simülasyon Bağlantısı: ERP'yi Fabrika Testinden Önce Simülasyonda Sınamak (Sürüm 1.5)
+# 14 — Simülasyon Bağlantısı: ERP'yi Fabrika Testinden Önce Simülasyonda Sınamak (Sürüm 1.6)
 
 **Amaç:** Kullanıcının `erp_backend` / `erp_simulation` olarak çalıştırdığı fırın simülasyonunu ERP Studio'ya bağlamak; gerçek fabrika testi başlamadan önce fırın sıcaklığı, alarm, üretim emri ve edge ajanı zincirini uçtan uca burada sınamak.
 
@@ -6,7 +6,9 @@
 
 **Sürüm 1.5:** Simülasyon verisi artık yalnızca bu ekranda değil, ana **Panel**, **Makine Parkı**, **PLC Durum** ve **Üretim Akışı** ekranlarında da gösterilir. Üst çubuktaki anahtar ile demo veriye dönülebilir; canlı mod salt okunurdur.
 
-**Kapsam:** Bir simülasyon sunucusu (`:8000`), bir köprü (`:8080`) ve isteğe bağlı edge ajanı (`:8787`). Simülasyonun kendi kaynak kodu değiştirilmez; yalnızca belgelenen REST uçları kullanılır.
+**Sürüm 1.6:** Simülasyon **ERP test ortamına** dönüştü. Fırın arızası senaryoları (sensör, aşırı sıcaklık, brülör, kapı, döküm) simülasyon ekranından tek tıkla uygulanır; olaylar `/api/events` ile ERP'ye taşınır ve **bildirim merkezi + kritik uyarı bandı + PLC ekranı** üzerinde görünür. İş akışı testleri yalnızca bildirim üretir, işletme tablosuna yazmaz. Ayrıntılı oynatma kitabı: `docs/16`.
+
+**Kapsam:** Bir simülasyon sunucusu (`:8000`), bir köprü (`:8080`) ve isteğe bağlı edge ajanı (`:8787`). Köprü simülasyonla yalnızca belgelenen REST uçları üzerinden konuşur; depodaki simülasyon kopyası v1.6'da senaryo ve olay uçlarıyla genişletilmiştir.
 
 ---
 
@@ -43,15 +45,15 @@ Tarayıcı yalnızca `8080` ile konuşur. Simülasyon kapalıysa köprü son ba�
 * `/app/` altında ERP Studio'yu sunar; eski `python3 -m http.server 8080` komutunun yerini alır.
 * Simülasyonun fırın, emir ve okuma uçlarını okur; Türkçe alan adlarını (`anlik_sicaklik`, `hedef_sicaklik`, `durum` …) tek biçime çevirir.
 * Simülasyon adları ile `docs/12` profil paketindeki makine kimliklerini eşler; eşleşmeyeni uyarı olarak gösterir.
-* Kullanıcının açık eylemiyle emir oluşturur ve başlatır.
+* Kullanıcının açık eylemiyle emir oluşturur ve başlatır, senaryo uygular.
 * `/api/edge/ingest` üzerinden HMAC-SHA256 imzalı batch'i doğrular, `batchId` ile idempotent biçimde SQLite'a yazar.
 * Simülasyon kapalıyken 503/200 + `stale` yanıtı üretir; arayüz çökmez.
 
 **Yapmaz:**
 
-* Simülasyonun veritabanına, kaynak koduna veya WebSocket'ine dokunmaz.
-* PLC'ye yazmaz; fırın başlatma yetkisi simülasyonun kendi API'sindedir.
-* ERP'nin stok, maliyet, muhasebe veya cari tablolarına yazmaz. Edge batch'i ayrı bir kayıt defterine düşer; işletme etkisi üretmez.
+* Simülasyonun veritabanına veya WebSocket'ine dokunmaz; yalnızca belgelenen REST uçlarını kullanır.
+* PLC'ye yazmaz; fırın başlatma ve senaryo uygulama yetkisi simülasyonun kendi API'sindedir.
+* ERP'nin stok, maliyet, muhasebe veya cari tablolarına yazmaz. Edge batch'i ayrı bir kayıt defterine düşer; simülasyon olayı yalnızca **bildirim** üretir, işletme kaydı oluşturmaz.
 * Gerçek fabrikada kullanılacak üretim ingest worker'ının yerini aldığını iddia etmez. Bu, prototip doğrulamasıdır (`docs/13` Bölüm 13).
 
 ---
@@ -173,9 +175,12 @@ Ajan `8787`'de açılır. **Bağlantıyı Test Et** düğmesi hem simülasyonu h
 | GET | `/api/sim/furnaces` | Ham ama normalize edilmiş fırın listesi |
 | GET | `/api/sim/orders` | Emir listesi |
 | GET | `/api/sim/readings?name=&limit=` | Fırın sıcaklık geçmişi (en fazla 500) |
+| GET | `/api/sim/scenarios` | ERP test senaryoları ve iş akışı testleri |
+| GET | `/api/sim/events?after=&limit=` | ERP'ye giden olay günlüğü (artan kimlik) |
 | GET | `/api/sim/map` | Fırın → makine eşlemesi ve eşleşmeyenler |
 | POST | `/api/sim/orders` | Emir oluştur (`product`, `furnace`, `target_temp`, `duration_min`) |
 | POST | `/api/sim/orders/start` | Emri başlat (`id`, isteğe bağlı `furnace`) |
+| POST | `/api/sim/scenarios` | `{scenario, furnace}` arıza uygula; `{scenario}` iş akışı testi |
 | POST | `/api/bridge/config` | `simBaseUrl` değiştir; gizli alanlar maskeli döner |
 | GET | `/api/edge/health` | Kayıt defteri durumu, anahtar/token gereksinimi |
 | GET | `/api/edge/summary` | Batch, okuma, olay, makine sayıları ve son batch |
@@ -192,7 +197,7 @@ Hata biçimi her uçta aynıdır: `{ "ok": false, "error": "Türkçe açıklama"
 Simülasyon fırınları adla gelir (`Aluminyum Eritme Fırını`), ERP makineleri ise profilden kimlikle (`MCH-01`). Sabit kod yoktur; `edge/erp_edge/sim_map.py` iki tarafta da aynı kuralları uygular:
 
 1. **Açık eşleme.** `furnaceMap` içinde fırın adı → makine kimliği varsa o kullanılır.
-2. **Ada göre kural.** "eritme / ergitme / ocak" → `FURNACE`, "homojen" → `HOMO_FURNACE` veya `CONT_HOMO`, "yaşlandırma / aging" → `FURNACE`, "testere / kesim" → `SAW`, "tabla / döküm" → `CAST_TABLE`.
+2. **Ada göre kural.** "eritme / ergitme / ocak" → `FURNACE`, "homojen" → `HOMO_FURNACE` veya `CONT_HOMO`, "yaşlandırma / aging" → `FURNACE`, "biyet / ısıtma / billet" → `FURNACE`, "testere / kesim" → `SAW`, "tabla / döküm" → `CAST_TABLE`.
 3. **Kullanılmamış makine.** Aynı tipte, başka fırına atanmamış ilk makine seçilir. Bir makine iki fırına atanmaz.
 4. **Eşleşme yoksa veri üretilmez.** Uydurma makine seçilmez; arayüz "eşleşmeyen fırın" uyarısı gösterir.
 
@@ -202,7 +207,7 @@ Simülasyon fırınları adla gelir (`Aluminyum Eritme Fırını`), ERP makinele
 | --- | --- | --- | --- |
 | Aluminyum Eritme Fırını | MCH-01 · A Fırını | FURNACE | Otomatik kural |
 | Homojenizasyon Fırını | MCH-10 · Homojen 1 | HOMO_FURNACE | Otomatik kural |
-| Yaşlandırma Fırını | MCH-02 · B Fırını | FURNACE | Otomatik kural |
+| Biyet Isıtma Fırını | MCH-02 · B Fırını | FURNACE | Otomatik kural |
 
 Profilde 13 aktif makine vardır; simülasyonda üç fırın olduğu için yalnızca üç makine veri alır. Kalan makineler için okuma üretilmez ve bu durum arayüzde açıkça yazılır.
 
@@ -216,8 +221,8 @@ Adaptör, v1.3'teki `connect / test / readFourSignals / readTelemetry / disconne
 | --- | --- | --- |
 | `alarm` | `status` / `durum`, `alarm` | Durum `ALARM` veya alarm metni varsa `fault`, yoksa `ok` |
 | `running` | `status` | `ISINIYOR`, `BEKLETIYOR`, `CALISIYOR`, `RUNNING` ise `true` |
-| `door` | Simülasyonda yok | `unknown` yazılır; uydurma `closed` yazılmaz |
-| `casting` | Simülasyonda yok | `unknown` yazılır |
+| `door` | `signals.door` (senaryo) | `open` / `closed`; yoksa `unknown` yazılır, uydurma `closed` yazılmaz |
+| `casting` | `signals.casting` (senaryo) | `pouring` / `idle`; yoksa `unknown` yazılır |
 
 Telemetri olarak makine tipine göre `temperatureC` (ergitme) veya `chamberTempC` (homojen fırın) yazılır; değer simülasyonun `anlik_sicaklik` alanından gelir. Yağ sıcaklığı (`oilTempC`) simülasyonda yayınlanmadığı için atlanır. Kalite her satırda `SIMULATED`, kaynak `ERP-SIM` olur; böylece gerçek PLC verisiyle karışmaz.
 
@@ -275,19 +280,20 @@ Sırayla:
 2. Köprü Windows'ta `Baslat.bat`, macOS'te `Baslat.command` çift tıkla (veya `python3 server/sim_bridge/run.py --open`) açılır; tarayıcı canlı **Panel**'de açılır, konsolda eşlemenin `3/3` olduğu görülür. Üst çubukta **Canlı simülasyon** yazar; teşhis için **Entegrasyon → Simülasyon Bağlantısı** açılır.
 3. Arayüzde `Homojenizasyon Fırını`, hedef `60 °C`, süre `0.2` dk ile emir oluşturulur ve başlatılır. Kart `ISINIYOR` → `BEKLETIYOR` → `TAMAMLANDI` olur; süre hedefe ulaştıktan sonra işler.
 4. `Aluminyum Eritme Fırını`, hedef `900 °C` (güvenlik sınırı 850 °C) ile alarm denenir; kart `ALARM` olur, brülör kapanır.
-5. Edge ajanı `8787`'de **Bağlantıyı Test Et** → simülasyon ve ERP köprüsü yeşil; **Şimdi Oku** → 15 okuma (3 fırın × 4 sinyal + 3 telemetri); **Toplu Gönder** → kuyruk `sent`.
-6. **Panel**, **Makine Parkı**, **PLC Durum** ve **Üretim Akışı** aynı fırınları, sıcaklıkları ve emirleri gösterir; sayfa başlığında **CANLI SİMÜLASYON** etiketi vardır. Üst çubuktan **Demo veri**ye dönülünce eski demo ekranları geri gelir.
-7. Simülasyon ekranında edge batch sayısı ve son okumalar görünür. `outbox` artık `501` değil `200` alır.
+5. Simülasyon ekranındaki **ERP Test Senaryoları** panelinden `Biyet Isıtma Fırını → Sensör` seçilir. ERP'de zil sayacı artar, üstte kırmızı **Sensör arızası** bandı çıkar, **PLC Durum** ekranında kalite `BAD` ve alarm rozeti `Sensör BAD` görünür. `Senaryoyu sıfırla` ile fırın normale döner. Ayrıntı: `docs/16`.
+6. Edge ajanı `8787`'de **Bağlantıyı Test Et** → simülasyon ve ERP köprüsü yeşil; **Şimdi Oku** → 15 okuma (3 fırın × 4 sinyal + 3 telemetri); **Toplu Gönder** → kuyruk `sent`.
+7. **Panel**, **Makine Parkı**, **PLC Durum** ve **Üretim Akışı** aynı fırınları, sıcaklıkları ve emirleri gösterir; sayfa başlığında **CANLI SİMÜLASYON** etiketi vardır. Üst çubuktan **Demo veri**ye dönülünce eski demo ekranları geri gelir.
+8. Simülasyon ekranında edge batch sayısı, son okumalar ve **son simülasyon olayları** görünür. `outbox` artık `501` değil `200` alır.
 
 Bu depodaki otomatik doğrulama:
 
 ```bash
-python3 tools/sim_bridge_smoke_test.py    # 16 test
+python3 tools/sim_bridge_smoke_test.py    # 18 test
 python3 tools/edge_smoke_test.py          # 13 test
-node tools/smoke_test.mjs                 # 35 ekran
+node tools/smoke_test.mjs                 # 35 ekran + simülasyon bildirimi
 ```
 
-Sonuçlar: köprü 16/16, edge 13/13, ekranlar 35/35. Köprü testi gerçek FastAPI gerektirmez; demo motoru ve sahte istemcilerle ağ davranışını sınar. Ayrıca `linkedom` ile yapılan DOM denetiminde sim ekranı canlı köprüye bağlandı: 3 fırın kartı, emir tablosu, edge sayacı, eşleme tablosu, fırın seçiminde sıcaklık grafiği ve yeni emir modalı çizildi; ağ kesildiğinde sayfa yenilenmeden "Köprü çalışmıyor" uyarısı göründü.
+Sonuçlar: köprü 18/18, edge 13/13, ekranlar 35/35 ve simülasyon bildirimi tekilleştirme testi geçer. Köprü testi gerçek FastAPI gerektirmez; demo motoru ve sahte istemcilerle ağ davranışını sınar. Ayrıca `linkedom` ile yapılan DOM denetiminde sim ekranı canlı köprüye bağlandı: 3 fırın kartı, emir tablosu, edge sayacı, eşleme tablosu, fırın seçiminde sıcaklık grafiği ve yeni emir modalı çizildi; ağ kesildiğinde sayfa yenilenmeden "Köprü çalışmıyor" uyarısı göründü.
 
 ---
 
@@ -304,13 +310,13 @@ Sonuçlar: köprü 16/16, edge 13/13, ekranlar 35/35. Köprü testi gerçek Fast
 
 ## 12. Sınırlar ve açık işler
 
-1. **Demo kopya, kullanıcının simülasyonu değildir.** Aynı sözleşmeyi uygulayan üç fırınlı bir vekildir; gerçek simülasyonun iç mantığı, veritabanı ve varsa ek uçları bu depoda yoktur.
+1. **Demo kopya ile gerçek simülasyon ayrıdır.** `--demo` üç fırınlı bağımlılıksız vekildir; depodaki `Simulasyon/` ise kullanıcının FastAPI + SQLite simülasyonudur. İkisi de aynı `/api/scenarios` ve `/api/events` sözleşmesini uygular; testler ikisini ayrı ayrı sınar.
 2. **WebSocket kullanılmaz.** Bilinçli karardır: yenileme döngüsünü önler. Canlılık Simülasyon Bağlantısı ekranında 2,5, ana ekranlarda 3 saniyelik REST yoklamasıyla sağlanır; saniyelik akış gerekirse köprüye SSE eklenebilir.
 3. **`/api/edge/ingest` üretim worker'ı değildir.** Batch'i doğrular ve kayıt defterine yazar; `signalStates`, bakım bildirimi veya stok hareketi üretmez. Gerçek worker `docs/10` aşama 8'dedir.
-4. **Kapı ve döküm sinyalleri simülasyonda yoktur.** `unknown` olarak işaretlenir; gerçek PLC bağlandığında `opcua` / `modbus` adaptörü bu sinyalleri okur.
+4. **Kapı ve döküm sinyalleri senaryo ile üretilir.** Normal çalışmada `unknown` görünebilir; `Kapı açık` ve `Döküm başlat` senaryoları bu sinyalleri yayınlar. Gerçek PLC bağlandığında `opcua` / `modbus` adaptörü aynı alanları okur.
 5. **Tek köprü / tek ajan.** İkinci bir saha bilgisayarı eklenirse `siteCode` ayrılmalı ve her ajan kendi `clientId` alanıyla gelmelidir.
 6. **Gerçek tarayıcı testi** yapılmamıştır; ekran Node duman testi, `linkedom` DOM denetimi ve HTTP istekleriyle doğrulanmıştır. Dokunmatik/tablet davranışı sahada görülmelidir.
-7. **Canlı mod yalnızca fırın/emir/telemetri kapsar.** Stok, cari ve muhasebe simülasyondan gelmez; bu ekranlar demo kayıtları gösterir ve etiketlenir.
+7. **Canlı mod yalnızca fırın/emir/telemetri ve simülasyon bildirimlerini kapsar.** Stok, cari ve muhasebe simülasyondan gelmez; bu ekranlar demo kayıtları gösterir ve etiketlenir. Simülasyon olayı bildirimi bir işletme kaydı değildir.
 8. **Windows exe'si ve macOS uygulaması depoda hazır değildir.** `Baslat.bat` / `Baslat.command` Python ile hemen çalışır; tek dosya isteniyorsa kendi işletim sisteminde `build_exe.bat` veya `build_macos.sh` bir kez çalıştırılır. Linux'ta ikili dosya üretilmez, yalnızca yerleşim test edilir.
 9. **Simülasyon emirleri kalıcı değildir.** Kullanıcı simülasyonu kendi kurallarıyla çalışır; köprü yeniden başlatıldığında yalnızca kendi kayıt defteri korunur.
 

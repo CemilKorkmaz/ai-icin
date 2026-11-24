@@ -4,9 +4,9 @@
 Kullanım: python3 tools/sim_bridge_smoke_test.py
 
 Kapsar: demo simülasyon motoru (ısınma, bekleme, tamamlanma, alarm, meşgul fırın),
-fırın → makine eşleme kuralları, REST proxy (fırın/emir/okuma), HMAC imzalı edge
-ingest, idempotency, yanlış imza reddi, statik ERP arayüzü, yol güvenliği ve
-simülasyon kapalıyken "son veri + uyarı" davranışı.
+fırın → makine eşleme kuralları, REST proxy (fırın/emir/okuma/**senaryo/olay**),
+HMAC imzalı edge ingest, idempotency, yanlış imza reddi, statik ERP arayüzü,
+yol güvenliği ve simülasyon kapalıyken "son veri + uyarı" davranışı.
 """
 from __future__ import annotations
 
@@ -351,6 +351,82 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(status, 400)
         print('  ✓ adres doğrulama: http/https zorunlu, gizli anahtar maskeli, boş istek 400')
 
+
+    def test_08b_scenarios_events_and_business_test(self):
+        # Demo kopya kendi simülasyon ekranını da sunar (önizleme).
+        with urllib.request.urlopen(self.sim.url + '/', timeout=5) as res:
+            self.assertEqual(res.status, 200)
+            self.assertIn('ERP Test Senaryoları', res.read().decode('utf-8'))
+        with urllib.request.urlopen(self.sim.url + '/api/speed', timeout=5) as res:
+            self.assertIn('adimlar', json.loads(res.read().decode('utf-8')))
+
+        status, data = self.get_json('/api/sim/scenarios')
+        self.assertEqual(status, 200)
+        ids = {x['id'] for x in data['scenarios']}
+        self.assertTrue({'sensor_failure', 'overheat', 'burner_failure', 'door_open', 'casting', 'reset'} <= ids)
+        self.assertTrue(data['business'], 'İş akışı testleri boş')
+        furnace = 'Yaşlandırma Fırını'
+
+        status, data = self.post('/api/sim/scenarios',
+                                  {'scenario': 'sensor_failure', 'furnace': furnace})
+        self.assertEqual(status, 200, data)
+        self.assertTrue(data['event']['id'] > 0)
+        self.assertFalse(data['furnace']['sensorOk'])
+        self.assertEqual(data['furnace']['quality'], 'BAD')
+        self.assertTrue(data['furnace']['alarmActive'])
+
+        status, live = self.get_json('/api/sim/live')
+        self.assertEqual(status, 200)
+        row = next(f for f in live['furnaces'] if f['name'] == furnace)
+        self.assertFalse(row['sensorOk'])
+        self.assertEqual(row['quality'], 'BAD')
+        self.assertGreaterEqual(live['latestEventId'], data['event']['id'])
+
+        status, events = self.get_json('/api/sim/events?after=0')
+        self.assertEqual(status, 200)
+        self.assertTrue(any(e['type'] == 'scenario_sensor_failure' for e in events['events']))
+        self.assertTrue(all(e['severity'] in ('info', 'warning', 'critical', 'success')
+                            for e in events['events']))
+
+        # Arızalı fırında emir başlatılamaz.
+        status, order = self.post('/api/sim/orders', {
+            'product': 'Sensör testi', 'furnace': furnace,
+            'target_temp': 200, 'duration_min': 2
+        })
+        self.assertEqual(status, 201)
+        status, err = self.post('/api/sim/orders/start',
+                                {'id': order['order']['id'], 'furnace': furnace})
+        self.assertIn(status, (400, 409), 'Arızalı fırında emir başladı')
+
+        # Sıfırlama sensörü ve alarmı temizler.
+        status, data = self.post('/api/sim/scenarios',
+                                  {'scenario': 'reset', 'furnace': furnace})
+        self.assertEqual(status, 200, data)
+        self.assertTrue(data['furnace']['sensorOk'])
+        self.assertFalse(data['furnace']['alarmActive'])
+
+        # İş akışı testi bildirim üretir; işletme kaydı oluşturmaz.
+        status, data = self.post('/api/sim/scenarios', {'scenario': 'stock_critical'})
+        self.assertEqual(status, 200, data)
+        self.assertTrue(data['event']['data']['test'])
+        self.assertFalse(data['event']['data']['createsRecord'])
+        status, err = self.post('/api/sim/scenarios', {'scenario': 'yok'})
+        self.assertEqual(status, 400)
+        print('  ✓ senaryolar: sensör BAD → canlı/olay · arızalı fırında emir reddi · sıfırlama · iş akışı testi')
+
+    def test_08c_biyet_furnace_mapping(self):
+        machines = [
+            {'id': 'MCH-01', 'name': 'A Fırını', 'type': 'FURNACE'},
+            {'id': 'MCH-02', 'name': 'B Fırını', 'type': 'FURNACE'},
+            {'id': 'MCH-10', 'name': 'Homojen 1', 'type': 'HOMO_FURNACE'},
+        ]
+        mapping = build_map(machines, ['Aluminyum Eritme Fırını', 'Homojenizasyon Fırını',
+                                       'Biyet Isıtma Fırını'])
+        self.assertEqual(mapping['matched'], 3, mapping)
+        by_name = {p['furnace']: p['machineId'] for p in mapping['pairs']}
+        self.assertEqual(by_name['Biyet Isıtma Fırını'], 'MCH-02')
+        self.assertEqual(preferred_types('Biyet Isıtma Fırını'), ('FURNACE',))
+        print('  ✓ Biyet Isıtma Fırını eşlemesi: FURNACE kuralı · 3/3')
 
 class ClientTests(unittest.TestCase):
     def test_client_parses_dict_and_list_shapes(self):

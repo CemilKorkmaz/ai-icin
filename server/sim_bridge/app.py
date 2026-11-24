@@ -26,7 +26,7 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-VERSION = '1.5.0'
+VERSION = '1.6.0'
 
 # İki yerleşim desteklenir:
 #  1. Depo içinden çalıştırma: statik dosyalar ve yapılandırma depo kökünde.
@@ -374,6 +374,16 @@ class BridgeHandler(BaseHTTPRequestHandler):
             elif path == '/api/sim/map':
                 mapping = state.mapping(state.client.furnaces())
                 self._json({'ok': True, **mapping, 'baseUrl': state.config['simBaseUrl']})
+            elif path == '/api/sim/scenarios':
+                self._json({'ok': True, **state.client.scenarios(),
+                            'baseUrl': state.config['simBaseUrl']})
+            elif path == '/api/sim/events':
+                try:
+                    after = int((query.get('after') or ['0'])[0])
+                    limit = int((query.get('limit') or ['100'])[0])
+                except ValueError:
+                    after, limit = 0, 100
+                self._json({'ok': True, **state.client.events(after, limit)})
             elif path == '/api/sim/readings':
                 name = (query.get('name') or [''])[0]
                 if not name:
@@ -447,6 +457,15 @@ class BridgeHandler(BaseHTTPRequestHandler):
                 order = state.client.start_order(order_id, body.get('furnace') or None)
                 self._json({'ok': True, 'order': order,
                             'message': f"{order['id']} başlatıldı"}, 200)
+            elif path in ('/api/sim/scenarios', '/api/sim/fault'):
+                scenario = str(body.get('scenario') or '').strip()
+                if not scenario:
+                    self._error('scenario zorunlu', 400)
+                    return
+                furnace = str(body.get('furnace') or '').strip() or None
+                result = state.client.apply_scenario(scenario, furnace)
+                self._json({'ok': True, **result,
+                            'message': result.get('event', {}).get('title', 'Senaryo uygulandı')})
             elif path == '/api/bridge/config':
                 url = body.get('simBaseUrl')
                 if not url:

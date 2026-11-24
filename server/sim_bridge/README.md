@@ -1,8 +1,8 @@
 # Simülasyon Köprüsü — ERP Studio'yu fırın simülasyonuna bağlar
 
-Bu klasör, kullanıcının `erp_backend` / `erp_simulation` olarak çalıştırdığı fırın simülasyonunu ERP Studio'ya bağlar. Amaç, gerçek fabrika testinden önce fırın sıcaklığı, alarm, emir ve edge ajanı zincirini uçtan uca sınamaktır. Ayrıntı ve gerekçeler `docs/14` içindedir.
+Bu klasör, kullanıcının `erp_backend` / `erp_simulation` olarak çalıştırdığı fırın simülasyonunu ERP Studio'ya bağlar. Amaç, gerçek fabrika testinden önce fırın sıcaklığı, alarm, emir ve edge ajanı zincirini uçtan uca sınamaktır. Ayrıntı ve gerekçeler `docs/14`, senaryo/olay oynatma kitabı `docs/16` içindedir.
 
-**Ne yapar:** `/app/` altında ERP Studio'yu sunar, simülasyonun REST uçlarını `/api/sim/*` ile proxy'ler, ana Panel/Makine Parkı/PLC Durum/Üretim Akışı ekranlarını canlı fırın ve emir verisiyle besler, edge ajanının HMAC imzalı batch'lerini `/api/edge/ingest` ile kabul eder. **Ne yapmaz:** simülasyonun veritabanına/kaynak koduna dokunmaz, PLC'ye yazmaz, ERP'nin stok/maliyet/muhasebe tablolarını değiştirmez.
+**Ne yapar:** `/app/` altında ERP Studio'yu sunar, simülasyonun REST uçlarını (fırın, emir, **senaryo**, **olay**) `/api/sim/*` ile proxy'ler, ana Panel/Makine Parkı/PLC Durum/Üretim Akışı ekranlarını canlı fırın ve emir verisiyle besler, edge ajanının HMAC imzalı batch'lerini `/api/edge/ingest` ile kabul eder. **Ne yapmaz:** simülasyonun veritabanına/kaynak koduna dokunmaz, PLC'ye yazmaz, ERP'nin stok/maliyet/muhasebe tablolarını değiştirmez.
 
 ## Hızlı başlangıç
 
@@ -77,12 +77,12 @@ Kayıt defteri `data/ingest.db` (SQLite, WAL) dosyasındadır ve `.gitignore` ka
 ## Testler
 
 ```bash
-python3 tools/sim_bridge_smoke_test.py   # 16 test
+python3 tools/sim_bridge_smoke_test.py   # 18 test
 node tools/smoke_test.mjs                # 35 ekran
 python3 tools/edge_smoke_test.py         # 13 test (simulation adaptörü dahil)
 ```
 
-Köprü testi gerçek FastAPI gerektirmez: yerleşik demo motoru ve sahte istemcilerle bağlantı, eşleme, emir, imza, idempotency, "simülasyon kapalı" davranışı ve exe yerleşimi sınanır.
+Köprü testi gerçek FastAPI gerektirmez: yerleşik demo motoru ve sahte istemcilerle bağlantı, eşleme, emir, **senaryo → olay**, imza, idempotency, "simülasyon kapalı" davranışı ve exe yerleşimi sınanır.
 
 ## Dosyalar
 

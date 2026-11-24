@@ -38,6 +38,15 @@ async function fetchJson(url, options = {}) {
 }
 
 function tone(status) { return STATUS_TONE[status] || 'neutral'; }
+
+/** Simülasyon ekranının adresi: yerelde :8000, önizlemede aynı kökün 8000 portu. */
+function simulatorUrl() {
+  try {
+    const host = location.hostname;
+    if (/^\d+-/.test(host)) return `${location.protocol}//${host.replace(/^\d+-/, '8000-')}/`;
+    return `${location.protocol}//${host}:8000/`;
+  } catch { return 'http://localhost:8000/'; }
+}
 function temp(value) { return value === null || value === undefined ? '—' : fmtNum(value, 1); }
 function when(value) { return value ? fmtDateTime(value) : '—'; }
 
@@ -58,6 +67,7 @@ export const simView = {
           Fırın sıcaklığı, durum ve alarmlar <code>erp_backend</code> REST uçlarından okunur;
           edge ajanının imzalı batch'leri <code>/api/edge/ingest</code> ile burada kayda geçer.
           Sayfa bağlantı kopunca <strong>yenilenmez</strong>; 2,5 saniyede bir sessizce yeniden dener.</span>
+          <a class="btn btn-primary btn-sm" href="${esc(simulatorUrl())}" target="_blank" rel="noopener">${icon('external', 14)} Simülasyon ekranını aç</a>
         </div>
 
         <section class="card">
@@ -104,6 +114,14 @@ export const simView = {
             <span class="card-tag" id="sim-map-tag">profil</span>
           </div>
           <div id="sim-map">${emptyState('Eşleme yükleniyor…', 'link')}</div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <div><h3>Son simülasyon olayları</h3><p>Senaryoların ürettiği olaylar; aynıları ERP bildirim merkezine düşer.</p></div>
+            <button class="btn btn-ghost btn-sm" data-nav="notifications">${icon('bell', 14)} Bildirim Merkezi</button>
+          </div>
+          <div id="sim-events">${emptyState('Olay yok; simülasyon ekranından bir senaryo çalıştırın.', 'activity')}</div>
         </section>
 
         <section class="card" id="sim-detail-card">
@@ -179,6 +197,7 @@ function paint(host) {
   paintOrders(host);
   paintEdge(host);
   paintMapping(host);
+  paintEvents(host);
   if (selected) loadDetail(host);
 }
 
@@ -272,6 +291,28 @@ function paintOrders(host) {
       <td>${o.state === 'CREATED' ? `<button class="btn btn-primary btn-sm" data-sim-order-start="${esc(o.id)}" data-furnace="${esc(o.furnace)}">${icon('play', 12)} Başlat</button>` : ''}</td>
     </tr>`).join('')}</tbody></table></div>
     <p class="micro">Süre, hedef sıcaklığa ulaştıktan sonra işler. Emir başlatmak fırını meşgul eder; alarm durumunda brülör kapanır.</p>`;
+}
+
+/* ============================ OLAYLAR ============================ */
+
+function paintEvents(host) {
+  const el = host.querySelector('#sim-events');
+  if (!el) return;
+  const events = Array.isArray(snapshot?.events) ? snapshot.events.slice().reverse().slice(0, 30) : [];
+  if (!events.length) {
+    el.innerHTML = emptyState('Olay yok; simülasyon ekranından bir senaryo çalıştırın.', 'activity');
+    return;
+  }
+  const toneOf = (sev) => ({ critical: 'danger', warning: 'warn', info: 'info', success: 'ok' }[sev] || 'neutral');
+  el.innerHTML = `<div class="table-wrap"><table class="data">
+    <thead><tr><th>Zaman</th><th>Önem</th><th>Olay</th><th>Fırın / Modül</th><th>Mesaj</th></tr></thead>
+    <tbody>${events.map((ev) => `<tr>
+      <td class="cell-sub">${when(ev.at)}</td>
+      <td>${pill(String(ev.severity || 'info').toUpperCase(), toneOf(ev.severity))}</td>
+      <td><div class="cell-strong">${esc(ev.title || ev.type || '—')}</div><div class="cell-sub">${esc(ev.code || '')}</div></td>
+      <td>${esc(ev.furnace || ev.module || '—')}</td>
+      <td class="cell-sub">${esc(ev.message || '')}${ev.data?.test ? ' · <strong>TEST</strong>' : ''}</td>
+    </tr>`).join('')}</tbody></table></div>`;
 }
 
 /* ============================ EDGE ============================ */

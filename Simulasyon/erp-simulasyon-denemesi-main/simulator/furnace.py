@@ -53,6 +53,14 @@ class FurnaceState:
     cycle_time: float = 0.0          # mevcut çevrimde geçen süre (saniye)
     alarm: Optional[str] = None
     last_updated: float = field(default_factory=time.time)
+    # ERP test senaryoları için ek sinyaller (docs/16).
+    sensor_ok: bool = True
+    burner_fault: bool = False
+    door_open: bool = False
+    casting: bool = False
+    fault_code: Optional[str] = None
+    # Bekletme (hedefe ulaşma) simülasyon saati; emir süresi buradan ölçülür.
+    soak_started_at: Optional[float] = None
 
 
 class Furnace:
@@ -88,6 +96,9 @@ class Furnace:
         self.soak_started_at = None
         self._soak_started_sim = None
         self.state.alarm = None
+        self.state.casting = False
+        self.state.soak_started_at = None
+        # Sensör/kapı/brülör arızası varsa başlatma Plant tarafında reddedilir.
 
     def complete_order(self) -> Optional[dict]:
         """Çevrim tamamlandıysa emri kapatır ve özet döndürür."""
@@ -106,6 +117,7 @@ class Furnace:
         self.order_product = None
         self.order_duration_s = 0.0
         self.soak_started_at = None
+        self.state.soak_started_at = None
         self.state.status = FurnaceStatus.OFF
         self.state.target_temperature = self.params.target_temp
         self.state.cycle_time = 0.0
@@ -120,21 +132,33 @@ class Furnace:
         self.sim_time += dt
         now = time.time()
 
+        # Sensör arızasında sıcaklık okunamaz: son geçerli değeri dondururuz.
+        # Otomatik alarm temizleme yapılmaz; senaryo sıfırlanana kadar alarm açık kalır.
+        if not s.sensor_ok:
+            s.burner_on = False
+            s.gas_consumption = 0.0
+            s.status = FurnaceStatus.ALARM
+            s.last_updated = now
+            return events
+
+        safety_block = s.door_open or s.burner_fault
+
         # ---- Durum makinesi ----
         if s.status == FurnaceStatus.ALARM:
             s.burner_on = False
-            # Sıcaklık güvenli seviyeye düştüğünde alarm otomatik temizlenir,
-            # fırın KAPALI durumuna döner.
-            if s.temperature < p.max_temp - 10.0:
+            # Yalnızca geçici aşırı sıcaklık alarmı kendiliğinden temizlenir.
+            # Kapı/brülör arızası sıfırlanana kadar alarm korunur.
+            if (not safety_block) and s.temperature < p.max_temp - 10.0:
                 s.status = FurnaceStatus.OFF
                 s.alarm = None
+                s.fault_code = None
                 events.append({"type": "alarm_cleared", "furnace": p.name})
         elif s.status == FurnaceStatus.OFF:
             s.burner_on = False
         elif s.status == FurnaceStatus.HEATING:
-            s.burner_on = True
+            s.burner_on = not safety_block
             # Hedefe ulaşıldığında bekletmeye geç.
-            if s.temperature >= s.target_temperature - p.hold_band:
+            if s.burner_on and s.temperature >= s.target_temperature - p.hold_band:
                 s.status = FurnaceStatus.HOLDING
                 # DİKKAT: alan FurnaceState üzerinde (s), Furnace üzerinde değil.
                 # Eskiden self.soak_started_at yazılıyordu; bu yüzden
@@ -150,12 +174,14 @@ class Furnace:
                 })
         elif s.status == FurnaceStatus.HOLDING:
             # Termostat: alt bandın altında ise ısıt, üst bandın üzeri kapat.
-            if s.temperature < s.target_temperature - p.hold_band:
+            if safety_block:
+                s.burner_on = False
+            elif s.temperature < s.target_temperature - p.hold_band:
                 s.burner_on = True
             elif s.temperature > s.target_temperature + p.hold_band:
                 s.burner_on = False
-            # Üretim süresi dolduysa emri tamamla.
-            if (self.order_id is not None and s.soak_started_at is not None
+            # Üretim süresi dolduysa emri tamamla; arıza varsa bekle.
+            if (not safety_block and self.order_id is not None and s.soak_started_at is not None
                     and self.sim_time - s.soak_started_at >= self.order_duration_s):
                 summary = self.complete_order()
                 if summary:
@@ -228,6 +254,20 @@ class Furnace:
             "last_updated": s.last_updated,
             "order_id": self.order_id,
             "order_product": self.order_product,
+            # ERP test ortamı ek alanları (docs/16).
+            "sensor_ok": s.sensor_ok,
+            "burner_fault": s.burner_fault,
+            "door_open": s.door_open,
+            "casting": s.casting,
+            "fault_code": s.fault_code,
+            "quality": "BAD" if not s.sensor_ok else "SIMULATED",
+            "alarm_active": bool(s.alarm) or s.status == FurnaceStatus.ALARM,
+            "signals": {
+                "door": "open" if s.door_open else "closed",
+                "casting": "pouring" if s.casting else "idle",
+                "alarm": "fault" if (s.alarm or s.status == FurnaceStatus.ALARM) else "ok",
+                "running": "running" if s.status in (FurnaceStatus.HEATING, FurnaceStatus.HOLDING) else "stopped",
+            },
         }
 
 
