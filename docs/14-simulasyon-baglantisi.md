@@ -232,7 +232,7 @@ Simülasyon kapalıysa `connect` hata verir; collector ajanı durdurmaz, `simula
 
 ## 9. Arayüz: Simülasyon Bağlantısı ekranı
 
-**Entegrasyon → Simülasyon Bağlantısı** ekranı altı bölümden oluşur:
+**Entegrasyon → Simülasyon Bağlantısı** ekranı yedi bölümden oluşur:
 
 | Bölüm | İçerik |
 | --- | --- |
@@ -242,6 +242,7 @@ Simülasyon kapalıysa `connect` hata verir; collector ajanı durdurmaz, `simula
 | Üretim emirleri | Emir listesi, “Yeni Emir” ve “Başlat”; hatalar satır içi gösterilir |
 | Edge ajanı → ERP | Batch/okuma/olay sayıları, son batch, son okumaların kalitesi |
 | Eşleme ve geçmiş | Fırın → makine tablosu, eşleşmeyenler; seçilen fırının son 40 okuması |
+| Son simülasyon olayları | Sunucudaki son 30 olay: zaman, önem, başlık, fırın/modül, mesaj; bildirim merkezine bağlantı |
 
 Davranış kuralları:
 
@@ -259,7 +260,7 @@ Aynı `/api/sim/live` yanıtı dört ana ekranı besler. Amaç, simülasyon veri
 | --- | --- | --- |
 | Panel | Fırın sayısı, ortalama/en yüksek sıcaklık, alarm, çalışan emir, fırın kartları, emir tablosu | `/api/sim/live` |
 | Makine Parkı | Fırın → profil makine eşlemesi, sıcaklık, hedef, alarm, durum; diğer profil makineleri ayrı listede | aynı yanıt + `docs/12` profili |
-| PLC Durum | Dört sinyal (`door`, `casting`, `alarm`, `running`) ve ayrı telemetri; kapı/döküm simülasyonda yoksa “Bilinmiyor” | aynı yanıt |
+| PLC Durum | Dört sinyal (`door`, `casting`, `alarm`, `running`) ve ayrı telemetri; senaryo yoksa kapı/döküm “Bilinmiyor”, sensör arızasında kalite `BAD` | aynı yanıt |
 | Üretim Akışı | Simülasyon üretim emirleri: oluşturuldu, çalışıyor, tamamlandı, iptal; fırın durum tablosu | aynı yanıt |
 
 **Açma/kapama.** Üst çubuktaki **Canlı simülasyon / Demo veri** düğmesi modu değiştirir; tercih tarayıcıda saklanır. Köprü ilk açılışta yanıt verirse canlı mod otomatik devreye girer. Canlı modda köprü kapalıysa ana ekranlar demo veriye dönmez; “bağlantı yok / son bilinen veri” gösterir.
