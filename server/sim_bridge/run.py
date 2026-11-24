@@ -10,18 +10,31 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
 import sys
 import webbrowser
 from pathlib import Path
 
 FROZEN = bool(getattr(sys, 'frozen', False))
 ROOT = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parents[2])).resolve()
-BASE_DIR = Path(sys.executable).resolve().parent if FROZEN else ROOT
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from server.sim_bridge.app import VERSION, BridgeState, make_server  # noqa: E402
+from server.sim_bridge.app import BASE_DIR, VERSION, BridgeState, make_server  # noqa: E402
 from server.sim_bridge.demo_sim import DemoSim  # noqa: E402
+
+
+def _alert(message: str) -> None:
+    """macOS .app penceresiz çalışır; ölümcül hatayı ileti olarak gösterir."""
+    if not (FROZEN and sys.platform == 'darwin'):
+        return
+    text = ' '.join(str(message).split())[:900].replace('\\', '/').replace('"', "'")
+    try:
+        subprocess.run(
+            ['osascript', '-e', f'display alert "ERP Sim Bridge" message "{text}" as critical'],
+            check=False, timeout=30)
+    except (OSError, subprocess.SubprocessError):
+        pass
 
 
 def main(argv=None) -> int:
@@ -51,8 +64,10 @@ def main(argv=None) -> int:
             demo = DemoSim(host='127.0.0.1', port=args.demo_port,
                            speed=args.demo_speed).start()
         except OSError as exc:
-            print(f'Demo simülasyon {args.demo_port} portunu açamadı: {exc}')
-            print('Bu portta kendi simülasyonunuz açık olabilir. --demo-port 8001 deneyin.')
+            message = (f'Demo simülasyon {args.demo_port} portunu açamadı: {exc} '
+                       'Bu portta kendi simülasyonunuz açık olabilir; --demo-port 8001 deneyin.')
+            print(message)
+            _alert(message)
             return 2
         sim_url = sim_url or demo.url
         print(f'[demo] Simülasyon kopyası: {demo.url} ({args.demo_speed:g}x)')
@@ -63,9 +78,10 @@ def main(argv=None) -> int:
                             db_path=Path(args.db) if args.db else None,
                             sim_url=sim_url, demo=bool(demo))
     except OSError as exc:
-        print(f'Köprü çalışma dosyalarını oluşturamadı: {exc}')
-        print('ERP-Sim-Bridge.exe dosyasını yazılabilir bir klasöre kopyalayın')
-        print('(Masaüstü veya C:\\ERP-Sim gibi); Program Files altında yazma izni yoktur.')
+        message = (f'Köprü çalışma dosyalarını oluşturamadı: {exc}. '
+                   'Uygulamayı yazılabilir bir klasöre kopyalayın (Masaüstü gibi).')
+        print(message)
+        _alert(message)
         return 3
 
     if args.check:
@@ -85,9 +101,11 @@ def main(argv=None) -> int:
     try:
         httpd = make_server(state, args.host, args.port)
     except OSError as exc:
-        print(f'{args.port} portu açılamadı: {exc}')
-        print('Muhtemelen eski köprü penceresi hâlâ açık. Onu kapatın veya:')
-        print(f'  python3 server/sim_bridge/run.py --port {args.port + 1}')
+        message = (f'{args.port} portu açılamadı: {exc}. '
+                   'Muhtemelen eski köprü penceresi hâlâ açık; onu kapatıp yeniden deneyin.')
+        print(message)
+        print(f'  Alternatif: python3 server/sim_bridge/run.py --port {args.port + 1}')
+        _alert(message)
         return 2
     url = f'http://localhost:{args.port}/app/#/sim'
     print(f'ERP Studio + simülasyon köprüsü v{VERSION}')

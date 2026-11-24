@@ -2,7 +2,7 @@
 
 Bu depo, sohbette tarif edilen **alüminyum biyet dökümhanesi** için uçtan uca ERP planını, çalışan bir web prototipini ve firma sunucusundaki `ERP/` klasörünün dosya tabanlı modelini içerir. Genel dökümhane planı değil; sürekli döküm, ergitme, testere, homojenizasyon, soğutma, paketleme ve iki onaylı sevkiyat akışı esas alınır.
 
-**Sürüm:** 1.4.1 · Simülasyon Köprüsü (Windows çift tık) · `schemaVersion: 4` · **35 ekran + 1 saha arayüzü + 1 simülasyon köprüsü** · **59 varlık** · **15 doküman**
+**Sürüm:** 1.4.2 · Simülasyon Köprüsü (Windows + macOS çift tık) · `schemaVersion: 4` · **35 ekran + 1 saha arayüzü + 1 simülasyon köprüsü** · **59 varlık** · **15 doküman**
 
 ---
 
@@ -30,16 +30,21 @@ Bu depo, sohbette tarif edilen **alüminyum biyet dökümhanesi** için uçtan u
 | `server/erp/` | Firma sunucusundaki `ERP/` klasörünün modeli: **59 JSON dosyası**, olay kuyruğu, arşiv, worker'lar |
 | `edge/` | **Fabrikadaki tek bilgisayar**: `ERP-Edge-Collector.exe` kaynağı, SQLite şeması, adaptörler (`simulation` dahil), yerel web arayüzü, PyInstaller spec ve kurulum betikleri |
 | `server/sim_bridge/` | **Simülasyon köprüsü**: ERP Studio'yu `:8080` üzerinden kullanıcı simülasyonuna (`:8000`) bağlar, REST proxy ve imzalı edge ingest sunar |
-| `Baslat.bat` | **Windows'ta çift tık**: köprüyü başlatır, tarayıcıyı doğrudan Simülasyon ekranında açar |
+| `Baslat.bat`, `Baslat.command` | **Windows / macOS çift tık**: köprüyü başlatır, tarayıcıyı doğrudan Simülasyon ekranında açar |
 | `tools/` | Word üretici, seed aktarımı, ikon üretici, duman testi, **edge ajanı** ve **simülasyon köprüsü** duman testleri |
 
 ---
 
 ## 2. Prototipi çalıştırma
 
-**Windows'ta en kolay yol:** fırın simülasyonunuz `localhost:8000` üzerinde çalışırken depo kökündeki **`Baslat.bat`** dosyasına çift tıklayın. Köprü kendiliğinden başlar ve tarayıcı `http://localhost:8080/app/#/sim` adresinde açılır; ayrı komut veya adres yazmak gerekmez. Siyah pencere köprüdür, açık kaldıkça çalışır.
+**En kolay yol (Windows veya macOS):** fırın simülasyonunuz `localhost:8000` üzerinde çalışırken depo kökündeki başlatıcıya çift tıklayın; köprü kendiliğinden başlar ve tarayıcı `http://localhost:8080/app/#/sim` adresinde açılır. Ayrı komut veya adres yazmak gerekmez. Açılan pencere köprüdür, açık kaldıkça çalışır.
 
-Tek dosya program isteniyorsa Windows'ta bir kez `server\sim_bridge\build_exe.bat` çalıştırılır; `dist\ERP-Sim-Bridge.exe` üretilir ve `Baslat.bat` sonraki açılışlarda onu kullanır. Exe'nin yanında `config.json`, profil ve `data/ingest.db` oluşur; yazılabilir bir klasöre konmalıdır.
+| Platform | Çift tık | Tek dosya program (isteğe bağlı, bir kez) |
+| --- | --- | --- |
+| Windows | `Baslat.bat` | `server\sim_bridge\build_exe.bat` → `dist\ERP-Sim-Bridge.exe` |
+| macOS | `Baslat.command` | `server/sim_bridge/build_macos.sh` → `dist/ERP-Sim-Bridge.app` |
+
+Windows'ta ayar ve veri exe'nin yanında; macOS'ta `~/Library/Application Support/ERP-Sim-Bridge` altında oluşur. macOS uygulaması imzasızdır; ilk açılışta sağ tık → Aç gerekebilir.
 
 Bağımlılık kurulumu gerekmez. Depo kökünde:
 
@@ -135,13 +140,13 @@ python3 server/erp/scripts/plc_poller.py --dry-run    # dört sinyal kuralı
 python3 server/erp/scripts/outbox_worker.py --dry-run # çevrimdışı kuyruk
 python3 server/erp/scripts/backup.py --no-external    # yedek + checksum
 python3 tools/edge_smoke_test.py                       # exe ajanı: 13 test
-python3 tools/sim_bridge_smoke_test.py                 # simülasyon köprüsü: 15 test
+python3 tools/sim_bridge_smoke_test.py                 # simülasyon köprüsü: 16 test
 python3 edge/main.py --dry-run                         # tek döngü, yazmadan
 python3 edge/main.py --bind 0.0.0.0 --port 8787       # saha arayüzü (önizleme)
 python3 tools/build_docx.py                           # 15 dokümanı tek Word'e derle
 ```
 
-Son doğrulama sonuçları: 35 menü / 35 ekran eşleşiyor, mizan borç = alacak, 1 ve 2 fırınlı profil testleri geçti, 58 koleksiyonda 0 hata ve 1 bilgilendirici uyarı, **edge ajanının 13 testi**, **simülasyon köprüsünün 15 testi** ve 11 JSON ucu geçti, 15 doküman geçerli OOXML Word çıktısında birleşti.
+Son doğrulama sonuçları: 35 menü / 35 ekran eşleşiyor, mizan borç = alacak, 1 ve 2 fırınlı profil testleri geçti, 58 koleksiyonda 0 hata ve 1 bilgilendirici uyarı, **edge ajanının 13 testi**, **simülasyon köprüsünün 16 testi** ve 11 JSON ucu geçti, 15 doküman geçerli OOXML Word çıktısında birleşti.
 
 > **Sınır:** Bu bir plan doğrulama prototipidir. Gerçek API/veritabanı, RBAC/VPN, OPC UA/Modbus sürücüsü, SMTP/SMS sağlayıcısı ve PLC donanımı bağlı değildir. Simülasyon köprüsü de üretim ingest worker'ı değildir: imzalı batch'i doğrular ve kendi kayıt defterine yazar, işletme tablolarını değiştirmez. Canlı kurulumda doğruluk kaynağı işlemsel veritabanı, JSON dosyaları arşiv ve aktarım görünümüdür.
 
@@ -162,7 +167,7 @@ python3 tools/edge_smoke_test.py                   # 13 test
 
 Windows ikilisi bu Linux ortamında üretilemediği için depoya konmamıştır; `edge/build_exe.bat` Windows'ta tek komutla `dist\ERP-Edge-Collector.exe` dosyasını üretir, `edge/install-task.ps1` otomatik başlatmayı kurar. Ayrıntılar `docs/13` içindedir.
 
-Aynı sınır simülasyon köprüsü için de geçerlidir: `Baslat.bat` Python ile hemen çalışır; tek dosya `ERP-Sim-Bridge.exe` isteniyorsa Windows'ta `server\sim_bridge\build_exe.bat` bir kez çalıştırılır.
+Aynı sınır simülasyon köprüsü için de geçerlidir: `Baslat.bat` / `Baslat.command` Python ile hemen çalışır; tek dosya uygulama isteniyorsa kendi işletim sisteminde `build_exe.bat` (Windows) veya `build_macos.sh` (macOS) bir kez çalıştırılır.
 
 ---
 
@@ -174,7 +179,7 @@ Kullanıcının fırın simülasyonu (`erp_backend`, varsayılan `:8000`) ile ER
 # 1) Kullanıcı simülasyonu (kendi klasöründe)
 ./start.sh 10
 
-# 2) Windows'ta depo kökündeki Baslat.bat dosyasına çift tık.
+# 2) Depo kökündeki başlatıcıya çift tık: Baslat.bat (Windows) / Baslat.command (macOS).
 #    Komut satırından (geliştirici):
 python3 server/sim_bridge/run.py --open               # sim :8000 → ERP :8080 + tarayıcı
 python3 server/sim_bridge/run.py --demo --demo-speed 10   # simülasyon kapalıysa demo kopya

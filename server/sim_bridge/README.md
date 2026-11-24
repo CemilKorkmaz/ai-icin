@@ -6,9 +6,17 @@ Bu klasör, kullanıcının `erp_backend` / `erp_simulation` olarak çalıştır
 
 ## Hızlı başlangıç
 
-**Windows — çift tık (önerilen):** Simülasyon `localhost:8000` üzerinde çalışırken depo kökündeki `Baslat.bat` dosyasına çift tıklayın. Köprü başlar, tarayıcı `http://localhost:8080/app/#/sim` adresinde açılır. Pencere kapatılınca köprü durur. `dist\ERP-Sim-Bridge.exe` varsa o kullanılır; yoksa Python ile çalışır.
+**Çift tık (önerilen):** Simülasyon `localhost:8000` üzerinde çalışırken depo kökündeki başlatıcıya çift tıklayın. Köprü başlar, tarayıcı `http://localhost:8080/app/#/sim` adresinde açılır. Pencere kapatılınca köprü durur.
 
-Tek dosya exe üretmek için (Windows'ta bir kez): `server\sim_bridge\build_exe.bat` → `dist\ERP-Sim-Bridge.exe`. Exe'nin yanında `config.json`, `config/ornek-fabrika-profili.json` ve `data/ingest.db` oluşur; bu yüzden yazılabilir bir klasöre konmalıdır.
+| Platform | Dosya | Üretilmiş uygulama varsa |
+| --- | --- | --- |
+| Windows | `Baslat.bat` | `dist\ERP-Sim-Bridge.exe` |
+| macOS | `Baslat.command` | `dist/ERP-Sim-Bridge.app` |
+
+Tek dosya uygulama üretmek için (kendi işletim sisteminizde bir kez):
+
+* Windows: `server\sim_bridge\build_exe.bat` → `dist\ERP-Sim-Bridge.exe`; ayar/veri exe'nin yanında.
+* macOS: `server/sim_bridge/build_macos.sh` → `dist/ERP-Sim-Bridge.app`; ayar/veri `~/Library/Application Support/ERP-Sim-Bridge` altında.
 
 ```bash
 # Kullanıcı simülasyonu (kendi klasöründe)
@@ -42,17 +50,17 @@ Tarayıcı: `http://localhost:8080/app/` → **Entegrasyon → Simülasyon Bağl
 | GET | `/api/edge/summary`, `/api/edge/batches`, `/api/edge/latest` | Edge kayıt defteri |
 | POST | `/api/edge/ingest` | HMAC imzalı `edge-batch`; `X-Edge-Signature` zorunlu |
 
-## Exe yerleşimi
+## Paketlenmiş uygulama yerleşimi
 
-Paketlenmiş exe'de kod ve arayüz geçici `_MEIPASS` klasöründen okunur; **yazılabilir** dosyalar exe'nin yanında durur:
+Paketlenmiş uygulamada kod ve arayüz geçici `_MEIPASS` klasöründen okunur; **yazılabilir** dosyalar uygulamanın dışında durur:
 
 | Yol | İçerik |
 | --- | --- |
-| exe içi `app/`, `index.html` | ERP Studio statik arayüzü (salt okunur) |
-| exe içi `edge/erp_edge/sim_map.py` | Fırın → makine eşleme kuralı |
-| exe yanı `config.json` | Ayarlar; yoksa ilk açılışta üretilir |
-| exe yanı `config/ornek-fabrika-profili.json` | `docs/12` profil paketi; yoksa kopyalanır |
-| exe yanı `data/ingest.db` | Edge batch kayıt defteri |
+| uygulama içi `app/`, `index.html` | ERP Studio statik arayüzü (salt okunur) |
+| uygulama içi `edge/erp_edge/sim_map.py` | Fırın → makine eşleme kuralı |
+| Windows: exe yanı · macOS: `~/Library/Application Support/ERP-Sim-Bridge` | `config.json`, `config/ornek-fabrika-profili.json`, `data/ingest.db` |
+
+macOS'ta uygulama paketinin içine yazılmaz: `.app` `/Applications` altına taşınabilir, güncellenebilir ve imza bütünlüğü bozulmaz.
 
 ## Yapılandırma
 
@@ -69,7 +77,7 @@ Kayıt defteri `data/ingest.db` (SQLite, WAL) dosyasındadır ve `.gitignore` ka
 ## Testler
 
 ```bash
-python3 tools/sim_bridge_smoke_test.py   # 15 test
+python3 tools/sim_bridge_smoke_test.py   # 16 test
 node tools/smoke_test.mjs                # 35 ekran
 python3 tools/edge_smoke_test.py         # 13 test (simulation adaptörü dahil)
 ```
@@ -88,3 +96,4 @@ Köprü testi gerçek FastAPI gerektirmez: yerleşik demo motoru ve sahte istemc
 | `config.json` | Köprü yapılandırması (kaynaktan çalışırken) |
 | `exe_entry.py` | PyInstaller giriş noktası |
 | `erp-sim-bridge.spec`, `build_exe.bat` | Windows tek dosya `dist\ERP-Sim-Bridge.exe` üretimi |
+| `erp-sim-bridge-macos.spec`, `build_macos.sh` | macOS `dist/ERP-Sim-Bridge.app` üretimi |

@@ -26,7 +26,7 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-VERSION = '1.4.1'
+VERSION = '1.4.2'
 
 # İki yerleşim desteklenir:
 #  1. Depo içinden çalıştırma: statik dosyalar ve yapılandırma depo kökünde.
@@ -34,7 +34,25 @@ VERSION = '1.4.1'
 #     (_MEIPASS), yapılandırma ve SQL ise exe'nin yanında (yazılabilir).
 FROZEN = bool(getattr(sys, 'frozen', False))
 ASSET_ROOT = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parents[2])).resolve()
-BASE_DIR = Path(sys.executable).resolve().parent if FROZEN else ASSET_ROOT
+
+
+def runtime_base_dir(frozen: bool = FROZEN, platform: str = sys.platform,
+                     executable: str | None = None) -> Path:
+    """Yazılabilir çalışma klasörünü seçer.
+
+    * Kaynaktan çalışırken: depo kökü.
+    * Windows exe: exe'nin bulunduğu klasör.
+    * macOS .app: `~/Library/Application Support/ERP-Sim-Bridge`
+      (uygulama paketinin içine yazmak imzayı ve güncellemeyi bozar).
+    """
+    if not frozen:
+        return ASSET_ROOT
+    if platform == 'darwin':
+        return Path.home() / 'Library' / 'Application Support' / 'ERP-Sim-Bridge'
+    return Path(executable or sys.executable).resolve().parent
+
+
+BASE_DIR = runtime_base_dir()
 DEFAULT_CONFIG = (BASE_DIR / 'config.json') if FROZEN else ASSET_ROOT / 'server' / 'sim_bridge' / 'config.json'
 DEFAULT_DB = (BASE_DIR / 'data' / 'ingest.db') if FROZEN else ASSET_ROOT / 'server' / 'sim_bridge' / 'data' / 'ingest.db'
 

@@ -13,6 +13,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import os
 import sys
 import tempfile
 import threading
@@ -439,6 +440,33 @@ class RuntimeLayoutTests(unittest.TestCase):
             self.assertIn(needle, spec_text)
         self.assertIn('PyInstaller', build.read_text(encoding='utf-8'))
         print('  ✓ Windows: Baslat.bat · build_exe.bat · ERP-Sim-Bridge.exe spec')
+
+    def test_macos_launcher_and_spec(self):
+        launcher = ROOT / 'Baslat.command'
+        spec = ROOT / 'server' / 'sim_bridge' / 'erp-sim-bridge-macos.spec'
+        build = ROOT / 'server' / 'sim_bridge' / 'build_macos.sh'
+        for path in (launcher, spec, build):
+            self.assertTrue(path.exists(), f'{path.name} yok')
+        self.assertTrue(os.access(launcher, os.X_OK), 'Baslat.command çalıştırılabilir değil')
+        self.assertTrue(os.access(build, os.X_OK), 'build_macos.sh çalıştırılabilir değil')
+        text = launcher.read_text(encoding='utf-8')
+        for needle in ('server/sim_bridge/run.py', '127.0.0.1', 'localhost:8080',
+                       'dist/ERP-Sim-Bridge.app', '--open', 'osascript'):
+            self.assertIn(needle, text)
+        spec_text = spec.read_text(encoding='utf-8')
+        for needle in ("name='ERP-Sim-Bridge.app'", 'BUNDLE(', 'console=False',
+                       'erp_edge.sim_map', '1.4.2'):
+            self.assertIn(needle, spec_text)
+        build_text = build.read_text(encoding='utf-8')
+        self.assertIn('Darwin', build_text)
+        self.assertIn('PyInstaller', build_text)
+        from server.sim_bridge.app import ASSET_ROOT, runtime_base_dir
+        mac_dir = runtime_base_dir(True, 'darwin', '/Applications/ERP-Sim-Bridge.app/Contents/MacOS/ERP-Sim-Bridge')
+        self.assertEqual(mac_dir, Path.home() / 'Library' / 'Application Support' / 'ERP-Sim-Bridge')
+        win_dir = runtime_base_dir(True, 'win32', str(ROOT / 'dist' / 'ERP-Sim-Bridge.exe'))
+        self.assertEqual(win_dir, (ROOT / 'dist').resolve())
+        self.assertEqual(runtime_base_dir(False), ASSET_ROOT)
+        print('  ✓ macOS: Baslat.command · build_macos.sh · .app spec · yazılabilir klasör')
 
 
 def urlopen_error(url):

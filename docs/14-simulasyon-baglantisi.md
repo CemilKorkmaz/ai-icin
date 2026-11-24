@@ -2,7 +2,7 @@
 
 **Amaç:** Kullanıcının `erp_backend` / `erp_simulation` olarak çalıştırdığı fırın simülasyonunu ERP Studio'ya bağlamak; gerçek fabrika testi başlamadan önce fırın sıcaklığı, alarm, üretim emri ve edge ajanı zincirini uçtan uca burada sınamak.
 
-**Sürüm 1.4.1:** Windows'ta çift tıkla başlatma (`Baslat.bat`) ve tek dosya `ERP-Sim-Bridge.exe` üretimi eklendi; protokol ve veri modeli değişmedi.
+**Sürüm 1.4.1–1.4.2:** Windows'ta `Baslat.bat` + `ERP-Sim-Bridge.exe`, macOS'te `Baslat.command` + `ERP-Sim-Bridge.app` ile çift tıkla başlatma eklendi; protokol ve veri modeli değişmedi.
 
 **Kapsam:** Bir simülasyon sunucusu (`:8000`), bir köprü (`:8080`) ve isteğe bağlı edge ajanı (`:8787`). Simülasyonun kendi kaynak kodu değiştirilmez; yalnızca belgelenen REST uçları kullanılır.
 
@@ -66,28 +66,40 @@ Kendi simülasyon klasöründe:
 
 `10` hız çarpanıdır; verilmezse gerçek zamanlı çalışır. Terminalde `Uvicorn running on http://0.0.0.0:8000` satırı görülmelidir. Windows'ta `start.sh 10` veya `bash start.sh 10` kullanılır.
 
-### 4.2 Windows'ta çift tık — köprüyü elle başlatmaya gerek yok
+### 4.2 Çift tıkla başlatma — Windows ve macOS
 
-Simülasyon her zamanki gibi `localhost:8000` üzerinde çalışırken depo kökündeki **`Baslat.bat`** dosyasına çift tıklanır. Betik köprüyü başlatır ve tarayıcıyı doğrudan **`http://localhost:8080/app/#/sim`** adresinde açar; adres yazmak veya ayrı komut ezberlemek gerekmez. Açılan siyah pencere köprünün kendisidir: **pencere açık kaldıkça** ERP simülasyona bağlıdır, kapatılınca köprü durur.
+Simülasyon her zamanki gibi `localhost:8000` üzerinde çalışırken depo kökündeki başlatıcıya çift tıklanır. Başlatıcı köprüyü açar ve tarayıcıyı doğrudan **`http://localhost:8080/app/#/sim`** adresinde gösterir; adres yazmak veya komut ezberlemek gerekmez. Açılan pencere köprünün kendisidir: **pencere açık kaldıkça** ERP simülasyona bağlıdır, kapatılınca köprü durur.
 
-`Baslat.bat` sırasıyla şunları dener:
+| İşletim sistemi | Çift tıklanan dosya | Açılan pencere |
+| --- | --- | --- |
+| Windows | `Baslat.bat` | Siyah komut penceresi |
+| macOS | `Baslat.command` | Terminal penceresi |
+
+Her iki başlatıcı aynı sırayı izler:
 
 | Durum | Davranış |
 | --- | --- |
-| `dist\ERP-Sim-Bridge.exe` varsa | Doğrudan exe çalışır; Python aranmaz |
-| Exe yok, Python varsa | `python3 server/sim_bridge/run.py --host 127.0.0.1 --port 8080 --open` çalışır |
-| 8080 doluysa | Türkçe hata verir, pencereyi kapatmaz; eski pencere kapatılıp yeniden denenir |
+| `dist\ERP-Sim-Bridge.exe` veya `dist/ERP-Sim-Bridge.app` varsa | Doğrudan uygulama çalışır; Python aranmaz |
+| Uygulama yok, Python varsa | `python3 server/sim_bridge/run.py --host 127.0.0.1 --port 8080 --open` çalışır |
+| 8080 doluysa | Türkçe hata verir, pencere kapanmaz; eski pencere kapatılıp yeniden denenir |
 | Simülasyon kapalıysa | Köprü yine açılır, ekran "köprü çalışmıyor / bayat veri" gösterir; çökmez |
 
-`Baslat.bat` köprüyü yalnızca bu bilgisayardan erişilecek biçimde (`127.0.0.1:8080`) açar; `ERP-Sim-Bridge.exe` doğrudan çift tıklanırsa da aynı davranır ve tarayıcıyı kendisi açar.
+**macOS ilk açılış.** Git ile gelen `Baslat.command` normalde doğrudan çalışır. Finder "geliştirici doğrulanamadı" derse dosyaya **sağ tık → Aç** deyin; gerekirse **Sistem Ayarları → Gizlilik ve Güvenlik → Yine de Aç** düğmesi kullanılır. Çalıştırma izni kaybolduysa Terminal'de `chmod +x Baslat.command` yeterlidir.
 
-**Adres neden `8080`?** 80 portu Windows'ta yönetici hakkı ister ve başka programlarla çakışır; bu yüzden köprü 8080'de çalışır. Tarayıcı zaten otomatik açıldığı için adres yazılmaz; sonradan elle girmek gerekirse `http://localhost:8080/app/#/sim` yer imine eklenir.
+**Adres neden `8080`?** 80 portu Windows'ta yönetici, macOS'ta `sudo` hakkı ister ve başka programlarla kolayca çakışır; bu yüzden köprü 8080'de çalışır. Tarayıcı zaten otomatik açıldığı için adres yazılmaz; sonradan elle girmek gerekirse `http://localhost:8080/app/#/sim` yer imine eklenir.
 
-#### Tek seferlik exe üretimi (isteğe bağlı)
+#### Tek seferlik uygulama üretimi (isteğe bağlı)
 
-Python kurulu olmayan bir bilgisayarda veya tek dosya taşımak için `server\sim_bridge\build_exe.bat` bir kez çalıştırılır. Betik PyInstaller'ı kurar ve **`dist\ERP-Sim-Bridge.exe`** üretir; sonraki çalıştırmalarda `Baslat.bat` bu exe'yi otomatik kullanır. Exe'nin içinde ERP Studio'nun `app/` dosyaları, varsayılan ayar ve örnek fabrika profili taşınır; `config.json`, `config/ornek-fabrika-profili.json` ve `data/ingest.db` **exe'nin yanında** oluşur. Bu yüzden exe yazılabilir bir klasöre (Masaüstü, `C:\ERP-Sim` gibi) kopyalanmalıdır; `Program Files` altında ayar yazılamaz.
+| Platform | Komut | Çıktı | Ayar ve veri |
+| --- | --- | --- | --- |
+| Windows | `server\sim_bridge\build_exe.bat` | `dist\ERP-Sim-Bridge.exe` | Exe'nin yanında |
+| macOS | `server/sim_bridge/build_macos.sh` | `dist/ERP-Sim-Bridge.app` | `~/Library/Application Support/ERP-Sim-Bridge` |
 
-> Windows ikilisi bu Linux geliştirme ortamında üretilemez (PyInstaller hedef işletim sisteminde çalışır). Depoda exe yerine onu üreten `erp-sim-bridge.spec` ve `build_exe.bat` vardır; exe yerleşimi (`_MEIPASS` içindeki varlıklar, exe yanındaki yazılabilir dosyalar) testlerle doğrulanmıştır.
+Betikler PyInstaller'ı kurar. Uygulamanın içinde ERP Studio'nun `app/` dosyaları, varsayılan ayar ve örnek fabrika profili taşınır. Windows'ta `config.json`, `config\ornek-fabrika-profili.json` ve `data\ingest.db` exe'nin yanında oluşur; bu yüzden exe yazılabilir bir klasöre (Masaüstü, `C:\ERP-Sim` gibi) konmalıdır, `Program Files` altında ayar yazılamaz. macOS'ta aynı dosyalar uygulama paketinin dışında, kullanıcı klasöründe tutulur; `.app` `/Applications` altına taşınabilir.
+
+macOS uygulaması imzasızdır; ilk açılışta aynı sağ tık → Aç adımı gerekir. `.app` yalnızca üretildiği Mac'in mimarisi için (Apple Silicon veya Intel) çalışır; diğer mimaride `build_macos.sh` yeniden çalıştırılır.
+
+> Windows exe'si ve macOS uygulaması bu Linux geliştirme ortamında üretilemez (PyInstaller hedef işletim sisteminde çalışır). Depoda ikili dosyalar yerine onları üreten `.spec` ve betikler vardır; exe/.app yerleşimi (`_MEIPASS` içindeki varlıklar, dışarıdaki yazılabilir dosyalar) testlerle doğrulanmıştır.
 
 ### 4.3 Komut satırından çalıştırma (geliştirici)
 
@@ -136,8 +148,8 @@ Ajan `8787`'de açılır. **Bağlantıyı Test Et** düğmesi hem simülasyonu h
 | `simBaseUrl` | `http://127.0.0.1:8000` | Simülasyon kök adresi; yalnızca sunucu tarafında kullanılır |
 | `timeoutSeconds` | `3` | Her REST çağrısının zaman aşımı |
 | `liveRefreshMs` | `2500` | Arayüzün önerilen yenileme aralığı (bilgi amaçlı) |
-| `profilePath` | `edge/config/ornek-fabrika-profili.json`; exe'de `config/ornek-fabrika-profili.json` | Makine eşlemesinin kaynağı |
-| `ingestDb` | `server/sim_bridge/data/ingest.db`; exe'de `data/ingest.db` | Batch, okuma ve olay kayıt defteri |
+| `profilePath` | `edge/config/ornek-fabrika-profili.json`; exe/.app'te `config/ornek-fabrika-profili.json` | Makine eşlemesinin kaynağı |
+| `ingestDb` | `server/sim_bridge/data/ingest.db`; exe/.app'te `data/ingest.db` | Batch, okuma ve olay kayıt defteri |
 | `autoMap` | `true` | Ada göre otomatik eşleme |
 | `furnaceMap` | `{}` | Açık eşleme: `{ "Fırın adı": "MCH-01" }` |
 | `edge.secret` | `degistirin-bu-gizli-anahtari` | Edge ajanıyla **aynı** HMAC anahtarı |
@@ -239,7 +251,7 @@ Davranış kuralları:
 Sırayla:
 
 1. Kullanıcı simülasyonu `./start.sh 10` ile açılır.
-2. Köprü Windows'ta `Baslat.bat` çift tıkla (veya `python3 server/sim_bridge/run.py`) açılır; tarayıcı Simülasyon ekranında açılır, konsolda eşlemenin `3/3` olduğu görülür.
+2. Köprü Windows'ta `Baslat.bat`, macOS'te `Baslat.command` çift tıkla (veya `python3 server/sim_bridge/run.py --open`) açılır; tarayıcı Simülasyon ekranında açılır, konsolda eşlemenin `3/3` olduğu görülür.
 3. Arayüzde `Homojenizasyon Fırını`, hedef `60 °C`, süre `0.2` dk ile emir oluşturulur ve başlatılır. Kart `ISINIYOR` → `BEKLETIYOR` → `TAMAMLANDI` olur; süre hedefe ulaştıktan sonra işler.
 4. `Aluminyum Eritme Fırını`, hedef `900 °C` (güvenlik sınırı 850 °C) ile alarm denenir; kart `ALARM` olur, brülör kapanır.
 5. Edge ajanı `8787`'de **Bağlantıyı Test Et** → simülasyon ve ERP köprüsü yeşil; **Şimdi Oku** → 15 okuma (3 fırın × 4 sinyal + 3 telemetri); **Toplu Gönder** → kuyruk `sent`.
@@ -248,12 +260,12 @@ Sırayla:
 Bu depodaki otomatik doğrulama:
 
 ```bash
-python3 tools/sim_bridge_smoke_test.py    # 15 test
+python3 tools/sim_bridge_smoke_test.py    # 16 test
 python3 tools/edge_smoke_test.py          # 13 test
 node tools/smoke_test.mjs                 # 35 ekran
 ```
 
-Sonuçlar: köprü 15/15, edge 13/13, ekranlar 35/35. Köprü testi gerçek FastAPI gerektirmez; demo motoru ve sahte istemcilerle ağ davranışını sınar. Ayrıca `linkedom` ile yapılan DOM denetiminde sim ekranı canlı köprüye bağlandı: 3 fırın kartı, emir tablosu, edge sayacı, eşleme tablosu, fırın seçiminde sıcaklık grafiği ve yeni emir modalı çizildi; ağ kesildiğinde sayfa yenilenmeden "Köprü çalışmıyor" uyarısı göründü.
+Sonuçlar: köprü 16/16, edge 13/13, ekranlar 35/35. Köprü testi gerçek FastAPI gerektirmez; demo motoru ve sahte istemcilerle ağ davranışını sınar. Ayrıca `linkedom` ile yapılan DOM denetiminde sim ekranı canlı köprüye bağlandı: 3 fırın kartı, emir tablosu, edge sayacı, eşleme tablosu, fırın seçiminde sıcaklık grafiği ve yeni emir modalı çizildi; ağ kesildiğinde sayfa yenilenmeden "Köprü çalışmıyor" uyarısı göründü.
 
 ---
 
@@ -276,7 +288,7 @@ Sonuçlar: köprü 15/15, edge 13/13, ekranlar 35/35. Köprü testi gerçek Fast
 4. **Kapı ve döküm sinyalleri simülasyonda yoktur.** `unknown` olarak işaretlenir; gerçek PLC bağlandığında `opcua` / `modbus` adaptörü bu sinyalleri okur.
 5. **Tek köprü / tek ajan.** İkinci bir saha bilgisayarı eklenirse `siteCode` ayrılmalı ve her ajan kendi `clientId` alanıyla gelmelidir.
 6. **Gerçek tarayıcı testi** yapılmamıştır; ekran Node duman testi, `linkedom` DOM denetimi ve HTTP istekleriyle doğrulanmıştır. Dokunmatik/tablet davranışı sahada görülmelidir.
-7. **Windows exe'si depoda hazır değildir.** `Baslat.bat` Python ile hemen çalışır; tek dosya isteniyorsa Windows'ta `build_exe.bat` bir kez çalıştırılır. Linux'ta exe üretilmez, yalnızca yerleşim test edilir.
+7. **Windows exe'si ve macOS uygulaması depoda hazır değildir.** `Baslat.bat` / `Baslat.command` Python ile hemen çalışır; tek dosya isteniyorsa kendi işletim sisteminde `build_exe.bat` veya `build_macos.sh` bir kez çalıştırılır. Linux'ta ikili dosya üretilmez, yalnızca yerleşim test edilir.
 8. **Simülasyon emirleri kalıcı değildir.** Kullanıcı simülasyonu kendi kurallarıyla çalışır; köprü yeniden başlatıldığında yalnızca kendi kayıt defteri korunur.
 
 ---
