@@ -26,7 +26,7 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-VERSION = '1.4.2'
+VERSION = '1.5.0'
 
 # İki yerleşim desteklenir:
 #  1. Depo içinden çalıştırma: statik dosyalar ve yapılandırma depo kökünde.

@@ -2,7 +2,7 @@
 
 Bu depo, sohbette tarif edilen **alüminyum biyet dökümhanesi** için uçtan uca ERP planını, çalışan bir web prototipini ve firma sunucusundaki `ERP/` klasörünün dosya tabanlı modelini içerir. Genel dökümhane planı değil; sürekli döküm, ergitme, testere, homojenizasyon, soğutma, paketleme ve iki onaylı sevkiyat akışı esas alınır.
 
-**Sürüm:** 1.4.2 · Simülasyon Köprüsü (Windows + macOS çift tık) · `schemaVersion: 4` · **35 ekran + 1 saha arayüzü + 1 simülasyon köprüsü** · **59 varlık** · **16 doküman**
+**Sürüm:** 1.5.0 · Canlı Simülasyon Ana Ekranları · `schemaVersion: 4` · **35 ekran + 1 saha arayüzü + 1 simülasyon köprüsü** · **59 varlık** · **16 doküman**
 
 ---
 
@@ -27,18 +27,18 @@ Bu depo, sohbette tarif edilen **alüminyum biyet dökümhanesi** için uçtan u
 | `docs/14-simulasyon-baglantisi.md` | **Fabrika testinden önce simülasyon**: köprü mimarisi, fırın → makine eşlemesi, canlı ekran, imzalı ingest, güvenlik ve sınırlar |
 | `docs/15-erp-sistemi-kapsamli-ozet.md` | **Tek parça sistem özeti**: 35 ekran, 59 varlık, iş akışları, hesaplar, dört sinyal, edge ve köprü |
 | `docs/Dokumhane-ERP-Plan.docx` | **16 dokümanın tamamını** birleştiren tek **Word** dosyası ("AI'a atılacak" çıktı) |
-| `app/` | Çalışan PWA prototipi: bağımlılık yok, saf HTML/CSS/JS, **35 ekran**, `calc.js` + `posting.js` + `modularity.js` + `adapters.js`, canlı simülasyon ekranı |
+| `app/` | Çalışan PWA prototipi: bağımlılık yok, saf HTML/CSS/JS, **35 ekran**, `calc.js` + `posting.js` + `modularity.js` + `adapters.js`, canlı simülasyon modu |
 | `server/erp/` | Firma sunucusundaki `ERP/` klasörünün modeli: **59 JSON dosyası**, olay kuyruğu, arşiv, worker'lar |
 | `edge/` | **Fabrikadaki tek bilgisayar**: `ERP-Edge-Collector.exe` kaynağı, SQLite şeması, adaptörler (`simulation` dahil), yerel web arayüzü, PyInstaller spec ve kurulum betikleri |
-| `server/sim_bridge/` | **Simülasyon köprüsü**: ERP Studio'yu `:8080` üzerinden kullanıcı simülasyonuna (`:8000`) bağlar, REST proxy ve imzalı edge ingest sunar |
-| `Baslat.bat`, `Baslat.command` | **Windows / macOS çift tık**: köprüyü başlatır, tarayıcıyı doğrudan Simülasyon ekranında açar |
+| `server/sim_bridge/` | **Simülasyon köprüsü**: ERP Studio'yu `:8080` üzerinden kullanıcı simülasyonuna (`:8000`) bağlar; ana Panel, Makine Parkı, PLC ve Üretim ekranlarını canlı besler, imzalı edge ingest sunar |
+| `Baslat.bat`, `Baslat.command` | **Windows / macOS çift tık**: köprüyü başlatır, tarayıcıyı doğrudan canlı Panel'de (`#/dashboard`) açar |
 | `tools/` | Word üretici, seed aktarımı, ikon üretici, duman testi, **edge ajanı** ve **simülasyon köprüsü** duman testleri |
 
 ---
 
 ## 2. Prototipi çalıştırma
 
-**En kolay yol (Windows veya macOS):** fırın simülasyonunuz `localhost:8000` üzerinde çalışırken depo kökündeki başlatıcıya çift tıklayın; köprü kendiliğinden başlar ve tarayıcı `http://localhost:8080/app/#/sim` adresinde açılır. Ayrı komut veya adres yazmak gerekmez. Açılan pencere köprüdür, açık kaldıkça çalışır.
+**En kolay yol (Windows veya macOS):** fırın simülasyonunuz `localhost:8000` üzerinde çalışırken depo kökündeki başlatıcıya çift tıklayın; köprü kendiliğinden başlar ve tarayıcı `http://localhost:8080/app/#/dashboard` adresinde, canlı Panel'de açılır. Ayrı komut veya adres yazmak gerekmez. Açılan pencere köprüdür, açık kaldıkça çalışır.
 
 | Platform | Çift tık | Tek dosya program (isteğe bağlı, bir kez) |
 | --- | --- | --- |
@@ -76,7 +76,7 @@ Veriyi sıfırlamak için **Ayarlar → Demo Verisini Sıfırla**. Yerel depolam
 13. **Tek kayıt, çok etki (Sürüm 1.1).** Onaylanan bir sevkiyat stok, fatura, muhasebe fişi, cari bakiye, maliyet, olay, bildirim ve rapor kuyruğunu tek işlemde üretir.
 14. **Modüler saha kurulumu (Sürüm 1.2).** Aynı yazılım 1, 2 veya 5 fırınlı fabrikaya kod değişikliği olmadan bağlanır; makineler eklenir, gerekçeyle devre dışı bırakılır (silinmez), fabrika profili JSON olarak indirilir/içe alınır, modüller ve PLC adaptörleri veriyle yönetilir.
 15. **Edge veri toplama ajanı (Sürüm 1.3).** Fabrikadaki tek bilgisayarda çalışan exe, dört sinyale ek olarak sıcaklık gibi ölçümleri okur; önce yerel SQLite'a yazar, imzalı batch ile ERP'ye gönderir, çevrimdışıyken kuyruğu korur. Bu exe ERP arayüzü değildir; PWA ve tarayıcı kararı değişmez.
-16. **Simülasyonla ön doğrulama (Sürüm 1.4).** Gerçek fabrika testinden önce aynı ERP zinciri kullanıcı fırın simülasyonuna bağlanır. Tarayıcı doğrudan simülasyona gitmez; aynı kökende çalışan köprü REST ile okur, fırın adlarını profil makinelerine eşler ve imzalı edge batch'lerini kabul eder. WebSocket ve sayfa yenileme yoktur.
+16. **Simülasyonla ön doğrulama (Sürüm 1.4–1.5).** Gerçek fabrika testinden önce aynı ERP zinciri kullanıcı fırın simülasyonuna bağlanır. Tarayıcı doğrudan simülasyona gitmez; aynı kökende çalışan köprü REST ile okur, fırın adlarını profil makinelerine eşler ve imzalı edge batch'lerini kabul eder. Sürüm 1.5'te canlı veri ana Panel, Makine Parkı, PLC Durum ve Üretim Akışı ekranlarına taşınır; üst çubuktan demo veriye dönülür.
 17. **Maliyet nesnesi döküm kodudur.** Genel ERP'deki proje modülü burada `DK-...` partisi olarak tercüme edilir; bordro, CAD/BIM ve kampanya CRM'i kasten dışarıda kalır.
 18. **Belirsiz terimler sabitlenmez.** `PIS`, `GNSL`, `Stone`, `Barsa piyazesi` ve `Saf küçük` için `docs/06` Bölüm 5'teki 8 soru hâlâ açıktır.
 
@@ -99,11 +99,11 @@ Veriyi sıfırlamak için **Ayarlar → Demo Verisini Sıfırla**. Yerel depolam
 | Yönetim | **Saha Kurulum Sihirbazı**, **Modül Kaydı**, Merkezi Yönetim |
 | Sistem | Bildirimler & Kuyruk, Ayarlar |
 
-Kalın olan 8 ekran Sürüm 1.1'de, **Saha Kurulum Sihirbazı** ve **Modül Kaydı** Sürüm 1.2'de eklendi; gerekçeler `docs/11` ve `docs/12` içindedir. Sürüm 1.3 ERP'ye ekran eklemez; `edge/` altına fabrikadaki tek bilgisayar için ayrı bir exe ve kendi arayüzünü ekler (`docs/13`). Sürüm 1.4, `docs/14` ile gelen **Simülasyon Bağlantısı** ekranını ekler; bu ekran fabrika testinden önce fırın verisini, emirleri ve edge kuyruğunu canlı gösterir.
+Kalın olan 8 ekran Sürüm 1.1'de, **Saha Kurulum Sihirbazı** ve **Modül Kaydı** Sürüm 1.2'de eklendi; gerekçeler `docs/11` ve `docs/12` içindedir. Sürüm 1.3 ERP'ye ekran eklemez; `edge/` altına fabrikadaki tek bilgisayar için ayrı bir exe ve kendi arayüzünü ekler (`docs/13`). Sürüm 1.4, `docs/14` ile gelen **Simülasyon Bağlantısı** ekranını ekler; bu ekran fabrika testinden önce fırın verisini, emirleri ve edge kuyruğunu canlı gösterir. Sürüm 1.5 aynı veriyi **ana Panel, Makine Parkı, PLC Durum ve Üretim Akışı** ekranlarına taşır; canlı mod salt okunurdur ve stok/cari/muhasebe kayıtlarına dokunmaz.
 
 ---
 
-## 5. Sürüm 1.1–1.4'te kapatılan boşluklar
+## 5. Sürüm 1.1–1.5'te kapatılan boşluklar
 
 Genel ERP anlatımı bu projeye uygulandığında en büyük eksik **modül sayısı değil, departmanlar arası otomatik veri akışıydı**. Önceki sürüm üretim, kütle dengesi ve olay günlüğünde güçlüydü; müşteri kartı, satış siparişi, satın alma talebi, hesap planı, muhasebe fişi, mizan, fatura, cari bakiye, ürün maliyeti, bütçe, depo lokasyonu ve vardiya yoktu.
 
@@ -133,7 +133,7 @@ Kasten eklenmeyenler: bordro ve özlük, kampanya CRM'i, inşaat proje kartı, A
 ## 6. Kontroller ve testler
 
 ```bash
-node tools/smoke_test.mjs                              # 35 ekran + hesaplar + mizan + profil + çıkarma + adaptör
+node tools/smoke_test.mjs                              # 35 ekran + hesaplar + mizan + profil + çıkarma + adaptör + canlı mod
 python3 server/erp/scripts/validate_data.py           # 58 koleksiyon, referans, finansal ve modüler bütünlük
 node tools/export_seed.mjs                            # 59 JSON + manifest (schema_version: 4)
 python3 server/erp/scripts/event_worker.py --dry-run  # kuyruk simülasyonu (silmez)
@@ -172,7 +172,7 @@ Aynı sınır simülasyon köprüsü için de geçerlidir: `Baslat.bat` / `Basla
 
 ---
 
-## 8. Simülasyonla ön doğrulama (Sürüm 1.4)
+## 8. Simülasyonla ön doğrulama (Sürüm 1.4–1.5)
 
 Kullanıcının fırın simülasyonu (`erp_backend`, varsayılan `:8000`) ile ERP Studio arasına aynı kökende çalışan bir köprü girer. Böylece tarayıcı CORS veya farklı port sorunu yaşamaz; WebSocket kullanılmadığı için "bağlantı koptu → sayfa yenilendi" döngüsü oluşmaz.
 
@@ -190,7 +190,7 @@ python3 server/sim_bridge/run.py --check              # yalnızca bağlantı + e
 python3 edge/main.py --bind 0.0.0.0 --port 8787 --no-browser
 ```
 
-**Entegrasyon → Simülasyon Bağlantısı** ekranında bağlantı durumu, üç fırın kartı, canlı sıcaklık/alarm, emir oluşturma ve başlatma, edge batch sayacı ve fırın → makine eşlemesi görünür. Ekran 2,5 saniyede bir sessizce yenilenir; hiçbir zaman `location.reload()` çağırmaz. Simülasyon kapanırsa son görüntü "bayat" etiketiyle kalır.
+**Ana ekranlar artık simülasyonla çalışır.** Köprü açıkken **Panel**, **Makine Parkı**, **PLC Durum** ve **Üretim Akışı** demo kayıtları yerine canlı fırın, emir, sıcaklık ve alarm verisini gösterir. Üst çubuktaki **Canlı simülasyon / Demo veri** düğmesiyle mod değiştirilir; canlı mod salt okunurdur ve stok/cari/muhasebe tablolarına yazmaz. **Simülasyon Bağlantısı** ekranı bağlantı, emir oluşturma ve edge teşhisi için kalır; 2,5 saniyede bir sessizce yenilenir, `location.reload()` çağırmaz. Simülasyon kapanırsa ana ekranlar “bağlantı yok / son veri” gösterir, demo veriye dönmez.
 
 Edge ajanı simülasyondan dört sinyali ve sıcaklığı okur; simülasyonda kapı/döküm sinyali olmadığı için bunları `unknown` yazar. Fırın adları `furnaceMap` veya "eritme / homojen / yaşlandırma / testere" kurallarıyla profil makinelerine eşlenir; eşleşmeyen fırın için veri üretilmez. İmzalı batch `POST /api/edge/ingest` ile köprüye düşer ve edge `outbox` kaydı **sent** olur. Ayrıntılar `docs/14` içindedir.
 

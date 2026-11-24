@@ -1,6 +1,6 @@
 #!/bin/bash
 # ERP Studio — Simülasyon Köprüsü / macOS çift tık başlatıcı.
-# Finder'da bu dosyaya çift tıklayın: köprü başlar, tarayıcı Simülasyon ekranında açılır.
+# Finder'da bu dosyaya çift tıklayın: köprü başlar, tarayıcı canlı Panel'de açılır.
 set -u
 cd "$(dirname "$0")" || { echo "Depo klasörü açılamadı."; exit 1; }
 
@@ -10,7 +10,7 @@ cat <<'BILGI'
    ERP Studio - Simulasyon Baglantisi (macOS)
   ============================================================
    Sizin simulasyonunuz : http://localhost:8000
-   ERP Studio           : http://localhost:8080/app/#/sim
+   ERP Studio           : http://localhost:8080/app/#/dashboard
 
    Simulasyonunuzu once her zamanki gibi baslatin.
    Bu Terminal penceresi acik kaldikca kopru calisir.

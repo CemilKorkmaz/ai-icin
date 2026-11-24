@@ -2,11 +2,11 @@
 
 Bu klasör, kullanıcının `erp_backend` / `erp_simulation` olarak çalıştırdığı fırın simülasyonunu ERP Studio'ya bağlar. Amaç, gerçek fabrika testinden önce fırın sıcaklığı, alarm, emir ve edge ajanı zincirini uçtan uca sınamaktır. Ayrıntı ve gerekçeler `docs/14` içindedir.
 
-**Ne yapar:** `/app/` altında ERP Studio'yu sunar, simülasyonun REST uçlarını `/api/sim/*` ile proxy'ler, edge ajanının HMAC imzalı batch'lerini `/api/edge/ingest` ile kabul eder. **Ne yapmaz:** simülasyonun veritabanına/kaynak koduna dokunmaz, PLC'ye yazmaz, ERP'nin stok/maliyet/muhasebe tablolarını değiştirmez.
+**Ne yapar:** `/app/` altında ERP Studio'yu sunar, simülasyonun REST uçlarını `/api/sim/*` ile proxy'ler, ana Panel/Makine Parkı/PLC Durum/Üretim Akışı ekranlarını canlı fırın ve emir verisiyle besler, edge ajanının HMAC imzalı batch'lerini `/api/edge/ingest` ile kabul eder. **Ne yapmaz:** simülasyonun veritabanına/kaynak koduna dokunmaz, PLC'ye yazmaz, ERP'nin stok/maliyet/muhasebe tablolarını değiştirmez.
 
 ## Hızlı başlangıç
 
-**Çift tık (önerilen):** Simülasyon `localhost:8000` üzerinde çalışırken depo kökündeki başlatıcıya çift tıklayın. Köprü başlar, tarayıcı `http://localhost:8080/app/#/sim` adresinde açılır. Pencere kapatılınca köprü durur.
+**Çift tık (önerilen):** Simülasyon `localhost:8000` üzerinde çalışırken depo kökündeki başlatıcıya çift tıklayın. Köprü başlar, tarayıcı `http://localhost:8080/app/#/dashboard` adresinde, canlı Panel'de açılır. Pencere kapatılınca köprü durur.
 
 | Platform | Dosya | Üretilmiş uygulama varsa |
 | --- | --- | --- |
