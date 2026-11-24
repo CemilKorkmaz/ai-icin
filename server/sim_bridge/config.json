@@ -1,0 +1,16 @@
+{
+  "version": "1.4.0",
+  "simBaseUrl": "http://127.0.0.1:8000",
+  "simLabel": "Kullanıcı simülasyonu · erp_backend",
+  "timeoutSeconds": 3,
+  "liveRefreshMs": 2500,
+  "profilePath": "edge/config/ornek-fabrika-profili.json",
+  "ingestDb": "server/sim_bridge/data/ingest.db",
+  "autoMap": true,
+  "furnaceMap": {},
+  "edge": {
+    "secret": "degistirin-bu-gizli-anahtari",
+    "token": "",
+    "maxBodyBytes": 5242880
+  }
+}

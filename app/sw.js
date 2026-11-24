@@ -3,7 +3,7 @@
 
 // Şema sürümüyle birlikte yükseltildi: modüler kurulum çekirdeği, adaptör sözleşmesi,
 // menü tanımı ve kurulum sihirbazı çevrimdışı ilk açılışta da önbellekte bulunmalıdır.
-const CACHE = 'erp-studio-v4';
+const CACHE = 'erp-studio-v5';
 const SHELL = [
   './',
   './index.html',
@@ -32,7 +32,8 @@ const SHELL = [
   './js/views/reports.js',
   './js/views/system.js',
   './js/views/engineering.js',
-  './js/views/enterprise.js'
+  './js/views/enterprise.js',
+  './js/views/sim.js'
 ];
 
 self.addEventListener('install', (event) => {

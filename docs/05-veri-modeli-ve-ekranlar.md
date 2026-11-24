@@ -1,6 +1,6 @@
 # 05 — Veri Modeli, API Sözleşmesi ve Ekran Envanteri
 
-**Amaç:** `docs/01`–`docs/12` arasında tarif edilen işlevlerin somut veri karşılıklarını, hesap kurallarını ve prototipteki ekranların envanterini vermek. Sürüm 1.2 itibarıyla **59 varlık** ve **34 ekran** kapsanır. Bu doküman, Faz 1 geliştirmesinde API sözleşmesi olarak kullanılır.
+**Amaç:** `docs/01`–`docs/14` arasında tarif edilen işlevlerin somut veri karşılıklarını, hesap kurallarını ve prototipteki ekranların envanterini vermek. Sürüm 1.4 itibarıyla **59 varlık**, **35 ERP ekranı**, **1 saha arayüzü** ve **1 simülasyon köprüsü** kapsanır. Bu doküman, Faz 1 geliştirmesinde API sözleşmesi olarak kullanılır.
 
 **Ortak kurallar:** Tüm tarih/saat değerleri ISO 8601 (`2026-11-02T09:30:00+03:00`), tüm ondalıklar nokta ile, tüm miktarlar `quantity` + `unit` ikilisiyle yazılır. Referanslar **ID** iledir; malzeme adı hiçbir kayıtta birincil bağlantı olarak kullanılmaz. `server/erp/data/` altındaki **koleksiyon dosyaları doğrudan kayıt dizisidir** (`settings.json` tek nesnedir); sürüm, üretim zamanı ve dosya listesi `manifest.json` içinde tutulur. Uygulamanın **Ayarlar → Veri Yönetimi** ekranından alınan tam yedek ise tüm koleksiyonları tek bir JSON nesnesinde birleştirir ve `schemaVersion` alanını taşır.
 
@@ -354,6 +354,10 @@ Sabitler (alüminyum özgül ağırlığı, bıçak kalınlığı, yolluk/filtre
 | GET/PUT | `/api/plant-modules?plantId=` | Fabrika bazında modül açık/kapalı haritası |
 | GET | `/api/module-registry`, `/api/adapter-contracts` | Modül ve bağlantı adaptörü kayıtları |
 | POST | `/api/adapters/:code/test` | `connect / test / readFourSignals / disconnect` sözleşmesi; sürücü yoksa `MANUAL` yedeği |
+| POST | `/api/edge/ingest` | Fabrikadaki exe ajanının **tek yazma ucu**: imzalı `edge-batch`, `readings[]` + `events[]`, `clientId` ile idempotent (`docs/13`) |
+| GET | `/api/sim/live`, `/api/sim/health`, `/api/sim/map` | Simülasyon köprüsü: fırınlar, emirler, alarmlar, eşleme ve bağlantı durumu (`docs/14`) |
+| POST | `/api/sim/orders`, `/api/sim/orders/start` | Kullanıcı simülasyonunda emir oluştur/başlat; ERP işletme tablosuna yazmaz |
+| GET/POST | `/api/edge/summary`, `/api/edge/batches`, `/api/edge/latest`, `/api/bridge/config` | Edge kayıt defteri özeti ve köprü adresi |
 
 Tüm yazma uçları idempotent `client_id` kabul eder; çevrimdışı istemcinin tekrar gönderimi çift kayıt oluşturmaz.
 
@@ -397,6 +401,7 @@ Tüm yazma uçları idempotent `client_id` kabul eder; çevrimdışı istemcinin
 | 30 | Depo, Rezervasyon & Sayım | Depolama & Personel | warehouses, reservations, stockCounts | Lokasyonlar, rezervasyon serbest bırakma, sayım farkı ve düzeltme fişi |
 | 31 | Personel & Vardiya | Depolama & Personel | employees, shifts, events | Vardiya ataması, gece vardiyası, olay-operatör izi; bordro hariç |
 | 32 | Entegrasyon Matrisi | Entegrasyon | integrationRules, tüm koleksiyonlar | Tek düğmeyle onaylı sevkiyattan sekiz koleksiyona atomik yazım |
+| 35 | Simülasyon Bağlantısı | Entegrasyon | salt okunur simülasyon REST uçları, `furnaceMap`, ingest kayıt defteri | Fırın sıcaklığı/alarmı canlı, emir oluştur/başlat, edge batch sayacı, eşleme tablosu; sayfa yenilemez (`docs/14`) |
 
 ---
 
@@ -484,10 +489,24 @@ Bütün kurallar `integrationRules` koleksiyonunda veri olarak da tutulur; kod i
 | Makine (`machines`) | `id`, `plantId`, `type`, `name`, `capacityTon`, `mode`, `plcId`, `active`, `status`, `decommissionedAt`, `decommissionReason`, `installedAt` | Tek kaynak; devre dışı makine silinmez, `active: false` ve gerekçe zorunludur |
 | Ocak projeksiyonu (`furnaces`) | `id`, `code`, `name`, `capacityTon`, `type`, `rotary`, `status`, `machineId`, `plantId` | Kimlik kümesi `machines` içindeki FURNACE/ROTARY kümesine eşit olmalıdır |
 | Eski kod (`machineAliases`) | `id`, `legacyCode`, `machineId`, `plantId`, `note` | Yalnızca uyumluluk köprüsü; hedef makine ve fabrika var olmalıdır |
-| Modül (`moduleRegistry`) | `id`, `code`, `label`, `group`, `views[]`, `defaultEnabled`, `requiresMachineType`, `requiresMode`, `note` | 34 ekranın tamamı bir modüle bağlıdır; kod benzersizdir |
+| Modül (`moduleRegistry`) | `id`, `code`, `label`, `group`, `views[]`, `defaultEnabled`, `requiresMachineType`, `requiresMode`, `note` | 35 ekranın tamamı bir modüle bağlıdır; kod benzersizdir |
 | Fabrika modül haritası (`plantModules`) | `id`, `plantId`, `enabled{}`, `note` | `enabled` anahtarları kayıtlı modül kodlarıdır; `CORE` ve `VENDOR` açıktır |
 | Kurulum taslağı (`setupDrafts`) | `id`, `step`, `values{counts, defaultCapacity, mode, connection, modules, lastTest}`, `updatedAt` | `step` 1–5 arası; her adım kaydedilir |
 | Adaptör (`adapterContracts`) | `id`, `code`, `label`, `protocol`, `implemented`, `capabilities[]`, `note` | Dört yetenek zorunludur; sürücü yoksa `MANUAL` yedeğe düşülür |
 | Profil paketi (`profilePackages.payload`) | `kind`, `packageVersion`, `schemaVersion`, `plant`, `machineTypes`, `machines`, `castingPaths`, `plcConnections`, `plcTags`, eşikler, `plantModules`, `moduleRegistry` | `kind` ve şema sürümü doğrulanır; her yol paket içindeki makinelere bağlıdır |
 
 **Sabit kod yasağı.** Ekran kodunda fabrika veya makine kimliği yazılmaz. Aktif fabrika `activePlantId()`, aktif makine `machinesOfType()` ve `firstMachineId()` yardımcı işlevlerinden gelir. Duman testi 1 ve 2 fırınlı profilleri, bağımlılık raporunu, geri almayı, modül filtresini ve adaptör yedeğini doğrular; veri doğrulayıcı 58 koleksiyonda projeksiyon ve referans bütünlüğünü denetler.
+
+## 11. Edge Ajanının Yerel SQL Şeması (`docs/13`)
+
+`docs/13` ile gelen ajan, ERP koleksiyonlarından **ayrı** bir yerel SQLite veritabanı (`edge/data/edge.db`, WAL) tutar. Bu, aynı verinin iki yerde tutulması değildir: saha bilgisayarında ham okuma ve gönderim kuyruğu, sunucuda doğrulanmış işletme kaydı vardır.
+
+| Tablo | Alanlar | Kural |
+| --- | --- | --- |
+| `readings` | `client_id`, `at`, `plant_id`, `machine_id`, `tag_id`, `kind`, `signal`, `value_num`, `value_text`, `unit`, `quality`, `source`, `adapter`, `raw` | `client_id` benzersiz; `kind` = `signal` veya `telemetry`; dört sinyal + sıcaklık ölçümü |
+| `events` | `client_id`, `at`, `machine_id`, `signal`, `kind`, `previous`, `current`, `severity`, `note` | `STATE_CHANGE` / `THRESHOLD` / `DRIVER_FALLBACK`; silinmez |
+| `outbox` | `client_id`, `batch_id`, `endpoint`, `payload_json`, `status`, `attempts`, `next_attempt_at`, `last_error` | `queued → sending → sent / failed → dead`; hiçbir satır silinmez |
+| `runs` | `at`, `duration_ms`, `tag_count`, `reading_count`, `event_count`, `adapter`, `errors` | Her tarama döngüsünün izi |
+| `app_log` | `at`, `level`, `source`, `message` | Ajan günlüğü |
+
+**Kalite ayrımı.** `quality` alanı `GOOD`, `SIMULATED`, `STALE`, `BAD` alır; gerçek sürücü takılı değilken üretilen veri `SIMULATED` olarak işaretlenir ve sahada ölçülmüş gibi raporlanmaz. **Sıcaklık beşinci kontrol sinyali değildir**: `docs/08` Bölüm 4'teki dört sinyal (`door`, `casting`, `alarm`, `running`) değişmez, ölçümler `telemetry` kategorisinde ayrı tutulur. Bağlantı, imza, çevrimdışı kuyruk ve exe üretimi `docs/13` içindedir. Simülasyon köprüsü, fırın → makine eşlemesi ve test ekranı `docs/14` içindedir; köprü kendi SQLite kayıt defterini tutar ve işletme koleksiyonlarına yazmaz.

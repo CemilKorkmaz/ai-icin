@@ -84,7 +84,7 @@ Tetikleyici: Her gün 03:00 ve her saat başı (artımlı)
 
 ## Ticari ve finansal koleksiyonlar (Sürüm 1.1)
 
-Sürüm 1.2'de altı modüler kurulum koleksiyonu daha eklenmiştir; ayrıntı `../data/README.md` ve `docs/12` içindedir.
+Sürüm 1.2'de altı modüler kurulum koleksiyonu daha eklenmiştir; ayrıntı `../data/README.md` ve `docs/12` içindedir. Sürüm 1.3'te fabrikadaki exe ajanı bu dosyalara doğrudan yazmaz, `/api/edge/ingest` üzerinden worker'a besler (`docs/13`). Sürüm 1.4'te `server/sim_bridge` aynı ucu prototip düzeyinde kabul eder; batch'i ayrı kayıt defterine yazar, bu JSON koleksiyonlarını değiştirmez (`docs/14`).
 
 `docs/11` karşılaştırmasıyla `data/` altına 18 koleksiyon eklendi. Bunlar üretim olaylarının finansal karşılığıdır; ayrı bir veritabanı veya servis gerektirmezler.
 

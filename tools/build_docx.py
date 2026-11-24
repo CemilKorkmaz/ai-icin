@@ -34,6 +34,8 @@ FILES = [
     ('10-kurulum-ve-yol-haritasi-v2.md', 'BÖLÜM 10 — Kurulum ve Yol Haritası (Sürüm 2)'),
     ('11-genel-erp-karsilastirma-ve-bosluk-analizi.md', 'BÖLÜM 11 — Genel ERP Karşılaştırması ve Boşluk Analizi'),
     ('12-saha-kurulum-ve-modul-yasam-dongusu.md', 'BÖLÜM 12 — Saha Kurulum ve Modül Yaşam Döngüsü'),
+    ('13-edge-veri-toplama-ajani.md', 'BÖLÜM 13 — Edge Veri Toplama Ajanı (exe, SQL ve ERP Köprüsü)'),
+    ('14-simulasyon-baglantisi.md', 'BÖLÜM 14 — Simülasyon Bağlantısı ve Fabrika Öncesi Doğrulama'),
 ]
 
 W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'

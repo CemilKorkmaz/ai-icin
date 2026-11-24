@@ -44,7 +44,10 @@ export const NAV = [
     { id: 'archive', label: 'Arşiv', icon: 'archive' }
   ] },
   { group: 'RAPORLAMA', items: [{ id: 'reports', label: 'Raporlar & İstatistik', icon: 'chart' }] },
-  { group: 'ENTEGRASYON', items: [{ id: 'integration', label: 'Entegrasyon Matrisi', icon: 'link' }] },
+  { group: 'ENTEGRASYON', items: [
+    { id: 'integration', label: 'Entegrasyon Matrisi', icon: 'link' },
+    { id: 'sim', label: 'Simülasyon Bağlantısı', icon: 'activity' }
+  ] },
   { group: 'YÖNETİM', items: [
     { id: 'setup', label: 'Saha Kurulum Sihirbazı', icon: 'cpu' },
     { id: 'modules', label: 'Modül Kaydı', icon: 'grid' },

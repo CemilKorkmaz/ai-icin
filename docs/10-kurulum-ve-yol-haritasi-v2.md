@@ -2,7 +2,7 @@
 
 Bu doküman, saha görüşmesinin sonundaki isteğe cevap verir: "Sen yapın nasıl kuracağımızı bir bul bakayım... Biz bir mini PC, bu senin laptopun olur, sistemi kuracağız, çalıştıracağız. Ama bizim merkezi yönetimi önce yapmamız gerekiyor." Ayrıca düzenleme sitesinin önerdiği geliştirme sırası, yeni görüşmedeki bulgularla birlikte güncellenir.
 
-Önceki `docs/03` içindeki Faz 0–5 sırası korunur; bu doküman onu **çok fabrikalı, modüler ve olay tabanlı** ürün yapısına göre yeniden sıralar. Sürüm 1.1'de genel ERP karşılaştırmasıyla (`docs/11`) ticari ve finansal katman, Sürüm 1.2'de modüler saha kurulumu (`docs/12`) eklenmiş, aşama sırası korunmuştur. Şekil ve şema çizilmez.
+Önceki `docs/03` içindeki Faz 0–5 sırası korunur; bu doküman onu **çok fabrikalı, modüler ve olay tabanlı** ürün yapısına göre yeniden sıralar. Sürüm 1.1'de genel ERP karşılaştırmasıyla (`docs/11`) ticari ve finansal katman, Sürüm 1.2'de modüler saha kurulumu (`docs/12`), Sürüm 1.3'te fabrikadaki tek bilgisayarda çalışan edge veri toplama ajanı (`docs/13`), Sürüm 1.4'te fabrika testinden önce kullanılan simülasyon köprüsü (`docs/14`) eklenmiş, aşama sırası korunmuştur. Şekil ve şema çizilmez.
 
 ---
 
@@ -150,3 +150,11 @@ Sohbetin en baştaki hedefi olan "tüm işlevleri bir Word'e döküp yapay zekâ
 Sürüm 1.2 aşama sırasını değiştirmez; **aşama 1'de sahada yapılan işi kısaltır**. Önceden fabrikaya özel makine listesi koda yazılıyordu; artık fabrika kartı, makineler, döküm yolları, PLC eşlemesi, eşikler ve açık modüller tek bir profil paketidir. Kurulum sihirbazı beş adımda bu veriyi toplar, bağlantıyı test eder ve profili tek işlemde uygular. Başka bir fabrikaya gidildiğinde hazır paket içe alınır veya fırın sayısı değiştirilerek kopyalanır; 5 fırınlı bir profilden 1 fırınlı veya 2 fırınlı fabrika üretilebilir.
 
 Makine sökülmesi de sahada yapılan bir iştir ve artık kayıt silme değildir: bağımlılık raporu gösterilir, gerekçe alınır, makine devre dışı işaretlenir, geçmiş korunur, gerekiyorsa geri alınır. Modül kaydı menüyü ve entegrasyon kurallarını fabrikaya göre filtreler. Adaptör sözleşmesi, gerçek OPC UA / Modbus sürücüsü takılana kadar `MANUAL` yedekle çalışmayı garanti eder. Bu ek, aşama 8'deki gerçek veritabanı/API ve aşama 9'daki gerçek sürücü işlerini ortadan kaldırmaz; yalnızca onların aynı veri sözleşmesiyle takılmasını sağlar. Ayrıntılar `docs/12` Bölüm 12'dedir.
+
+### 4.3 Sürüm 1.3 eki: saha bilgisayarı ve exe ajanı
+
+Aşama 1'de tarif edilen mini PC, Sürüm 1.3'te ikinci bir görev üstlenir: üzerinde `ERP-Edge-Collector.exe` çalışır. Bu program ocak içi sıcaklık, alarm ve diğer sensör verilerini okur, yerel SQLite veritabanına yazar, imzalı batch'lerle ERP'ye gönderir ve kendi teknisyen arayüzünü sunar. ERP'nin kullanıcı arayüzü exe'ye dönmez; PWA kararı değişmez. Aşama 8'deki canlı API kurulduğunda `/api/edge/ingest` worker'ı, aşama 9'da gerçek OPC UA / Modbus sürücüsü aynı sözleşmeyle takılır. Bu ek aşama sırasını değiştirmez, yalnızca aşama 1'in saha kurulumunu somutlaştırır. Ayrıntılar `docs/13` Bölüm 9 ve 13'tedir.
+
+### 4.4 Sürüm 1.4 eki: simülasyonla ön doğrulama
+
+Gerçek PLC'ye gitmeden önce aynı ERP zinciri kullanıcının fırın simülasyonuyla sınanır. `server/sim_bridge` simülasyonun REST uçlarını okur, fırın adlarını profil makinelerine eşler ve edge ajanının imzalı batch'lerini kabul eder. Bu, aşama 8'deki canlı API ve aşama 9'daki sürücü çalışmasından önce veri sözleşmesini, arayüzü ve kuyruğu görünür kılar. Ayrıntılar `docs/14` içindedir.

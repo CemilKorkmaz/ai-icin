@@ -5,6 +5,16 @@ server/erp/db/*.sqlite
 server/erp/db/*.db
 server/erp/files/
 
+# Edge ajanının çalışma zamanı çıktıları (kaynak koda girmez)
+edge/data/
+edge/logs/
+edge/dist/
+edge/build/
+edge/*.spec.bak
+
+# Simülasyon köprüsünün çalışma zamanı kayıtları
+server/sim_bridge/data/
+
 # Genel
 __pycache__/
 *.py[cod]

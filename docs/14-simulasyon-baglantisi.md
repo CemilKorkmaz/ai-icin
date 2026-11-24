@@ -1,0 +1,268 @@
+# 14 — Simülasyon Bağlantısı: ERP'yi Fabrika Testinden Önce Simülasyonda Sınamak (Sürüm 1.4)
+
+**Amaç:** Kullanıcının `erp_backend` / `erp_simulation` olarak çalıştırdığı fırın simülasyonunu ERP Studio'ya bağlamak; gerçek fabrika testi başlamadan önce fırın sıcaklığı, alarm, üretim emri ve edge ajanı zincirini uçtan uca burada sınamak.
+
+**Kapsam:** Bir simülasyon sunucusu (`:8000`), bir köprü (`:8080`) ve isteğe bağlı edge ajanı (`:8787`). Simülasyonun kendi kaynak kodu değiştirilmez; yalnızca belgelenen REST uçları kullanılır.
+
+---
+
+## 1. Neden arada bir köprü var?
+
+Simülasyon `8000`, ERP Studio `8080` portunda çalışır. Tarayıcı doğrudan `http://localhost:8000/api/furnaces` çağırsaydı üç sorun çıkardı:
+
+1. **Farklı köken (CORS).** Simülasyonun FastAPI sunucusunda ERP için CORS izni yoktur; tarayıcı isteği engellerdi.
+2. **Adres sorunu.** Kullanıcı simülasyonu kendi bilgisayarında çalıştırır; erişim noktası `127.0.0.1:8000` olduğunda tarayıcının bulunduğu makineye göre değişir. Köprü sunucu tarafında çalıştığı için adres tek yerde durur.
+3. **WebSocket döngüsü.** Kullanıcı rehberindeki "bağlantı koptu / sayfa sürekli yenileniyor" sorunu, WebSocket kapanınca `location.reload()` çağrılmasından doğmuştu. Bu bağlantıda **WebSocket kullanılmaz**; arayüz 2,5 saniyede bir REST ile okur ve bağlantı kopunca **sayfayı yenilemez**.
+
+Bu nedenle `server/sim_bridge` tek süreçte üç iş yapar: statik ERP Studio'yu sunar, simülasyon REST uçlarını proxy'ler ve edge ajanının imzalı batch'lerini kabul eder.
+
+---
+
+## 2. Mimari
+
+Üç süreç, tek yönlü veri akışı:
+
+| Katman | Adres | Görev |
+| --- | --- | --- |
+| Kullanıcı simülasyonu | `http://127.0.0.1:8000` | Fırın durumları, üretim emirleri, sıcaklık geçmişi; kendi SQLite dosyası |
+| Köprü + ERP Studio | `http://localhost:8080` | Statik arayüz, `/api/sim/*` proxy, `/api/edge/ingest` alıcısı, yerel kayıt defteri |
+| Edge ajanı (isteğe bağlı) | `http://127.0.0.1:8787` | Simülasyondan okur, kendi SQLite'ına yazar, imzalı batch'i köprüye gönderir |
+
+Tarayıcı yalnızca `8080` ile konuşur. Simülasyon kapalıysa köprü son başarılı görüntüyü "bayat" etiketiyle gösterir; edge ajanı ise `simulated` / `MANUAL` yedeğine düşer. Hiçbir katman diğerinin veritabanına doğrudan yazmaz.
+
+---
+
+## 3. Köprü ne yapar, ne yapmaz?
+
+**Yapar:**
+
+* `/app/` altında ERP Studio'yu sunar; eski `python3 -m http.server 8080` komutunun yerini alır.
+* Simülasyonun fırın, emir ve okuma uçlarını okur; Türkçe alan adlarını (`anlik_sicaklik`, `hedef_sicaklik`, `durum` …) tek biçime çevirir.
+* Simülasyon adları ile `docs/12` profil paketindeki makine kimliklerini eşler; eşleşmeyeni uyarı olarak gösterir.
+* Kullanıcının açık eylemiyle emir oluşturur ve başlatır.
+* `/api/edge/ingest` üzerinden HMAC-SHA256 imzalı batch'i doğrular, `batchId` ile idempotent biçimde SQLite'a yazar.
+* Simülasyon kapalıyken 503/200 + `stale` yanıtı üretir; arayüz çökmez.
+
+**Yapmaz:**
+
+* Simülasyonun veritabanına, kaynak koduna veya WebSocket'ine dokunmaz.
+* PLC'ye yazmaz; fırın başlatma yetkisi simülasyonun kendi API'sindedir.
+* ERP'nin stok, maliyet, muhasebe veya cari tablolarına yazmaz. Edge batch'i ayrı bir kayıt defterine düşer; işletme etkisi üretmez.
+* Gerçek fabrikada kullanılacak üretim ingest worker'ının yerini aldığını iddia etmez. Bu, prototip doğrulamasıdır (`docs/13` Bölüm 13).
+
+---
+
+## 4. Kurulum — üç adım
+
+### 4.1 Kullanıcı simülasyonu
+
+Kendi simülasyon klasöründe:
+
+```bash
+./start.sh 10
+```
+
+`10` hız çarpanıdır; verilmezse gerçek zamanlı çalışır. Terminalde `Uvicorn running on http://0.0.0.0:8000` satırı görülmelidir. Windows'ta `start.sh 10` veya `bash start.sh 10` kullanılır.
+
+### 4.2 Köprü + ERP Studio
+
+Bu depoda:
+
+```bash
+python3 server/sim_bridge/run.py
+```
+
+Varsayılanlar simülasyon `http://127.0.0.1:8000`, ERP `http://0.0.0.0:8080`. Tarayıcıda `http://localhost:8080/app/` açılır; **Entegrasyon → Simülasyon Bağlantısı** ekranına gidilir.
+
+Simülasyon kapalıyken arayüzü yine görmek için yerleşik demo kopya kullanılabilir:
+
+```bash
+python3 server/sim_bridge/run.py --demo --demo-speed 10
+```
+
+Demo kopya `127.0.0.1:8000` üzerinde üç fırınla çalışır ve her yanıtta `mode: demo` döner. **Kullanıcının gerçek simülasyonu değildir**; yalnızca önizleme ve test içindir.
+
+Farklı bir makinedeki simülasyona bağlanmak için:
+
+```bash
+python3 server/sim_bridge/run.py --sim-url http://192.168.1.20:8000
+```
+
+Adres, arayüzdeki **Adresi Değiştir** düğmesiyle de güncellenebilir; bu işlem `server/sim_bridge/config.json` dosyasını yazar.
+
+### 4.3 Edge ajanı (isteğe bağlı)
+
+`edge/config/edge-config.json` içinde `adapter` değeri `simulation`, `simulation.baseUrl` simülasyon adresidir. Ajan:
+
+```bash
+cd edge && python3 main.py
+```
+
+Ajan `8787`'de açılır. **Bağlantıyı Test Et** düğmesi hem simülasyonu hem ERP köprüsünü dener. **Şimdi Oku** tek döngü çalıştırır; **Toplu Gönder** kuyruğu boşaltır. Başarılı gönderimden sonra `outbox` kaydı `sent` olur — v1.3'te statik ERP'nin 501 döndürdüğü yerde artık imzalı alıcı vardır.
+
+---
+
+## 5. Yapılandırma
+
+`server/sim_bridge/config.json`:
+
+| Alan | Varsayılan | Anlam |
+| --- | --- | --- |
+| `simBaseUrl` | `http://127.0.0.1:8000` | Simülasyon kök adresi; yalnızca sunucu tarafında kullanılır |
+| `timeoutSeconds` | `3` | Her REST çağrısının zaman aşımı |
+| `liveRefreshMs` | `2500` | Arayüzün önerilen yenileme aralığı (bilgi amaçlı) |
+| `profilePath` | `edge/config/ornek-fabrika-profili.json` | Makine eşlemesinin kaynağı |
+| `ingestDb` | `server/sim_bridge/data/ingest.db` | Batch, okuma ve olay kayıt defteri |
+| `autoMap` | `true` | Ada göre otomatik eşleme |
+| `furnaceMap` | `{}` | Açık eşleme: `{ "Fırın adı": "MCH-01" }` |
+| `edge.secret` | `degistirin-bu-gizli-anahtari` | Edge ajanıyla **aynı** HMAC anahtarı |
+| `edge.token` | boş | Doluysa `Authorization: Bearer …` zorunlu olur |
+| `edge.maxBodyBytes` | 5 MB | Batch gövde sınırı |
+
+`run.py` seçenekleri: `--host`, `--port`, `--sim-url`, `--config`, `--db`, `--demo`, `--demo-port`, `--demo-speed`, `--check`, `--open`. `--check` yalnızca bağlantıyı sınar ve eşleme tablosunu yazdırır.
+
+---
+
+## 6. Köprü REST uçları
+
+| Metot | Yol | Açıklama |
+| --- | --- | --- |
+| GET | `/api/health` | Köprü canlı mı, sürüm ve çalışma süresi |
+| GET | `/api/bridge/info` | Kök, profil, demo modu, maskeli yapılandırma |
+| GET | `/api/sim/health` | Simülasyon bağlantısı, gecikme, fırın sayısı |
+| GET | `/api/sim/live` | Arayüzün tek çağrısı: fırınlar, emirler, alarmlar, eşleme, edge özeti |
+| GET | `/api/sim/furnaces` | Ham ama normalize edilmiş fırın listesi |
+| GET | `/api/sim/orders` | Emir listesi |
+| GET | `/api/sim/readings?name=&limit=` | Fırın sıcaklık geçmişi (en fazla 500) |
+| GET | `/api/sim/map` | Fırın → makine eşlemesi ve eşleşmeyenler |
+| POST | `/api/sim/orders` | Emir oluştur (`product`, `furnace`, `target_temp`, `duration_min`) |
+| POST | `/api/sim/orders/start` | Emri başlat (`id`, isteğe bağlı `furnace`) |
+| POST | `/api/bridge/config` | `simBaseUrl` değiştir; gizli alanlar maskeli döner |
+| GET | `/api/edge/health` | Kayıt defteri durumu, anahtar/token gereksinimi |
+| GET | `/api/edge/summary` | Batch, okuma, olay, makine sayıları ve son batch |
+| GET | `/api/edge/batches?limit=` | Son batch'ler |
+| GET | `/api/edge/latest?limit=` | Son okumalar ve olaylar |
+| POST | `/api/edge/ingest` | Edge ajanının **tek yazma ucu**; HMAC zorunlu |
+
+Hata biçimi her uçta aynıdır: `{ "ok": false, "error": "Türkçe açıklama" }`. Simülasyon kapalıyken emir uçları `503`, simülasyonun kendi 4xx yanıtları `400` olarak döner; arayüz hatayı toast ve satır içi mesajla gösterir.
+
+---
+
+## 7. Fırın → makine eşleme kuralı
+
+Simülasyon fırınları adla gelir (`Aluminyum Eritme Fırını`), ERP makineleri ise profilden kimlikle (`MCH-01`). Sabit kod yoktur; `edge/erp_edge/sim_map.py` iki tarafta da aynı kuralları uygular:
+
+1. **Açık eşleme.** `furnaceMap` içinde fırın adı → makine kimliği varsa o kullanılır.
+2. **Ada göre kural.** "eritme / ergitme / ocak" → `FURNACE`, "homojen" → `HOMO_FURNACE` veya `CONT_HOMO`, "yaşlandırma / aging" → `FURNACE`, "testere / kesim" → `SAW`, "tabla / döküm" → `CAST_TABLE`.
+3. **Kullanılmamış makine.** Aynı tipte, başka fırına atanmamış ilk makine seçilir. Bir makine iki fırına atanmaz.
+4. **Eşleşme yoksa veri üretilmez.** Uydurma makine seçilmez; arayüz "eşleşmeyen fırın" uyarısı gösterir.
+
+Örnek profil ve demo simülasyonla sonuç:
+
+| Simülasyon fırını | ERP makinesi | Tip | Kaynak |
+| --- | --- | --- | --- |
+| Aluminyum Eritme Fırını | MCH-01 · A Fırını | FURNACE | Otomatik kural |
+| Homojenizasyon Fırını | MCH-10 · Homojen 1 | HOMO_FURNACE | Otomatik kural |
+| Yaşlandırma Fırını | MCH-02 · B Fırını | FURNACE | Otomatik kural |
+
+Profilde 13 aktif makine vardır; simülasyonda üç fırın olduğu için yalnızca üç makine veri alır. Kalan makineler için okuma üretilmez ve bu durum arayüzde açıkça yazılır.
+
+---
+
+## 8. Edge ajanının `simulation` adaptörü
+
+Adaptör, v1.3'teki `connect / test / readFourSignals / readTelemetry / disconnect` sözleşmesini uygular. Simülasyonun yayınladığı alanları okur; olmayan sinyali uydurmaz.
+
+| Dört sinyal | Kaynak | Kural |
+| --- | --- | --- |
+| `alarm` | `status` / `durum`, `alarm` | Durum `ALARM` veya alarm metni varsa `fault`, yoksa `ok` |
+| `running` | `status` | `ISINIYOR`, `BEKLETIYOR`, `CALISIYOR`, `RUNNING` ise `true` |
+| `door` | Simülasyonda yok | `unknown` yazılır; uydurma `closed` yazılmaz |
+| `casting` | Simülasyonda yok | `unknown` yazılır |
+
+Telemetri olarak makine tipine göre `temperatureC` (ergitme) veya `chamberTempC` (homojen fırın) yazılır; değer simülasyonun `anlik_sicaklik` alanından gelir. Yağ sıcaklığı (`oilTempC`) simülasyonda yayınlanmadığı için atlanır. Kalite her satırda `SIMULATED`, kaynak `ERP-SIM` olur; böylece gerçek PLC verisiyle karışmaz.
+
+Simülasyon kapalıysa `connect` hata verir; collector ajanı durdurmaz, `simulated` yedeğine düşer, bunu `fallback` alanına ve `app_log` tablosuna yazar. Dört sinyal, SQL şeması ve ERP batch sözleşmesi değişmez.
+
+---
+
+## 9. Arayüz: Simülasyon Bağlantısı ekranı
+
+**Entegrasyon → Simülasyon Bağlantısı** ekranı altı bölümden oluşur:
+
+| Bölüm | İçerik |
+| --- | --- |
+| Bağlantı durumu | Yeşil/sarı/kırmızı nokta, adres, gecikme, demo/kullanıcı modu, son başarılı okuma |
+| Özet şerit | Fırın, sıcak fırın, çalışan emir, alarm, edge batch ve okuma sayıları |
+| Fırın kartları | Sıcaklık, hedef, maksimum, yüzde, brülör, gaz tüketimi, alarm metni |
+| Üretim emirleri | Emir listesi, “Yeni Emir” ve “Başlat”; hatalar satır içi gösterilir |
+| Edge ajanı → ERP | Batch/okuma/olay sayıları, son batch, son okumaların kalitesi |
+| Eşleme ve geçmiş | Fırın → makine tablosu, eşleşmeyenler; seçilen fırının son 40 okuması |
+
+Davranış kuralları:
+
+* Sayfa **hiçbir zaman** kendini yenilemez; `location.reload()` yoktur.
+* Bağlantı kopunca son görüntü "Bağlantı koptu · son veri gösteriliyor" etiketiyle kalır.
+* Yenileme 2,5 saniyededir; sekme arka plandayken (`document.hidden`) durur.
+* Köprü hiç çalışmıyorsa ekran "Köprü çalışmıyor" der ve çalıştırma komutunu gösterir; diğer ERP ekranları statik olarak çalışmaya devam eder.
+* Emir oluşturma/başlatma sırasında düğme kilitlenir; çift tıklama ikinci kayıt üretmez.
+
+---
+
+## 10. Uçtan uca doğrulama
+
+Sırayla:
+
+1. Kullanıcı simülasyonu `./start.sh 10` ile açılır.
+2. Köprü `python3 server/sim_bridge/run.py` ile açılır; konsolda eşlemenin `3/3` olduğu görülür.
+3. Arayüzde `Homojenizasyon Fırını`, hedef `60 °C`, süre `0.2` dk ile emir oluşturulur ve başlatılır. Kart `ISINIYOR` → `BEKLETIYOR` → `TAMAMLANDI` olur; süre hedefe ulaştıktan sonra işler.
+4. `Aluminyum Eritme Fırını`, hedef `900 °C` (güvenlik sınırı 850 °C) ile alarm denenir; kart `ALARM` olur, brülör kapanır.
+5. Edge ajanı `8787`'de **Bağlantıyı Test Et** → simülasyon ve ERP köprüsü yeşil; **Şimdi Oku** → 15 okuma (3 fırın × 4 sinyal + 3 telemetri); **Toplu Gönder** → kuyruk `sent`.
+6. Simülasyon ekranında edge batch sayısı ve son okumalar görünür. `outbox` artık `501` değil `200` alır.
+
+Bu depodaki otomatik doğrulama:
+
+```bash
+python3 tools/sim_bridge_smoke_test.py    # 12 test
+python3 tools/edge_smoke_test.py          # 13 test
+node tools/smoke_test.mjs                 # 35 ekran
+```
+
+Sonuçlar: köprü 12/12, edge 13/13, ekranlar 35/35. Köprü testi gerçek FastAPI gerektirmez; demo motoru ve sahte istemcilerle ağ davranışını sınar. Ayrıca `linkedom` ile yapılan DOM denetiminde sim ekranı canlı köprüye bağlandı: 3 fırın kartı, emir tablosu, edge sayacı, eşleme tablosu, fırın seçiminde sıcaklık grafiği ve yeni emir modalı çizildi; ağ kesildiğinde sayfa yenilenmeden "Köprü çalışmıyor" uyarısı göründü.
+
+---
+
+## 11. Güvenlik
+
+* Edge batch'i `HMAC-SHA256` ile imzalanır; anahtar köprü ve ajanda aynıdır, arayüzde maskelenir.
+* İsteğe bağlı `Bearer` token vardır; boşsa yalnızca imza denetlenir.
+* Gövde sınırı 5 MB. Statik sunucu yalnızca `/app/` ve `/index.html` yayınlar; depo kökü, `edge-config.json`, köprü yapılandırması ve `/.git` hiçbir koşulda sunulmaz.
+* Simülasyon API'sinde kimlik doğrulama yoktur; bu yüzden yalnızca yerel makinede veya güvenli iç ağda çalıştırılmalıdır. İnternete açılmaz.
+* Köprü simülasyona yalnızca emir oluşturma/başlatma yazar; PLC'ye yazma yetkisi yoktur. İlk aşama salt-okunur ilkesi korunur.
+* Edge batch'i işletme tablolarına dönüşmez; stok, maliyet ve muhasebe etkisi yoktur.
+
+---
+
+## 12. Sınırlar ve açık işler
+
+1. **Demo kopya, kullanıcının simülasyonu değildir.** Aynı sözleşmeyi uygulayan üç fırınlı bir vekildir; gerçek simülasyonun iç mantığı, veritabanı ve varsa ek uçları bu depoda yoktur.
+2. **WebSocket kullanılmaz.** Bilinçli karardır: yenileme döngüsünü önler. Canlılık 2,5 saniyelik REST yoklamasıyla sağlanır; saniyelik akış gerekirse köprüye SSE eklenebilir.
+3. **`/api/edge/ingest` üretim worker'ı değildir.** Batch'i doğrular ve kayıt defterine yazar; `signalStates`, bakım bildirimi veya stok hareketi üretmez. Gerçek worker `docs/10` aşama 8'dedir.
+4. **Kapı ve döküm sinyalleri simülasyonda yoktur.** `unknown` olarak işaretlenir; gerçek PLC bağlandığında `opcua` / `modbus` adaptörü bu sinyalleri okur.
+5. **Tek köprü / tek ajan.** İkinci bir saha bilgisayarı eklenirse `siteCode` ayrılmalı ve her ajan kendi `clientId` alanıyla gelmelidir.
+6. **Gerçek tarayıcı testi** yapılmamıştır; ekran Node duman testi, `linkedom` DOM denetimi ve HTTP istekleriyle doğrulanmıştır. Dokunmatik/tablet davranışı sahada görülmelidir.
+7. **Simülasyon emirleri kalıcı değildir.** Kullanıcı simülasyonu kendi kurallarıyla çalışır; köprü yeniden başlatıldığında yalnızca kendi kayıt defteri korunur.
+
+---
+
+## 13. Gerçek fabrikaya geçiş
+
+Simülasyon bağlantısı bir **test koşumu**dur; üretim hattı değildir. Sahaya geçişte:
+
+1. `edge-config.json` içinde `adapter` → `opcua` veya `modbus`, `connection.ip/port/protokol` gerçek PLC değerleri.
+2. Gerçek OPC UA / Modbus sürücüsü takılır; sözleşme ve SQL şeması değişmez.
+3. Köprü kapatılır veya yalnızca önizleme için tutulur; `/api/edge/ingest` çağrısı gerçek ERP worker'ına yönlenir.
+4. Sıcaklık eşikleri (`warnAt`, `criticalAt`) ve dört sinyalin tag adresleri sahada doğrulanır.
+5. İlk aşama salt-okunur kalır; fırın başlatma/durdurma yetkisi PLC/SCADA'da kalır.
+
+Bu geçiş için gereken tek şey yapılandırma ve sürücüdür; ERP ekranı, edge SQL'i ve batch sözleşmesi aynı kalır.

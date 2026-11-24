@@ -219,7 +219,9 @@ Depo kökünde `README.md` genel bakışı ve çalıştırma adımlarını verir
 | Klasör | İçerik |
 | --- | --- |
 | `docs/` | `00`–`11` Markdown dokümanlar + `Dokumhane-ERP-Plan.docx` |
-| `app/` | PWA: kabuk, 34 ekran, `calc.js` + `posting.js` + `modularity.js` + `adapters.js`, tasarım sistemi, ikonlar |
+| `app/` | PWA: kabuk, 35 ekran, `calc.js` + `posting.js` + `modularity.js` + `adapters.js`, tasarım sistemi, ikonlar |
+| `edge/` | Fabrikadaki tek bilgisayar: exe veri toplama ajanı, SQLite, yerel arayüz (`docs/13`) |
+| `server/sim_bridge/` | Simülasyon köprüsü: ERP Studio'yu `:8080`, fırın simülasyonunu `:8000` üzerinden bağlar; imzalı edge ingest (`docs/14`) |
 | `server/erp/data/` | 59 JSON dosyası (58 koleksiyon + `manifest.json`), `README.md` |
 | `server/erp/scripts/` | Yedekleme, giden kutu, 52 koleksiyonu doğrulama, olay işçisi, PLC denetçisi |
 | `server/erp/inbox/` | Olay kuyruğu ve örnek kayıtlar |

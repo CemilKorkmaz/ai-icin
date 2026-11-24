@@ -1,0 +1,81 @@
+{
+  "siteCode": "FIRM1",
+  "siteName": "Anadolu Alüminyum · Saha Bilgisayarı",
+  "plantId": "P1",
+  "profilePath": "config/ornek-fabrika-profili.json",
+  "sqlPath": "data/edge.db",
+  "pollSeconds": 3,
+  "retentionDays": 90,
+  "adapter": "simulation",
+  "connection": {
+    "name": "Fırın hattı PLC",
+    "ip": "192.168.1.50",
+    "protocol": "OPC UA",
+    "port": 4840,
+    "mode": "PLC"
+  },
+  "erp": {
+    "url": "http://127.0.0.1:8080/api/edge/ingest",
+    "token": "",
+    "secret": "degistirin-bu-gizli-anahtari",
+    "timeoutSeconds": 5,
+    "batchSize": 50,
+    "maxRetries": 6,
+    "enabled": true
+  },
+  "ui": {
+    "host": "127.0.0.1",
+    "port": 8787,
+    "openBrowser": true
+  },
+  "telemetryProfiles": [
+    {
+      "type": "FURNACE",
+      "signal": "temperatureC",
+      "label": "Ocak İçi Sıcaklık",
+      "unit": "°C",
+      "addressPattern": "ns=2;s={machineId}.Temp",
+      "nominalMin": 680,
+      "nominalMax": 780,
+      "warnAt": 790,
+      "criticalAt": 820,
+      "simBase": 735,
+      "simSpan": 58,
+      "note": "Ergitme ocağı; eşik sahada doğrulanacak"
+    },
+    {
+      "type": "HOMO_FURNACE",
+      "signal": "chamberTempC",
+      "label": "Homojen Fırın Sıcaklığı",
+      "unit": "°C",
+      "addressPattern": "ns=2;s={machineId}.ChamberTemp",
+      "nominalMin": 550,
+      "nominalMax": 590,
+      "warnAt": 595,
+      "criticalAt": 605,
+      "simBase": 575,
+      "simSpan": 8,
+      "note": "575 °C / 8 saat reçetesiyle uyumlu (docs/07)"
+    },
+    {
+      "type": "SAW",
+      "signal": "oilTempC",
+      "label": "Kesme Yağı Sıcaklığı",
+      "unit": "°C",
+      "addressPattern": "ns=2;s={machineId}.OilTemp",
+      "nominalMin": 20,
+      "nominalMax": 55,
+      "warnAt": 60,
+      "criticalAt": 70,
+      "simBase": 42,
+      "simSpan": 6,
+      "note": "Yağ ömrü sayacıyla ilişkili telemetri"
+    }
+  ],
+  "simulation": {
+    "baseUrl": "http://127.0.0.1:8000",
+    "timeoutSeconds": 3,
+    "autoMap": true,
+    "furnaceMap": {}
+  }
+}

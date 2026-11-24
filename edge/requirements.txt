@@ -1,0 +1,9 @@
+# Çalışma zamanı bağımlılığı YOKTUR — yalnızca Python 3.10+ standart kütüphanesi.
+# sqlite3, http.server, urllib.request, hmac, hashlib, json, threading, webbrowser
+# stdlib içinde gelir; saha bilgisayarında internet gerekmeden kurulur.
+#
+# Yalnızca .exe ÜRETİM bilgisayarında (fabrikadaki PC'de değil) gerekir:
+#   pyinstaller==6.11.1
+#
+# Gerçek OPC UA / Modbus sürücüsü sonraki aşamada opsiyonel olarak eklenir:
+#   opcua  /  pymodbus   (bkz. docs/13 Bölüm 13)
