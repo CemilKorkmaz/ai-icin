@@ -2,7 +2,7 @@
 
 Örnekler:
   python3 server/sim_bridge/run.py                     # sim :8000, ERP :8080
-  python3 server/sim_bridge/run.py --open              # tarayıcıyı sim ekranında açar
+  python3 server/sim_bridge/run.py --open              # tarayıcıyı canlı Panel'de açar
   python3 server/sim_bridge/run.py --demo              # simülasyon kapalıysa demo kopya
   python3 server/sim_bridge/run.py --sim-url http://192.168.1.20:8000
   python3 server/sim_bridge/run.py --check             # yalnızca bağlantıyı sınar
@@ -107,7 +107,7 @@ def main(argv=None) -> int:
         print(f'  Alternatif: python3 server/sim_bridge/run.py --port {args.port + 1}')
         _alert(message)
         return 2
-    url = f'http://localhost:{args.port}/app/#/sim'
+    url = f'http://localhost:{args.port}/app/#/dashboard'
     print(f'ERP Studio + simülasyon köprüsü v{VERSION}')
     print(f'  ERP Studio : {url}')
     print(f'  Simülasyon : {state.config["simBaseUrl"]}  (sizin çalıştırdığınız)')

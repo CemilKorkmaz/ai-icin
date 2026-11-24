@@ -1,7 +1,8 @@
 import { D, store, material, matName, furnace, recipe, lot, uid, nowISO, moveStock, addActivity, addNotification, billetTonnage, machinesOfType, activePlantId } from '../store.js';
 import { icon } from '../icons.js';
-import { esc, fmtNum, fmtDateTime, fmtDate, pill, dot, field, input, select, formData, modal, confirmDialog, toast, progress } from '../ui.js';
+import { esc, fmtNum, fmtDateTime, fmtDate, pill, dot, field, input, select, formData, modal, confirmDialog, toast, progress, emptyState } from '../ui.js';
 import { STAGES } from '../seed.js';
+import { liveEnabled, liveSnapshot, liveStats, orderColumns, statusLabel, statusTone } from '../live.js';
 
 let recipeTab = 'Ergitme';
 let collapsed = {};
@@ -36,11 +37,53 @@ function lotCard(l) {
 
 /* ============================ ÜRETİM AKIŞI (KANBAN) ============================ */
 
+function liveOrderCard(o) {
+  return `<article class="lot-card sim-order" data-sim-order="${esc(o.id)}" style="--stage:#0ea5e9">
+    <div class="lot-top"><span class="lot-code">${esc(o.id || '—')}</span><span class="lot-alert live-tag">SIM</span></div>
+    <div class="lot-alloy">${esc(o.product || 'Ürün belirtilmemiş')}</div>
+    <div class="lot-nums"><span>${icon('flame', 13)} ${esc(o.furnace || '—')}</span><span>${o.targetC === null || o.targetC === undefined ? '—' : fmtNum(o.targetC, 0)} °C</span></div>
+    <div class="lot-foot"><span class="lot-time">${icon('clock', 13)} ${o.remainingMin !== null && o.remainingMin !== undefined ? fmtNum(o.remainingMin, 1) + ' dk kaldı' : (o.durationMin !== null && o.durationMin !== undefined ? fmtNum(o.durationMin, 0) + ' dk plan' : '—')}</span>${pill(statusLabel(o.state), statusTone(o.state))}</div>
+  </article>`;
+}
+
+function liveProductionRender() {
+  const snap = liveSnapshot();
+  if (!snap) return `<section class="card">${emptyState('Simülasyon bağlantısı yok. Köprüyü başlatıp Yeniden Dene deyin.', 'wifiOff')}</section>`;
+  const stats = liveStats(snap);
+  const orders = Array.isArray(snap.orders) ? snap.orders : [];
+  const columns = orderColumns(orders);
+  return `
+    <div class="stat-strip">
+      <div><span>Simülasyon Emri</span><strong>${stats.orders}</strong></div>
+      <div><span>Çalışan</span><strong class="text-ok">${stats.running}</strong></div>
+      <div><span>Tamamlanan</span><strong>${stats.completed}</strong></div>
+      <div><span>Fırın</span><strong>${stats.furnaceCount}</strong></div>
+      <div><span>Alarm</span><strong class="text-danger">${stats.alarms}</strong></div>
+    </div>
+    <div class="info-banner">${icon('activity', 17)}<span><strong>Bu ekran ana ERP üretim akışıdır.</strong> Emirler simülasyondan <strong>salt okunur</strong> gelir; kart sürüklemek veya ERP döküm kodu açmak simülasyona yazmaz. Sıcaklık ve alarm ana Panel, Makine Parkı ve PLC Durum ekranlarında da canlıdır.</span></div>
+    <section class="card">
+      <div class="card-head"><div><h3>Canlı üretim emirleri</h3><p>Emir sahibi simülasyondur; ERP yalnızca izler.</p></div><span class="card-tag">${icon('activity', 14)} ${esc(snap.checkedAt ? fmtDateTime(snap.checkedAt) : 'canlı')}</span></div>
+      <div class="kanban">
+        ${columns.map((col) => `<div class="kanban-col" style="--stage:#0ea5e9">
+          <div class="kanban-head"><span class="kanban-ico">${icon(col.ico, 15)}</span><strong>${esc(col.label)}</strong><span class="kanban-count">${col.orders.length}</span></div>
+          <div class="kanban-body">${col.orders.map(liveOrderCard).join('') || '<div class="kanban-empty">Kart yok</div>'}</div>
+        </div>`).join('')}
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-head"><div><h3>Fırın durumu</h3><p>Emirlerin çalıştığı hat.</p></div></div>
+      <div class="table-wrap"><table class="data"><thead><tr><th>Fırın</th><th>Durum</th><th>Sıcaklık</th><th>Hedef</th><th>Alarm</th></tr></thead><tbody>
+        ${(snap.furnaces || []).map((f) => `<tr><td class="cell-strong">${esc(f.name)}</td><td>${pill(statusLabel(f.status), statusTone(f.status))}</td><td>${f.temperatureC === null || f.temperatureC === undefined ? '—' : fmtNum(f.temperatureC, 1)} °C</td><td>${f.targetC === null || f.targetC === undefined ? '—' : fmtNum(f.targetC, 0)} °C</td><td>${f.alarmActive ? pill('Alarm', 'danger') : pill('Normal', 'ok')}</td></tr>`).join('')}
+      </tbody></table></div>
+    </section>`;
+}
+
 export const productionView = {
   title: 'Üretim Akışı',
   subtitle: 'Döküm kodu bazlı aşama takibi · sürükle-bırak kartlar fare ve dokunmatik ile çalışır',
 
   render() {
+    if (liveEnabled()) return liveProductionRender();
     const d = D();
     const active = d.lots.filter((l) => !['Mamul Stok', 'Sevkiyat'].includes(l.stage));
     const alarms = d.lots.filter((l) => l.alerts && l.alerts.length).length;
@@ -75,6 +118,7 @@ export const productionView = {
   },
 
   mount(root) {
+    if (liveEnabled()) return;
     /* --- Yeni döküm --- */
     root.querySelector('#lot-new').addEventListener('click', () => {
       const ergitme = D().recipes.filter((r) => r.type === 'Ergitme');

@@ -3,7 +3,7 @@
 
 // Şema sürümüyle birlikte yükseltildi: modüler kurulum çekirdeği, adaptör sözleşmesi,
 // menü tanımı ve kurulum sihirbazı çevrimdışı ilk açılışta da önbellekte bulunmalıdır.
-const CACHE = 'erp-studio-v5';
+const CACHE = 'erp-studio-v6';
 const SHELL = [
   './',
   './index.html',
@@ -19,6 +19,7 @@ const SHELL = [
   './js/posting.js',
   './js/modularity.js',
   './js/adapters.js',
+  './js/live.js',
   './js/icons.js',
   './js/ui.js',
   './js/views/index.js',
@@ -50,6 +51,8 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
+  // Köprü API'si asla önbelleğe alınmaz; canlı veri her zaman ağdan gelir.
+  if (url.pathname.startsWith('/api/')) return;
 
   event.respondWith(
     caches.match(event.request).then((cached) => {

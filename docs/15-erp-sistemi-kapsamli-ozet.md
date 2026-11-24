@@ -4,7 +4,7 @@
 
 **Kime hitap eder:** Sistemi kullanacak fabrika yöneticisi, üretim şefi, depo ve sevkiyat sorumlusu; ayrıca sistemi kuracak ve geliştirecek teknik ekip.
 
-**Kapsam:** Sürüm 1.4.2 itibarıyla **35 ERP ekranı**, **59 veri varlığı**, **1 saha veri toplama arayüzü** ve **1 simülasyon köprüsü**. Şekil, kutu diyagramı ve ok şeması kullanılmaz; anlatım prose ve tablolarla yürür.
+**Kapsam:** Sürüm 1.5.0 itibarıyla **35 ERP ekranı**, **59 veri varlığı**, **1 saha veri toplama arayüzü** ve **1 simülasyon köprüsü**. Şekil, kutu diyagramı ve ok şeması kullanılmaz; anlatım prose ve tablolarla yürür.
 
 ---
 
@@ -53,13 +53,13 @@ Sistem dört katmandan oluşur. Her katmanın görevi ayrıdır ve hiçbiri diğ
 4. Okunan her değer önce `edge.db` içine, sonra `outbox` kuyruğuna yazılır.
 5. Ajan, paketi HMAC-SHA256 ile imzalayıp ERP'nin `/api/edge/ingest` ucuna gönderir.
 6. Paket HMAC imzası ve `batchId` ile doğrulanır. Üretim worker'ı bağlıysa `signalStates` ve telemetri kayıtları üretilir; prototipte köprü yalnızca kendi kayıt defterine yazar. **Stok, maliyet, muhasebe ve cari tablolarına dokunulmaz.**
-7. Simülasyon köprüsü açıksa arayüz fırın sıcaklığını, alarmı, emirleri ve edge sayaçlarını 2,5 saniyede bir REST ile tazeler.
+7. Simülasyon köprüsü açıksa ana Panel, Makine Parkı, PLC Durum ve Üretim Akışı fırın sıcaklığını, alarmı ve emirleri 3 saniyede bir; Simülasyon Bağlantısı ekranı teşhis verilerini 2,5 saniyede bir REST ile tazeler.
 
 ---
 
 ## 4. Veri modeli: neleri takip ediyoruz?
 
-Sürüm 1.4.2 itibarıyla **59 varlık** vardır; `manifest.json` hariç sunucuda 59 JSON dosyası bulunur. Şema sürümü `4`'tür. Her kayıt bir `id` taşır; çoğu kayıt `createdAt`, `updatedAt`, `plantId` ve kaynak belge kimliği ile izlenir. Makine kimlikleri sabit kodlanmaz; fabrika profilinden gelir.
+Sürüm 1.5.0 itibarıyla **59 varlık** vardır; `manifest.json` hariç sunucuda 59 JSON dosyası bulunur. Şema sürümü `4`'tür. Her kayıt bir `id` taşır; çoğu kayıt `createdAt`, `updatedAt`, `plantId` ve kaynak belge kimliği ile izlenir. Makine kimlikleri sabit kodlanmaz; fabrika profilinden gelir.
 
 | Alan | Varlıklar | Ne tutulur |
 | --- | --- | --- |
@@ -124,7 +124,28 @@ Menü 12 grupta toplanır. Aşağıdaki tablo, ekranların tamamını ve günlü
 | 34 | Bildirimler & Kuyruk | Sistem | Sistem bildirimleri, SMS/e-posta giden kutusu, yeniden deneme ve hata durumu |
 | 35 | Ayarlar | Sistem | Şirket bilgisi, para birimi, tema, eşikler, yedek yolu, demo verisini sıfırlama |
 
-**Not:** Bu 35 ekranın dışında fabrikadaki edge ajanının kendi Türkçe paneli (`:8787`) vardır; ayrı bir süreçtir. Simülasyon köprüsü ise yeni bir ekran eklemez; aynı 35 ekran içindeki **Simülasyon Bağlantısı** ekranını canlı veriyle besler.
+**Not:** Bu 35 ekranın dışında fabrikadaki edge ajanının kendi Türkçe paneli (`:8787`) vardır; ayrı bir süreçtir. Simülasyon köprüsü yeni bir ekran eklemez; aynı 35 ekran içindeki **Simülasyon Bağlantısı** ekranını ve aşağıdaki dört ana ekranı canlı veriyle besler.
+
+### 5.1 Canlı simülasyon modu (Sürüm 1.5)
+
+Simülasyon verisi artık yalnızca bağlantı ekranında gösterilmez. Köprü çalışırken ana ERP ekranları demo kayıtları yerine **fırın, emir, sıcaklık ve alarm** verisini gösterir:
+
+| Ana ekran | Canlı içerik |
+| --- | --- |
+| Panel | Fırın sayısı, ortalama/en yüksek sıcaklık, alarm, çalışan emir, fırın kartları ve emir tablosu |
+| Makine Parkı | Fırın → profil makine eşlemesi, anlık sıcaklık, hedef, alarm; tablo/testere/homojen makineleri profilden ayrıca listelenir |
+| PLC Durum | Dört sinyal ve ayrı telemetri; kapı/döküm simülasyonda yoksa “Bilinmiyor” |
+| Üretim Akışı | Simülasyon emirleri: oluşturuldu, çalışıyor, tamamlandı, iptal; fırın durum tablosu |
+
+Üst çubuktaki **Canlı simülasyon / Demo veri** düğmesi modu değiştirir. Köprü ilk açılışta yanıt verirse canlı mod otomatik açılır. Canlı modda:
+
+* Hiçbir ERP koleksiyonuna, stok/maliyet/muhasebe tablosuna yazılmaz; yalnızca okunur.
+* Makine düzenleme, döküm kartı sürükleme ve PLC sinyal değiştirme kapalıdır.
+* Köprü veya simülasyon kapalıysa demo veriye dönülmez; “bağlantı yok” veya “son bilinen veri” gösterilir.
+* Veri 3 saniyede bir, yalnızca sekme görünürken REST ile tazelenir; WebSocket ve sayfa yenileme yoktur. Service worker `/api/` yanıtlarını önbelleğe almaz.
+* Stok, tedarikçi, cari, fatura ve muhasebe simülasyondan gelmediği için bu ekranlar demo kayıtları gösterir ve **DEMO VERİ** etiketi taşır.
+
+Bu ayrım bilinçlidir: simülasyon bir **fırın hattı** test ortamıdır; bütün işletme verilerinin kaynağı değildir. Canlı fırın verisinden stok veya muhasebe kaydı türetmek, "PLC verisi işletme tablosuna yazmaz" kuralını ihlal ederdi.
 
 ---
 
@@ -395,7 +416,8 @@ Köprü bu yüzden araya girer:
 - Simülasyonun REST uçlarını `/api/sim/*` altında proxy'ler.
 - Fırın adlarını `docs/12` profil paketindeki makine kimliklerine eşler.
 - Edge ajanının HMAC imzalı batch'lerini `/api/edge/ingest` ile kabul eder.
-- **WebSocket kullanmaz**; arayüz 2,5 saniyede bir REST ile tazelenir ve bağlantı kopunca sayfayı yenilemez.
+- **WebSocket kullanmaz**; ana ekranlar 3, Simülasyon Bağlantısı ekranı 2,5 saniyede bir REST ile tazelenir ve bağlantı kopunca sayfayı yenilemez.
+- Ana Panel, Makine Parkı, PLC Durum ve Üretim Akışı ekranlarını canlı fırın/emir verisiyle besler; üst çubuktaki düğme demo veriye döndürür.
 
 ### 11.1 Eşleme
 
@@ -426,7 +448,7 @@ Simülasyon kapalıysa `/api/sim/live` son başarılı görüntüyü `stale` eti
 
 | Platform | Dosya | Sonuç |
 | --- | --- | --- |
-| Windows | `Baslat.bat` | Köprü başlar, tarayıcı `#/sim` ekranında açılır |
+| Windows | `Baslat.bat` | Köprü başlar, tarayıcı canlı `#/dashboard` ekranında açılır |
 | macOS | `Baslat.command` | Aynı davranış; Terminal penceresi açık kalır |
 | Windows (tek dosya) | `build_exe.bat` → `ERP-Sim-Bridge.exe` | Python gerekmez; ayar exe yanında |
 | macOS (tek dosya) | `build_macos.sh` → `ERP-Sim-Bridge.app` | Python gerekmez; ayar `~/Library/Application Support` altında |
@@ -439,6 +461,7 @@ Köprü `127.0.0.1:8080` dinler; 80 portu yönetici/`sudo` hakkı istediği içi
 - PLC'ye yazmaz.
 - ERP'nin stok, maliyet, muhasebe ve cari tablolarına yazmaz.
 - Üretim ingest worker'ının yerini aldığını iddia etmez; batch'i doğrular ve kendi kayıt defterine yazar.
+- Canlı modda ERP kayıtlarını değiştirmez; makine düzenleme, kart sürükleme ve sinyal yazma kapalıdır.
 
 ---
 
@@ -486,7 +509,7 @@ Raporlar günlük, haftalık ve aylık üretilir; SMS ve e-posta gönderimi `out
 5. **Kalite/fire:** Kırıcı ve fire kaydı girilir; kütle dengesi kapanır.
 6. **Sevkiyat:** Sipariş hazırlanır, iki onay verilir; fatura, fiş, stok çıkışı ve cari bakiye tek işlemde oluşur.
 7. **Kapanış:** Günlük rapor alınır, yedek çalıştırılır, giden kutu kontrol edilir.
-8. **Simülasyon/edge:** Fabrika testi öncesi Simülasyon Bağlantısı ekranında fırın verisi ve edge kuyruğu izlenir.
+8. **Simülasyon/edge:** Fabrika testi öncesi Panel, Makine Parkı, PLC Durum ve Üretim Akışı canlı simülasyon verisiyle izlenir; Simülasyon Bağlantısı ekranı bağlantı ve teşhis için kullanılır.
 
 ---
 
@@ -500,10 +523,11 @@ Raporlar günlük, haftalık ve aylık üretilir; SMS ve e-posta gönderimi `out
 4. **Köprü üretim worker'ı değildir:** İmzalı batch'i doğrular ve kendi defterine yazar; stok/maliyet/muhasebe üretmez.
 5. **Simülasyon emirleri kalıcı değildir:** Kullanıcı simülasyonunun kendi kuralları geçerlidir.
 6. **Kapı ve döküm sinyalleri simülasyonda yoktur:** `unknown` yazılır; gerçek PLC'de okunur.
-7. **Bordro, e-fatura, banka mutabakatı, KDV beyannamesi, CRM, CAD/BIM ve POS kapsam dışıdır.**
-8. **Gerçek tarayıcı/tablet testi sahada yapılmalıdır:** Ekranlar Node duman testi ve DOM denetimiyle doğrulanmıştır.
-9. **Tek köprü / tek ajan:** İkinci saha bilgisayarı eklenirse `siteCode` ve ayrı `clientId` gerekir.
-10. **Veri hacmi:** Yüz binlerce satırda gerçek veritabanı ve indeksleme gerekir; prototip küçük-orta hacim içindir.
+7. **Canlı mod yalnızca fırın/emir/telemetri kapsar.** Stok, cari, muhasebe ve maliyet simülasyondan gelmez; demo kayıtları etiketli olarak gösterilir.
+8. **Bordro, e-fatura, banka mutabakatı, KDV beyannamesi, CRM, CAD/BIM ve POS kapsam dışıdır.**
+9. **Gerçek tarayıcı/tablet testi sahada yapılmalıdır:** Ekranlar Node duman testi ve DOM denetimiyle doğrulanmıştır.
+10. **Tek köprü / tek ajan:** İkinci saha bilgisayarı eklenirse `siteCode` ve ayrı `clientId` gerekir.
+11. **Veri hacmi:** Yüz binlerce satırda gerçek veritabanı ve indeksleme gerekir; prototip küçük-orta hacim içindir.
 
 ### 15.2 Gerçek fabrikaya geçiş sırası
 

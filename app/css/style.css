@@ -701,3 +701,39 @@ td.num, .money-num { font-variant-numeric: tabular-nums; }
   .sim-conn { flex-wrap: wrap; }
   .sim-conn-side { margin-left: 0; }
 }
+
+/* ---------------- Canlı simülasyon modu (ana ERP ekranları) ---------------- */
+.live-chip { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; padding: 7px 11px; border-radius: 20px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--muted); }
+.live-chip.on { background: rgba(8,145,178,.1); color: #0891b2; border-color: rgba(8,145,178,.28); }
+.live-chip.on svg { animation: livePulse 2.4s ease-in-out infinite; }
+@keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+.source-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: .04em; padding: 5px 9px; border-radius: 20px; color: var(--muted); background: var(--surface-2); border: 1px solid var(--border); }
+.source-tag.live { color: #0891b2; background: rgba(8,145,178,.09); border-color: rgba(8,145,178,.25); }
+.live-banner { display: flex; align-items: center; gap: 11px; padding: 11px 15px; margin-bottom: 16px; border-radius: 13px; border: 1px solid rgba(8,145,178,.22); background: linear-gradient(100deg, rgba(8,145,178,.09), rgba(79,70,229,.06)); font-size: 12px; }
+.live-banner > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.live-banner strong { font-size: 12.5px; }
+.live-banner span:not(.live-dot) { color: var(--muted); font-size: 11px; line-height: 1.45; }
+.live-banner .btn { margin-left: auto; flex: 0 0 auto; }
+.live-banner.off { border-color: rgba(239,68,68,.28); background: rgba(239,68,68,.06); }
+.live-banner.stale { border-color: rgba(245,158,11,.3); background: rgba(245,158,11,.08); }
+.live-dot { flex: 0 0 9px; width: 9px; height: 9px; border-radius: 50%; background: #0891b2; box-shadow: 0 0 0 4px rgba(8,145,178,.14); }
+.live-banner.off .live-dot { background: var(--danger); box-shadow: 0 0 0 4px rgba(239,68,68,.14); }
+.live-banner.stale .live-dot { background: var(--warn); box-shadow: 0 0 0 4px rgba(245,158,11,.16); }
+.live-hero { background: linear-gradient(115deg, #0e7490, #155e75 55%, #312e81); }
+.live-temp-row { display: flex; align-items: baseline; gap: 4px; margin-top: 8px; }
+.live-temp-row strong { font-size: 26px; letter-spacing: -.04em; }
+.live-temp-row small { font-size: 12px; color: var(--muted); }
+.live-temp-row span { margin-left: auto; font-size: 10.5px; color: var(--muted); }
+.live-telemetry { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-top: 12px; padding: 10px 12px; border-radius: 10px; border: 1px dashed rgba(8,145,178,.35); background: rgba(8,145,178,.05); font-size: 11px; color: var(--muted); }
+.live-telemetry strong { font-size: 20px; color: var(--text); letter-spacing: -.03em; }
+.live-telemetry span:first-child { display: inline-flex; align-items: center; gap: 5px; }
+.data-card.live-alarm { border-color: rgba(239,68,68,.4); background: rgba(239,68,68,.035); }
+.lot-card.sim-order { cursor: default; }
+.lot-card.sim-order:hover { transform: none; }
+.live-tag { background: rgba(8,145,178,.12); color: #0891b2; font-size: 9px; padding: 2px 5px; border-radius: 5px; letter-spacing: .05em; }
+@media (max-width: 900px) {
+  .live-banner { flex-wrap: wrap; }
+  .live-banner .btn { margin-left: 20px; }
+  .live-chip span { display: none; }
+  .live-chip { padding: 7px 9px; }
+}

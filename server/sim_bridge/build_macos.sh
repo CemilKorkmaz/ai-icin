@@ -34,7 +34,7 @@ python3 -m PyInstaller "server/sim_bridge/erp-sim-bridge-macos.spec" --noconfirm
 echo
 if [ -d "dist/ERP-Sim-Bridge.app" ]; then
   echo "  [TAMAM] dist/ERP-Sim-Bridge.app hazir."
-  echo "  Finder'da cift tiklayin; tarayicida http://localhost:8080/app/#/sim acilir."
+  echo "  Finder'da cift tiklayin; tarayicida http://localhost:8080/app/#/dashboard acilir."
   echo "  Simulasyonunuzun http://localhost:8000 uzerinde calisiyor olmasi yeterlidir."
   echo
   echo "  Not: Uygulama imzasizdir. macOS ilk acilista uyarirsa:"

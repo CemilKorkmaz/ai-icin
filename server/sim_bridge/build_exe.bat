@@ -47,7 +47,7 @@ if errorlevel 1 (
 echo.
 if exist "dist\ERP-Sim-Bridge.exe" (
   echo  [TAMAM] dist\ERP-Sim-Bridge.exe hazir.
-  echo  Bu dosyaya cift tiklayin; tarayicida http://localhost:8080/app/#/sim acilir.
+  echo  Bu dosyaya cift tiklayin; tarayicida http://localhost:8080/app/#/dashboard acilir.
   echo  Simulasyonunuzun http://localhost:8000 uzerinde calisiyor olmasi yeterlidir.
 ) else (
   echo  [UYARI] dist\ERP-Sim-Bridge.exe bulunamadi; dist klasorunu kontrol edin.

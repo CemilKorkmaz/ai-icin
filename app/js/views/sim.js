@@ -52,7 +52,9 @@ export const simView = {
       <div data-sim-root>
         <div class="info-banner">
           ${icon('link', 17)}
-          <span><strong>Bu ekran simülasyonu ERP'ye bağlar, simülasyonu değiştirmez.</strong>
+          <span><strong>Burası bağlantı ve teşhis ekranıdır.</strong>
+          Aynı canlı veri ana <strong>Panel</strong>, <strong>Makine Parkı</strong>, <strong>PLC Durum</strong> ve
+          <strong>Üretim Akışı</strong> ekranlarını besler; veri orada da görünür.
           Fırın sıcaklığı, durum ve alarmlar <code>erp_backend</code> REST uçlarından okunur;
           edge ajanının imzalı batch'leri <code>/api/edge/ingest</code> ile burada kayda geçer.
           Sayfa bağlantı kopunca <strong>yenilenmez</strong>; 2,5 saniyede bir sessizce yeniden dener.</span>

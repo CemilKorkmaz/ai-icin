@@ -1,14 +1,14 @@
 @echo off
 chcp 65001 >nul
-title ERP Studio - Simulasyon Baglantisi
+title ERP Studio - Canli Simulasyon
 cd /d "%~dp0"
 
 echo.
 echo  ============================================================
-echo   ERP Studio - Simulasyon Baglantisi
+echo   ERP Studio - Canli Simulasyon
 echo  ============================================================
 echo   Sizin simulasyonunuz : http://localhost:8000
-echo   ERP Studio           : http://localhost:8080/app/#/sim
+echo   ERP Studio           : http://localhost:8080/app/#/dashboard
 echo.
 echo   Simulasyonunuzu once her zamanki gibi baslatin.
 echo   Bu pencere acik kaldikca kopru calisir; kapatirsaniz durur.

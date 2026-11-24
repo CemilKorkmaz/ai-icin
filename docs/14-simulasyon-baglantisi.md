@@ -1,8 +1,10 @@
-# 14 — Simülasyon Bağlantısı: ERP'yi Fabrika Testinden Önce Simülasyonda Sınamak (Sürüm 1.4)
+# 14 — Simülasyon Bağlantısı: ERP'yi Fabrika Testinden Önce Simülasyonda Sınamak (Sürüm 1.5)
 
 **Amaç:** Kullanıcının `erp_backend` / `erp_simulation` olarak çalıştırdığı fırın simülasyonunu ERP Studio'ya bağlamak; gerçek fabrika testi başlamadan önce fırın sıcaklığı, alarm, üretim emri ve edge ajanı zincirini uçtan uca burada sınamak.
 
-**Sürüm 1.4.1–1.4.2:** Windows'ta `Baslat.bat` + `ERP-Sim-Bridge.exe`, macOS'te `Baslat.command` + `ERP-Sim-Bridge.app` ile çift tıkla başlatma eklendi; protokol ve veri modeli değişmedi.
+**Sürüm 1.4.1–1.4.2:** Windows'ta `Baslat.bat` + `ERP-Sim-Bridge.exe`, macOS'te `Baslat.command` + `ERP-Sim-Bridge.app` ile çift tıkla başlatma eklendi.
+
+**Sürüm 1.5:** Simülasyon verisi artık yalnızca bu ekranda değil, ana **Panel**, **Makine Parkı**, **PLC Durum** ve **Üretim Akışı** ekranlarında da gösterilir. Üst çubuktaki anahtar ile demo veriye dönülebilir; canlı mod salt okunurdur.
 
 **Kapsam:** Bir simülasyon sunucusu (`:8000`), bir köprü (`:8080`) ve isteğe bağlı edge ajanı (`:8787`). Simülasyonun kendi kaynak kodu değiştirilmez; yalnızca belgelenen REST uçları kullanılır.
 
@@ -14,7 +16,7 @@ Simülasyon `8000`, ERP Studio `8080` portunda çalışır. Tarayıcı doğrudan
 
 1. **Farklı köken (CORS).** Simülasyonun FastAPI sunucusunda ERP için CORS izni yoktur; tarayıcı isteği engellerdi.
 2. **Adres sorunu.** Kullanıcı simülasyonu kendi bilgisayarında çalıştırır; erişim noktası `127.0.0.1:8000` olduğunda tarayıcının bulunduğu makineye göre değişir. Köprü sunucu tarafında çalıştığı için adres tek yerde durur.
-3. **WebSocket döngüsü.** Kullanıcı rehberindeki "bağlantı koptu / sayfa sürekli yenileniyor" sorunu, WebSocket kapanınca `location.reload()` çağrılmasından doğmuştu. Bu bağlantıda **WebSocket kullanılmaz**; arayüz 2,5 saniyede bir REST ile okur ve bağlantı kopunca **sayfayı yenilemez**.
+3. **WebSocket döngüsü.** Kullanıcı rehberindeki "bağlantı koptu / sayfa sürekli yenileniyor" sorunu, WebSocket kapanınca `location.reload()` çağrılmasından doğmuştu. Bu bağlantıda **WebSocket kullanılmaz**; Simülasyon Bağlantısı ekranı 2,5, ana ekranlar 3 saniyede bir REST ile okur ve bağlantı kopunca **sayfayı yenilemez**.
 
 Bu nedenle `server/sim_bridge` tek süreçte üç iş yapar: statik ERP Studio'yu sunar, simülasyon REST uçlarını proxy'ler ve edge ajanının imzalı batch'lerini kabul eder.
 
@@ -68,7 +70,7 @@ Kendi simülasyon klasöründe:
 
 ### 4.2 Çift tıkla başlatma — Windows ve macOS
 
-Simülasyon her zamanki gibi `localhost:8000` üzerinde çalışırken depo kökündeki başlatıcıya çift tıklanır. Başlatıcı köprüyü açar ve tarayıcıyı doğrudan **`http://localhost:8080/app/#/sim`** adresinde gösterir; adres yazmak veya komut ezberlemek gerekmez. Açılan pencere köprünün kendisidir: **pencere açık kaldıkça** ERP simülasyona bağlıdır, kapatılınca köprü durur.
+Simülasyon her zamanki gibi `localhost:8000` üzerinde çalışırken depo kökündeki başlatıcıya çift tıklanır. Başlatıcı köprüyü açar ve tarayıcıyı doğrudan **`http://localhost:8080/app/#/dashboard`** adresinde, canlı Panel'de gösterir; adres yazmak veya komut ezberlemek gerekmez. Açılan pencere köprünün kendisidir: **pencere açık kaldıkça** ERP simülasyona bağlıdır, kapatılınca köprü durur.
 
 | İşletim sistemi | Çift tıklanan dosya | Açılan pencere |
 | --- | --- | --- |
@@ -86,7 +88,7 @@ Her iki başlatıcı aynı sırayı izler:
 
 **macOS ilk açılış.** Git ile gelen `Baslat.command` normalde doğrudan çalışır. Finder "geliştirici doğrulanamadı" derse dosyaya **sağ tık → Aç** deyin; gerekirse **Sistem Ayarları → Gizlilik ve Güvenlik → Yine de Aç** düğmesi kullanılır. Çalıştırma izni kaybolduysa Terminal'de `chmod +x Baslat.command` yeterlidir.
 
-**Adres neden `8080`?** 80 portu Windows'ta yönetici, macOS'ta `sudo` hakkı ister ve başka programlarla kolayca çakışır; bu yüzden köprü 8080'de çalışır. Tarayıcı zaten otomatik açıldığı için adres yazılmaz; sonradan elle girmek gerekirse `http://localhost:8080/app/#/sim` yer imine eklenir.
+**Adres neden `8080`?** 80 portu Windows'ta yönetici, macOS'ta `sudo` hakkı ister ve başka programlarla kolayca çakışır; bu yüzden köprü 8080'de çalışır. Tarayıcı zaten otomatik açıldığı için adres yazılmaz; sonradan elle girmek gerekirse `http://localhost:8080/app/#/dashboard` yer imine eklenir; Simülasyon Bağlantısı ekranı menüden açılır.
 
 #### Tek seferlik uygulama üretimi (isteğe bağlı)
 
@@ -109,7 +111,7 @@ Bu depoda:
 python3 server/sim_bridge/run.py
 ```
 
-Varsayılanlar simülasyon `http://127.0.0.1:8000`; ERP kaynaktan çalışırken `http://0.0.0.0:8080`, exe'de `http://127.0.0.1:8080`. `--open` eklenirse tarayıcı kendiliğinden **Simülasyon Bağlantısı** ekranında (`http://localhost:8080/app/#/sim`) açılır; eklenmezse `http://localhost:8080/app/` adresinden **Entegrasyon → Simülasyon Bağlantısı** seçilir.
+Varsayılanlar simülasyon `http://127.0.0.1:8000`; ERP kaynaktan çalışırken `http://0.0.0.0:8080`, exe'de `http://127.0.0.1:8080`. `--open` eklenirse tarayıcı kendiliğinden ana **Panel**'de (`http://localhost:8080/app/#/dashboard`) açılır; teşhis için **Entegrasyon → Simülasyon Bağlantısı** seçilir.
 
 Simülasyon kapalıyken arayüzü yine görmek için yerleşik demo kopya kullanılabilir:
 
@@ -244,6 +246,25 @@ Davranış kuralları:
 * Köprü hiç çalışmıyorsa ekran "Köprü çalışmıyor" der ve çalıştırma komutunu gösterir; diğer ERP ekranları statik olarak çalışmaya devam eder.
 * Emir oluşturma/başlatma sırasında düğme kilitlenir; çift tıklama ikinci kayıt üretmez.
 
+### 9.1 Ana ERP ekranlarının canlı beslenmesi (Sürüm 1.5)
+
+Aynı `/api/sim/live` yanıtı dört ana ekranı besler. Amaç, simülasyon verisini ayrı bir bölümde göstermek değil, ERP'yi fabrika testi sırasında gerçek veriyle çalıştırmaktır.
+
+| Ana ekran | Canlı gösterilen | Kaynak |
+| --- | --- | --- |
+| Panel | Fırın sayısı, ortalama/en yüksek sıcaklık, alarm, çalışan emir, fırın kartları, emir tablosu | `/api/sim/live` |
+| Makine Parkı | Fırın → profil makine eşlemesi, sıcaklık, hedef, alarm, durum; diğer profil makineleri ayrı listede | aynı yanıt + `docs/12` profili |
+| PLC Durum | Dört sinyal (`door`, `casting`, `alarm`, `running`) ve ayrı telemetri; kapı/döküm simülasyonda yoksa “Bilinmiyor” | aynı yanıt |
+| Üretim Akışı | Simülasyon üretim emirleri: oluşturuldu, çalışıyor, tamamlandı, iptal; fırın durum tablosu | aynı yanıt |
+
+**Açma/kapama.** Üst çubuktaki **Canlı simülasyon / Demo veri** düğmesi modu değiştirir; tercih tarayıcıda saklanır. Köprü ilk açılışta yanıt verirse canlı mod otomatik devreye girer. Canlı modda köprü kapalıysa ana ekranlar demo veriye dönmez; “bağlantı yok / son bilinen veri” gösterir.
+
+**Salt okunur.** Canlı modda makine düzenleme, döküm kartı sürükleme ve PLC sinyal değiştirme kapalıdır. Hiçbir ERP koleksiyonuna, stok/maliyet/muhasebe tablosuna yazılmaz. Demo moduna dönüldüğünde bütün işlemler eskisi gibi çalışır.
+
+**Sınır.** Simülasyon yalnızca fırın, emir ve telemetri üretir; malzeme, stok, tedarikçi, cari, fatura ve muhasebe verisi yayınlamaz. Bu ekranlar canlı modda da demo kayıtları gösterir ve sayfa başlığında **DEMO VERİ** etiketi taşır. Canlı fırın verisinden stok veya muhasebe kaydı türetilmez; dört sinyal kuralı ve “PLC'ye yazma yok” ilkesi korunur.
+
+**Yenileme.** Ana ekranlar 3 saniyede bir, yalnızca sekme görünürken REST ile tazelenir. WebSocket yoktur; sayfa yenilenmez. Bir modal veya sürükleme sürerken tazeleme atlanır. Service worker yalnızca uygulama kabuğunu önbelleğe alır; `/api/` yanıtları hiçbir zaman önbellekten okunmaz.
+
 ---
 
 ## 10. Uçtan uca doğrulama
@@ -251,11 +272,12 @@ Davranış kuralları:
 Sırayla:
 
 1. Kullanıcı simülasyonu `./start.sh 10` ile açılır.
-2. Köprü Windows'ta `Baslat.bat`, macOS'te `Baslat.command` çift tıkla (veya `python3 server/sim_bridge/run.py --open`) açılır; tarayıcı Simülasyon ekranında açılır, konsolda eşlemenin `3/3` olduğu görülür.
+2. Köprü Windows'ta `Baslat.bat`, macOS'te `Baslat.command` çift tıkla (veya `python3 server/sim_bridge/run.py --open`) açılır; tarayıcı canlı **Panel**'de açılır, konsolda eşlemenin `3/3` olduğu görülür. Üst çubukta **Canlı simülasyon** yazar; teşhis için **Entegrasyon → Simülasyon Bağlantısı** açılır.
 3. Arayüzde `Homojenizasyon Fırını`, hedef `60 °C`, süre `0.2` dk ile emir oluşturulur ve başlatılır. Kart `ISINIYOR` → `BEKLETIYOR` → `TAMAMLANDI` olur; süre hedefe ulaştıktan sonra işler.
 4. `Aluminyum Eritme Fırını`, hedef `900 °C` (güvenlik sınırı 850 °C) ile alarm denenir; kart `ALARM` olur, brülör kapanır.
 5. Edge ajanı `8787`'de **Bağlantıyı Test Et** → simülasyon ve ERP köprüsü yeşil; **Şimdi Oku** → 15 okuma (3 fırın × 4 sinyal + 3 telemetri); **Toplu Gönder** → kuyruk `sent`.
-6. Simülasyon ekranında edge batch sayısı ve son okumalar görünür. `outbox` artık `501` değil `200` alır.
+6. **Panel**, **Makine Parkı**, **PLC Durum** ve **Üretim Akışı** aynı fırınları, sıcaklıkları ve emirleri gösterir; sayfa başlığında **CANLI SİMÜLASYON** etiketi vardır. Üst çubuktan **Demo veri**ye dönülünce eski demo ekranları geri gelir.
+7. Simülasyon ekranında edge batch sayısı ve son okumalar görünür. `outbox` artık `501` değil `200` alır.
 
 Bu depodaki otomatik doğrulama:
 
@@ -283,13 +305,14 @@ Sonuçlar: köprü 16/16, edge 13/13, ekranlar 35/35. Köprü testi gerçek Fast
 ## 12. Sınırlar ve açık işler
 
 1. **Demo kopya, kullanıcının simülasyonu değildir.** Aynı sözleşmeyi uygulayan üç fırınlı bir vekildir; gerçek simülasyonun iç mantığı, veritabanı ve varsa ek uçları bu depoda yoktur.
-2. **WebSocket kullanılmaz.** Bilinçli karardır: yenileme döngüsünü önler. Canlılık 2,5 saniyelik REST yoklamasıyla sağlanır; saniyelik akış gerekirse köprüye SSE eklenebilir.
+2. **WebSocket kullanılmaz.** Bilinçli karardır: yenileme döngüsünü önler. Canlılık Simülasyon Bağlantısı ekranında 2,5, ana ekranlarda 3 saniyelik REST yoklamasıyla sağlanır; saniyelik akış gerekirse köprüye SSE eklenebilir.
 3. **`/api/edge/ingest` üretim worker'ı değildir.** Batch'i doğrular ve kayıt defterine yazar; `signalStates`, bakım bildirimi veya stok hareketi üretmez. Gerçek worker `docs/10` aşama 8'dedir.
 4. **Kapı ve döküm sinyalleri simülasyonda yoktur.** `unknown` olarak işaretlenir; gerçek PLC bağlandığında `opcua` / `modbus` adaptörü bu sinyalleri okur.
 5. **Tek köprü / tek ajan.** İkinci bir saha bilgisayarı eklenirse `siteCode` ayrılmalı ve her ajan kendi `clientId` alanıyla gelmelidir.
 6. **Gerçek tarayıcı testi** yapılmamıştır; ekran Node duman testi, `linkedom` DOM denetimi ve HTTP istekleriyle doğrulanmıştır. Dokunmatik/tablet davranışı sahada görülmelidir.
-7. **Windows exe'si ve macOS uygulaması depoda hazır değildir.** `Baslat.bat` / `Baslat.command` Python ile hemen çalışır; tek dosya isteniyorsa kendi işletim sisteminde `build_exe.bat` veya `build_macos.sh` bir kez çalıştırılır. Linux'ta ikili dosya üretilmez, yalnızca yerleşim test edilir.
-8. **Simülasyon emirleri kalıcı değildir.** Kullanıcı simülasyonu kendi kurallarıyla çalışır; köprü yeniden başlatıldığında yalnızca kendi kayıt defteri korunur.
+7. **Canlı mod yalnızca fırın/emir/telemetri kapsar.** Stok, cari ve muhasebe simülasyondan gelmez; bu ekranlar demo kayıtları gösterir ve etiketlenir.
+8. **Windows exe'si ve macOS uygulaması depoda hazır değildir.** `Baslat.bat` / `Baslat.command` Python ile hemen çalışır; tek dosya isteniyorsa kendi işletim sisteminde `build_exe.bat` veya `build_macos.sh` bir kez çalıştırılır. Linux'ta ikili dosya üretilmez, yalnızca yerleşim test edilir.
+9. **Simülasyon emirleri kalıcı değildir.** Kullanıcı simülasyonu kendi kurallarıyla çalışır; köprü yeniden başlatıldığında yalnızca kendi kayıt defteri korunur.
 
 ---
 
