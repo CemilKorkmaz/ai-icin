@@ -168,8 +168,9 @@ Ajan yalnızca Python standart kütüphanesini kullanır: `sqlite3`, `http.serve
 - ERP istekleri paylaşılan gizli anahtarla HMAC-SHA256 imzalıdır; token opsiyoneldir.
 - Uzaktan erişim doğrudan IP ile değil VPN + MFA + RBAC ile yapılır (`docs/04` Bölüm 7). Geliştirici hesabı üretim verisini salt okunur görür.
 - Ajan ERP'nin işletme tablolarına veritabanı bağlantısı kurmaz; yalnızca tek bir HTTP uç noktasına yazar.
-- Gizli anahtar arayüzde maskeli gelir; dokunulmazsa korunur.
+- Gizli anahtar arayüzde maskeli gelir; dokunulmazsa korunur. Varsayılan/kısa anahtarda yerel arayüz ve `/api/status` `DEFAULT_EDGE_SECRET` uyarısı gösterir.
 - `quality: SIMULATED` verisi gerçek ölçüm gibi raporlanmaz.
+- Yerel arayüz yanıtları `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` ve izin politikası başlıkları taşır; POST gövdeleri 1 MiB ile sınırlıdır (Sürüm 1.7).
 - Kuyruk ve olay kayıtları silinmez; denetim izi korunur.
 
 ---
@@ -196,12 +197,13 @@ Yeni bir fabrikaya gidildiğinde yapılacak iş **exe değiştirmek değil**, o 
 | Komut | Sonuç |
 | --- | --- |
 | `python3 tools/edge_smoke_test.py` | 13 test: yapılandırma, profil, adaptör yedeği, dört sinyal + telemetri, idempotency, eşik bantları, durum değişimi ve eşik geçişi olayları, imzalı batch, çevrimdışı kuyruk, SQL şeması, `--dry-run`, yerel arayüzün 11 JSON ucu ve `/api/poll`, **simülasyon adaptörü (3 eşleşen fırın + kapalıyken yedek)**, exe üretim dosyaları → **TÜM TESTLER GEÇTİ** |
-| `python3 tools/sim_bridge_smoke_test.py` | 12 test: köprü statik sunucusu, canlı anlık görüntü, eşleme kuralları, emir oluştur/başlat, HMAC ingest ve idempotency, yanlış imza, simülasyon kapalıyken son veri, demo motorunda alarm/tamamlanma → **TÜM TESTLER GEÇTİ** |
+| `python3 tools/sim_bridge_smoke_test.py` | 20 test: köprü statik sunucusu, canlı anlık görüntü, eşleme kuralları, emir oluştur/başlat ve doğrulama, HMAC ingest ve idempotency, yanlış imza, güvenlik başlıkları, simülasyon kapalıyken son veri, demo motorunda alarm/tamamlanma → **TÜM TESTLER GEÇTİ** |
 | `python3 edge/main.py --dry-run` | Tek döngü, hiçbir yere yazmadan okuma sayısı ve adaptör özeti |
 | `python3 edge/main.py --once` | Tek döngü, SQLite `readings` + `outbox` yazımı |
 | `python3 edge/main.py --bind 0.0.0.0 --port 8787 --no-browser` | Canlı arayüz; HTML/CSS/JS ve tüm JSON uçları 200 |
 | `python3 -m py_compile edge/main.py edge/erp_edge/*.py` | Sözdizimi hatası yok |
-| `python3 tools/build_docx.py` | 14 doküman tek geçerli OOXML Word dosyasında birleşti |
+| `python3 tools/check_all.py` | 5 adımlı kalite kapısı: veri + simülasyon + köprü + edge + arayüz → **TÜM KALİTE KAPISI GEÇTİ** |
+| `python3 tools/build_docx.py` | 18 doküman tek geçerli OOXML Word dosyasında birleşti |
 
 Örnek profil 13 aktif makine (biri devre dışı olduğu için taranmaz), 52 sinyal tag'i ve üç telemetri şablonu üretir; tek döngüde 62 okuma yapılır. ERP kapalıyken kuyruk kayıtları `failed` olarak kalır ve hiçbiri silinmez.
 

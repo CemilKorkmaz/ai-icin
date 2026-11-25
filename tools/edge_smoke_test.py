@@ -195,6 +195,9 @@ class EdgeTests(unittest.TestCase):
             status, body = get('/')
             self.assertEqual(status, 200)
             self.assertIn('ERP Edge Collector', body)
+            with urllib.request.urlopen(f'http://127.0.0.1:{port}/api/status', timeout=3) as r:
+                self.assertEqual(r.headers.get('X-Content-Type-Options'), 'nosniff')
+                self.assertEqual(r.headers.get('Referrer-Policy'), 'no-referrer')
             for path in ('/app.css', '/app.js'):
                 self.assertEqual(get(path)[0], 200)
             for path in ('/api/status', '/api/config', '/api/profile', '/api/readings',
@@ -206,6 +209,7 @@ class EdgeTests(unittest.TestCase):
             status_obj = json.loads(get('/api/status')[1])
             self.assertEqual(status_obj['version'], '1.3.0-test')
             self.assertIn('collector', status_obj)
+            self.assertIn('DEFAULT_EDGE_SECRET', {w['code'] for w in status_obj['securityWarnings']})
             req = urllib.request.Request(f'http://127.0.0.1:{port}/api/poll',
                                          data=b'{}', method='POST',
                                          headers={'Content-Type': 'application/json'})

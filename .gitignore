@@ -40,3 +40,8 @@ server/erp/inbox/dead-letter/
 server/erp/archive/20*/
 server/erp/archive/processed-clients.json
 server/erp/archive/events/
+
+# Simülasyon çalışma zamanı veritabanları (kaynak koda girmez)
+Simulasyon/**/erp_sim.db
+Simulasyon/**/factory_sim.db
+Simulasyon/**/*.db-journal

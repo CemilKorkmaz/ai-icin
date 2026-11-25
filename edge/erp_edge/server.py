@@ -42,6 +42,19 @@ class EdgeContext:
         self.transport = transport
         self.version = version
 
+    def security_warnings(self) -> list[dict]:
+        """Saha kurulumunda kapatılması gereken yapılandırma açıkları."""
+        warnings: list[dict] = []
+        erp = self.cfg.data.get('erp', {}) if isinstance(self.cfg.data.get('erp'), dict) else {}
+        secret = str(erp.get('secret') or '')
+        if not secret or secret == 'degistirin-bu-gizli-anahtari' or len(secret) < 16:
+            warnings.append({
+                'code': 'DEFAULT_EDGE_SECRET',
+                'severity': 'high',
+                'message': 'HMAC gizli anahtarı varsayılan/kısa. ERP köprüsüyle aynı, en az 16 karakterlik rastgele anahtar kullanın.',
+            })
+        return warnings
+
     def status(self) -> dict:
         perf = self.db.counts()
         test = None
@@ -55,7 +68,8 @@ class EdgeContext:
             'erp': {'url': self.cfg.data['erp']['url'], 'enabled': self.cfg.data['erp'].get('enabled', True),
                     'adapter': self.cfg.data.get('adapter')},
             'adapters': contract_rows(),
-            'test': test
+            'test': test,
+            'securityWarnings': self.security_warnings(),
         }
 
 
@@ -67,12 +81,18 @@ def make_handler(ctx: EdgeContext):
         def log_message(self, fmt, *args):  # konsolu kirletme; app_log'a yazılır
             pass
 
+        def _common_headers(self):
+            self.send_header('X-Content-Type-Options', 'nosniff')
+            self.send_header('Referrer-Policy', 'no-referrer')
+            self.send_header('Permissions-Policy', 'geolocation=(), camera=(), microphone=()')
+
         def _json(self, obj, status=200):
             body = json.dumps(obj, ensure_ascii=False, default=str).encode('utf-8')
             self.send_response(status)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.send_header('Content-Length', str(len(body)))
             self.send_header('Cache-Control', 'no-store')
+            self._common_headers()
             self.end_headers()
             self.wfile.write(body)
 
@@ -86,17 +106,24 @@ def make_handler(ctx: EdgeContext):
             self.send_header('Content-Type', ctype)
             self.send_header('Content-Length', str(len(body)))
             self.send_header('Cache-Control', 'no-cache')
+            self._common_headers()
             self.end_headers()
             self.wfile.write(body)
 
         def _body(self) -> dict:
-            length = int(self.headers.get('Content-Length') or 0)
-            if not length:
+            try:
+                length = int(self.headers.get('Content-Length') or 0)
+            except (TypeError, ValueError):
+                return {}
+            if length <= 0:
+                return {}
+            if length > 1024 * 1024:
                 return {}
             try:
-                return json.loads(self.rfile.read(length).decode('utf-8'))
+                data = json.loads(self.rfile.read(length).decode('utf-8'))
             except (ValueError, UnicodeDecodeError):
                 return {}
+            return data if isinstance(data, dict) else {}
 
         def do_GET(self):
             path = self.path.split('?')[0]

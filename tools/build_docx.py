@@ -37,6 +37,8 @@ FILES = [
     ('13-edge-veri-toplama-ajani.md', 'BÖLÜM 13 — Edge Veri Toplama Ajanı (exe, SQL ve ERP Köprüsü)'),
     ('14-simulasyon-baglantisi.md', 'BÖLÜM 14 — Simülasyon Bağlantısı ve Fabrika Öncesi Doğrulama'),
     ('15-erp-sistemi-kapsamli-ozet.md', 'BÖLÜM 15 — ERP Sistemi Kapsamlı Özeti'),
+    ('16-erp-test-ortami.md', 'BÖLÜM 16 — Simülasyonu ERP Test Ortamına Çevirme'),
+    ('17-kalite-denetimi.md', 'BÖLÜM 17 — Uçtan Uca Kalite Denetimi ve Sertleştirme'),
 ]
 
 W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'

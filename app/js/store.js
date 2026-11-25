@@ -124,9 +124,9 @@ export function addActivity(text, icon = 'activity') {
   D().activity = D().activity.slice(0, 40);
 }
 
-export function addNotification({ type = 'info', title, body, source = 'Sistem', channel = null, to = '', subject = '' }) {
+export function addNotification({ type = 'info', title, body, source = 'Sistem', channel = null, to = '', subject = '', simEventId = null }) {
   const d = D();
-  d.notifications.unshift({ id: uid('NT'), at: nowISO(), type, title, body, source, read: false });
+  d.notifications.unshift({ id: uid('NT'), at: nowISO(), type, title, body, source, read: false, simEventId });
   if (channel) {
     d.outbox.unshift({
       id: uid('OB'), createdAt: nowISO(), channel, to,

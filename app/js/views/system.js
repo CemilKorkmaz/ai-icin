@@ -22,7 +22,7 @@ export const notificationsView = {
       const typeCls = { info: 'info', warning: 'warn', danger: 'danger', success: 'ok' };
       content = `<div class="notif-list">${d.notifications.map((n) => `<div class="notif-row ${n.read ? 'read' : ''}" data-notif="${esc(n.id)}">
         <span class="notif-ico ${typeCls[n.type] || 'info'}">${icon(n.type === 'danger' ? 'alert' : n.type === 'success' ? 'check' : n.type === 'warning' ? 'alert' : 'activity', 17)}</span>
-        <div class="notif-main"><strong>${esc(n.title)}</strong><span>${esc(n.body)}</span><small>${esc(n.source)} · ${fmtDateTime(n.at)}</small></div>
+        <div class="notif-main"><strong>${esc(n.title)}</strong><span>${esc(n.body)}</span><small>${esc(n.source)} · ${fmtDateTime(n.at)}${n.simEventId ? ' · SİM' : ''}</small></div>
         ${n.read ? '' : '<span class="unread-dot"></span>'}
       </div>`).join('')}</div>`;
     } else if (notifTab === 'Giden Kutu') {

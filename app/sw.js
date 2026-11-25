@@ -3,7 +3,7 @@
 
 // Şema sürümüyle birlikte yükseltildi: modüler kurulum çekirdeği, adaptör sözleşmesi,
 // menü tanımı ve kurulum sihirbazı çevrimdışı ilk açılışta da önbellekte bulunmalıdır.
-const CACHE = 'erp-studio-v6';
+const CACHE = 'erp-studio-v8';
 const SHELL = [
   './',
   './index.html',
@@ -20,6 +20,7 @@ const SHELL = [
   './js/modularity.js',
   './js/adapters.js',
   './js/live.js',
+  './js/sim_feed.js',
   './js/icons.js',
   './js/ui.js',
   './js/views/index.js',

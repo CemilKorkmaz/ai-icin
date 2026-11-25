@@ -719,6 +719,18 @@ td.num, .money-num { font-variant-numeric: tabular-nums; }
 .live-dot { flex: 0 0 9px; width: 9px; height: 9px; border-radius: 50%; background: #0891b2; box-shadow: 0 0 0 4px rgba(8,145,178,.14); }
 .live-banner.off .live-dot { background: var(--danger); box-shadow: 0 0 0 4px rgba(239,68,68,.14); }
 .live-banner.stale .live-dot { background: var(--warn); box-shadow: 0 0 0 4px rgba(245,158,11,.16); }
+
+/* Simülasyon olayından gelen kritik uyarı bandı (bildirim merkeziyle aynı kayıt) */
+.sim-alert { display: flex; align-items: flex-start; gap: 11px; padding: 12px 15px; margin-bottom: 16px; border-radius: 13px; font-size: 12px; border: 1px solid rgba(239,68,68,.32); background: rgba(239,68,68,.07); }
+.sim-alert.warn { border-color: rgba(245,158,11,.34); background: rgba(245,158,11,.08); }
+.sim-alert > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.sim-alert strong { font-size: 12.5px; }
+.sim-alert span { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.sim-alert small { color: var(--muted); font-size: 10px; }
+.sim-alert-ico { display: inline-flex; color: var(--danger); flex: 0 0 auto; margin-top: 1px; }
+.sim-alert.warn .sim-alert-ico { color: var(--warn); }
+.sim-alert-actions { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 820px) { .sim-alert { flex-wrap: wrap; } .sim-alert-actions { width: 100%; justify-content: flex-start; } }
 .live-hero { background: linear-gradient(115deg, #0e7490, #155e75 55%, #312e81); }
 .live-temp-row { display: flex; align-items: baseline; gap: 4px; margin-top: 8px; }
 .live-temp-row strong { font-size: 26px; letter-spacing: -.04em; }

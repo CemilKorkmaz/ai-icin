@@ -1,7 +1,7 @@
 """Simülasyon fırın adları ile ERP makine kimlikleri arasında eşleme.
 
 Kullanıcı simülasyonu (erp_backend / erp_simulation) fırınları adla yayınlar:
-"Aluminyum Eritme Fırını", "Homojenizasyon Fırını", "Yaşlandırma Fırını" gibi.
+"Aluminyum Eritme Fırını", "Homojenizasyon Fırını", "Biyet Isıtma Fırını" gibi.
 ERP tarafında makine kimliği profilden gelir (MCH-01, MCH-10 …); sabit kod yoktur.
 
 Bu modül saftır (dosya, ağ veya DOM okumaz) ve iki yerde aynı kuralla çalışır:
@@ -24,6 +24,7 @@ KEYWORD_RULES = (
     (('eritme', 'ergitme', 'melting', 'smelter', 'ocak'), ('FURNACE',)),
     (('homojen', 'homogen'), ('HOMO_FURNACE', 'CONT_HOMO')),
     (('yaslandir', 'aging', 'temper'), ('FURNACE', 'HOMO_FURNACE')),
+    (('biyet', 'isitma', 'billet', 'reheat'), ('FURNACE',)),
     (('testere', 'saw', 'kesim'), ('SAW',)),
     (('tabla', 'cast', 'dokum'), ('CAST_TABLE',)),
 )

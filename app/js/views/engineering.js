@@ -71,6 +71,9 @@ function liveMachinesRender() {
             <div class="toolbar" style="margin:10px 0 0">
               ${pill(statusLabel(l.status), statusTone(l.status))}
               ${pill(m.mapped ? 'Profil eşleşti' : 'Eşleşmedi', m.mapped ? 'ok' : 'warn')}
+              ${l.sensorOk === false ? pill('Sensör BAD', 'danger') : ''}
+              ${l.doorOpen ? pill('Kapı açık', 'warn') : ''}
+              ${l.burnerFault ? pill('Brülör arıza', 'danger') : ''}
               <span class="toolbar-spacer"></span>
               ${pill('CANLI', 'cyan')}
             </div>
@@ -878,16 +881,23 @@ function livePlcRender() {
       <div><span>Kaynak</span><strong>SIM REST</strong></div>
       <div><span>Yenileme</span><strong>3 sn</strong></div>
     </div>
-    <div class="info-banner">${icon('cpu', 18)}<span><strong>Dört sinyal kuralı korunuyor.</strong> Kapı ve döküm sinyalleri simülasyonda yayınlanmadığı için “Bilinmiyor” görünür; alarm ve çalışma durumu fırın durumundan türetilir. Sıcaklık beşinci sinyal değildir, ayrı telemetri olarak gösterilir. Bu ekran <strong>salt okunurdur</strong>.</span></div>
+    <div class="info-banner">${icon('cpu', 18)}<span><strong>Dört sinyal kuralı korunuyor.</strong> Kapı, döküm ve alarm sinyalleri simülasyon senaryolarından gelir; sensör arızasında kalite <strong>BAD</strong> olur. Sıcaklık beşinci sinyal değildir, ayrı telemetri olarak gösterilir. Bu ekran <strong>salt okunurdur</strong>.</span></div>
     ${rows.map((m) => {
       const l = m.live || {};
       const status = String(l.status || '').toUpperCase();
       const alarm = l.alarmActive || status === 'ALARM';
       const running = ['CALISIYOR', 'ISINIYOR', 'BEKLETIYOR'].includes(status);
+      const sig = l.signals || {};
       const values = {
-        door: { label: 'Bilinmiyor', kind: 'neutral' },
-        casting: { label: 'Bilinmiyor', kind: 'neutral' },
-        alarm: alarm ? { label: 'Arıza Var', kind: 'danger' } : { label: 'Arıza Yok', kind: 'ok' },
+        door: sig.door
+          ? { label: sig.door === 'open' ? 'Açık' : 'Kapalı', kind: sig.door === 'open' ? 'danger' : 'ok' }
+          : { label: 'Bilinmiyor', kind: 'neutral' },
+        casting: sig.casting
+          ? { label: sig.casting === 'pouring' ? 'Döküm Yapılıyor' : 'Beklemede', kind: sig.casting === 'pouring' ? 'warn' : 'neutral' }
+          : { label: 'Bilinmiyor', kind: 'neutral' },
+        alarm: (l.sensorOk === false || l.burnerFault)
+          ? { label: l.sensorOk === false ? 'Sensör BAD' : 'Brülör Arıza', kind: 'danger' }
+          : alarm ? { label: 'Arıza Var', kind: 'danger' } : { label: 'Arıza Yok', kind: 'ok' },
         running: running ? { label: 'Çalışıyor', kind: 'ok' } : { label: 'Durdu', kind: 'neutral' }
       };
       return `<section class="card">
@@ -895,13 +905,14 @@ function livePlcRender() {
         <div class="grid-2">${Object.keys(SIGNAL_LABELS).map((sig) => `<div class="data-card">
           <div class="cell-sub">${esc(SIGNAL_LABELS[sig])}</div>
           <div class="cell-strong" style="margin:6px 0">${pill(values[sig].label, values[sig].kind)}</div>
-          <div class="micro muted">${sig === 'door' || sig === 'casting' ? 'Simülasyonda yayınlanmıyor' : 'Fırın durumundan türetildi'} · SIM</div>
+          <div class="micro muted">${sig === 'door' || sig === 'casting' ? 'Senaryo / simülasyon sinyali' : 'Fırın durumundan türetildi'} · SIM</div>
         </div>`).join('')}</div>
         <div class="live-telemetry">
           <span>${icon('activity', 14)} Telemetri (dört sinyalden ayrı)</span>
           <strong>${l.temperatureC === null || l.temperatureC === undefined ? '—' : fmtNum(l.temperatureC, 1)} °C</strong>
           <span>hedef ${l.targetC === null || l.targetC === undefined ? '—' : fmtNum(l.targetC, 0)} °C</span>
           <span>maks ${l.maxC === null || l.maxC === undefined ? '—' : fmtNum(l.maxC, 0)} °C</span>
+          <span>kalite ${esc(l.quality || 'SIMULATED')}</span>
         </div>
       </section>`;
     }).join('')}`;

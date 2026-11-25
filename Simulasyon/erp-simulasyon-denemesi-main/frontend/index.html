@@ -86,6 +86,40 @@
   .start-row { display: flex; gap: 8px; margin-top: 6px; }
   select.furnace-select { max-width: 170px; }
 
+  /* ERP test senaryoları */
+  .scenario-note { font-size: 12px; color: #94a3b8; margin: -4px 0 12px; line-height: 1.5; }
+  .scenario-note b { color: #fbbf24; }
+  .scenario-furnace { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+  .scenario-furnace h4 { margin: 0 0 8px; font-size: 13px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .scenario-furnace h4 .muted { font-weight: 400; }
+  .scenario-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .scenario-btns button { padding: 6px 10px; font-size: 12px; }
+  .scenario-btns button.critical { background: #b91c1c; }
+  .scenario-btns button.critical:hover { background: #dc2626; }
+  .scenario-btns button.warning { background: #b45309; }
+  .scenario-btns button.warning:hover { background: #d97706; }
+  .scenario-btns button.info { background: #1d4ed8; }
+  .scenario-btns button.reset { background: #475569; }
+  .business-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .business-btns button { background: #334155; padding: 6px 10px; font-size: 12px; }
+  .business-btns button:hover { background: #475569; }
+  .event-list { max-height: 260px; overflow-y: auto; font-size: 12px; border: 1px solid #334155; border-radius: 8px; }
+  .event-item { padding: 7px 9px; border-bottom: 1px solid #2d3a52; display: flex; gap: 8px; align-items: flex-start; }
+  .event-item:last-child { border-bottom: 0; }
+  .event-item .time { color: #94a3b8; font-family: ui-monospace, SFMono-Regular; white-space: nowrap; }
+  .event-item .sev { font-size: 10px; font-weight: 800; letter-spacing: 0.4px; padding: 1px 6px; border-radius: 8px; text-transform: uppercase; white-space: nowrap; }
+  .sev.critical { background: #7f1d1d; color: #fecaca; }
+  .sev.warning { background: #78350f; color: #fde68a; }
+  .sev.info { background: #1e3a8a; color: #bfdbfe; }
+  .sev.success { background: #14532d; color: #bbf7d0; }
+  .event-item .body { flex: 1; min-width: 0; }
+  .event-item .body b { color: #e2e8f0; }
+  .event-item .body .where { color: #93c5fd; }
+  .event-item .body .msg { color: #cbd5e1; }
+  .fault-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+  .fault-tag { font-size: 10px; padding: 1px 6px; border-radius: 8px; background: #7f1d1d; color: #fecaca; }
+  .fault-tag.bad { background: #78350f; color: #fde68a; }
+
   /* Hız kontrolü (sağ üst) */
   .speed-box { margin-left: auto; display: flex; align-items: center; gap: 6px; }
   .speed-box .label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -110,6 +144,10 @@
   <h1>ERP + Fabrika Simülasyonu <span class="type">· Canlı makine takibi</span></h1>
   <button id="btnReconnect" class="secondary" style="padding:4px 10px;font-size:12px;" title="Sayfayı yenilemeden bağlantıyı yeniden dener">Yeniden bağlan</button>
 
+  <a id="erpLink" href="http://localhost:8080/app/" target="_blank" rel="noopener"
+     style="background:#0e7490;color:#fff;text-decoration:none;padding:6px 11px;border-radius:8px;font-size:12px;font-weight:600;"
+     title="ERP Studio'yu yeni sekmede açar (köprü 8080)">ERP'yi aç ↗</a>
+
   <div class="speed-box">
     <span class="label">Simülasyon hızı</span>
     <div class="speed-btns" id="speedBtns"></div>
@@ -119,6 +157,18 @@
 </header>
 
 <main>
+  <section style="grid-column: 1 / -1; border-color:#7c2d12;">
+    <h3 style="border-color:#7c2d12;">ERP Test Senaryoları <span class="type">· arıza enjekte et</span></h3>
+    <p class="scenario-note">
+      Aşağıdaki düğme fırının <b>gerçek simülasyon durumunu</b> değiştirir (sensör, kapı, brülör, sıcaklık).
+      Olay anında ERP Köprüsü'ne düşer; ERP'de <b>zil / bildirim merkezi / PLC ekranı</b> güncellenir.
+      <br>“İş akışı testleri” yalnızca bildirim üretir; <b>stok, cari veya üretim kaydı oluşturmaz.</b>
+    </p>
+    <div id="scenarioFurnaces" class="muted">Senaryo listesi yükleniyor…</div>
+    <h3 style="margin-top:18px;border-color:#334155;">İş akışı bildirim testleri</h3>
+    <div id="businessScenarios" class="business-btns"><span class="muted">Yükleniyor…</span></div>
+  </section>
+
   <div>
     <div class="furnace-grid" id="furnaceGrid">
       <!-- JS tarafından doldurulur -->
@@ -147,10 +197,11 @@
     </table>
   </section>
 
-  <section>
-    <h3>Alarmlar</h3>
-    <div id="alarms" class="alarms">
-      <div class="muted">Şu anda aktif alarm yok.</div>
+  <section style="grid-column: 1 / -1;">
+    <h3>Olay Günlüğü <span class="type">· ERP'ye giden olaylar</span></h3>
+    <div class="scenario-note" style="margin-top:0;">Bu günlük sunucuda tutulur (son 300 olay). ERP Köprüsü aynı olayları okur; sayfa yenilense de kaybolmaz.</div>
+    <div id="eventLog" class="event-list">
+      <div class="muted" style="padding:10px;">Henüz olay yok.</div>
     </div>
   </section>
 </main>
@@ -161,13 +212,14 @@ const wsDot = document.getElementById('wsDot');
 const wsStatus = document.getElementById('wsStatus');
 const furnaceGrid = document.getElementById('furnaceGrid');
 const ordersTbody = document.querySelector('#ordersTable tbody');
-const alarmsBox = document.getElementById('alarms');
 const inpFurnace = document.getElementById('inpFurnace');
 const btnReconnect = document.getElementById('btnReconnect');
 
 let furnaces = {};   // name -> DOM kart nesnesi
 let orders = [];
-let alarmHistory = [];
+let scenarioCatalog = null;
+let lastEventId = 0;
+let eventLog = [];
 
 // WebSocket yönetimi: kopunca SAYFA YENİLENMEZ, sadece sessizce yeniden bağlanır.
 // (Eski sürüm location.reload() yapıyordu; bu yüzden form doldururken sayfa sürekli
@@ -227,7 +279,7 @@ function connectWs() {
       updateFurnaces(msg.furnaces);
       orders = msg.orders;
       renderOrders();
-      renderAlarms(msg.furnaces, msg.ts);
+      if (msg.latestEventId && msg.latestEventId > lastEventId) loadEvents();
     }
   };
 }
@@ -329,17 +381,161 @@ async function loadSnapshot() {
     updateFurnaces(fData);
     orders = oData;
     renderOrders();
-    renderAlarms(fData, Date.now() / 1000);
     lastDataAt = Date.now();
   } catch (e) {
     console.warn('Anlık veri alınamadı:', e);
   }
 }
 
+function erpAppUrl() {
+  // Yerelde :8080, önizleme ortamında aynı kökün 8080 portu.
+  const host = location.hostname;
+  if (/^\d+-/.test(host)) return `${location.protocol}//${host.replace(/^\d+-/, '8080-')}/app/`;
+  const port = location.port === '8000' ? '8080' : (location.port || '8080');
+  return `${location.protocol}//${host}:${port}/app/`;
+}
+
 async function init() {
+  const erpLink = document.getElementById('erpLink');
+  if (erpLink) erpLink.href = erpAppUrl();
   await loadSpeed();
   await loadSnapshot();
+  await loadScenarioCatalog();
   connectWs();
+}
+
+// ------------------------------------------------------------------ ERP test senaryoları
+
+async function loadScenarioCatalog() {
+  try {
+    const res = await fetch('/api/scenarios');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    scenarioCatalog = await res.json();
+    renderScenarioPanel();
+    await loadEvents();
+  } catch (e) {
+    document.getElementById('scenarioFurnaces').innerHTML =
+      '<span class="muted">Senaryo listesi alınamadı: ' + escapeHtml(e.message) +
+      ' — sunucunun güncel olduğundan emin olun.</span>';
+  }
+}
+
+function renderScenarioPanel() {
+  const box = document.getElementById('scenarioFurnaces');
+  if (!scenarioCatalog) return;
+  box.innerHTML = '';
+  const furnaceScenarios = scenarioCatalog.scenarios.filter(x => x.id !== 'reset');
+  const resetDef = scenarioCatalog.scenarios.find(x => x.id === 'reset');
+  for (const furnace of scenarioCatalog.furnaces) {
+    const wrap = document.createElement('div');
+    wrap.className = 'scenario-furnace';
+    const head = document.createElement('h4');
+    head.innerHTML = escapeHtml(furnace) +
+      ' <span class="muted">· senaryo seçin</span>';
+    wrap.appendChild(head);
+    const btns = document.createElement('div');
+    btns.className = 'scenario-btns';
+    for (const def of furnaceScenarios) {
+      const b = document.createElement('button');
+      b.textContent = def.short || def.label;
+      b.title = def.description;
+      b.className = def.severity;
+      b.addEventListener('click', () => runScenario(def.id, furnace, b));
+      btns.appendChild(b);
+    }
+    if (resetDef) {
+      const r = document.createElement('button');
+      r.textContent = resetDef.label;
+      r.title = resetDef.description;
+      r.className = 'reset';
+      r.addEventListener('click', () => runScenario(resetDef.id, furnace, r));
+      btns.appendChild(r);
+    }
+    wrap.appendChild(btns);
+    box.appendChild(wrap);
+  }
+
+  const bbox = document.getElementById('businessScenarios');
+  bbox.innerHTML = '';
+  for (const def of (scenarioCatalog.business || [])) {
+    const b = document.createElement('button');
+    b.textContent = def.label;
+    b.title = def.message;
+    b.addEventListener('click', () => runBusinessScenario(def.id, b));
+    bbox.appendChild(b);
+  }
+}
+
+async function postScenario(payload, button) {
+  if (button) button.disabled = true;
+  try {
+    const res = await fetch('/api/scenarios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    let data = {};
+    try { data = await res.json(); } catch (e) { /* boş yanıt */ }
+    if (!res.ok) throw new Error(data.detail || ('HTTP ' + res.status));
+    if (data.event && data.event.id) lastEventId = Math.max(lastEventId, data.event.id - 1);
+    await loadEvents();
+    await loadSnapshot();
+    if (data.event) {
+      wsStatus.textContent = data.event.title + ' → ERP\'ye gönderildi';
+      setTimeout(() => {
+        if (ws && ws.readyState === WebSocket.OPEN) setWsState('online', 'Canlı veri akışı aktif');
+      }, 3000);
+    }
+    return data;
+  } catch (e) {
+    alert('Senaryo uygulanamadı: ' + e.message);
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
+function runScenario(scenario, furnace, button) {
+  return postScenario({ scenario, furnace }, button);
+}
+
+function runBusinessScenario(scenario, button) {
+  return postScenario({ scenario }, button);
+}
+
+async function loadEvents() {
+  try {
+    const res = await fetch('/api/events?after=' + encodeURIComponent(lastEventId) + '&limit=100');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (data.latestId !== undefined) lastEventId = Math.max(lastEventId, Number(data.latestId) || 0);
+    for (const ev of (data.events || [])) {
+      if (!eventLog.some(x => x.id === ev.id)) eventLog.push(ev);
+    }
+    eventLog = eventLog.slice(-200);
+    renderEvents();
+  } catch (e) {
+    console.warn('Olay günlüğü alınamadı:', e);
+  }
+}
+
+function renderEvents() {
+  const box = document.getElementById('eventLog');
+  if (!box) return;
+  if (!eventLog.length) {
+    box.innerHTML = '<div class="muted" style="padding:10px;">Henüz olay yok. Yukarıdan bir senaryo çalıştırın.</div>';
+    return;
+  }
+  box.innerHTML = eventLog.slice().reverse().map(ev => {
+    const t = ev.at ? new Date(ev.at).toLocaleTimeString('tr-TR', { hour12: false }) : '—';
+    const where = ev.furnace ? ' <span class="where">' + escapeHtml(ev.furnace) + '</span>' : '';
+    const test = ev.data && ev.data.test ? ' <span class="fault-tag bad">TEST</span>' : '';
+    return `<div class="event-item">
+      <span class="time">${escapeHtml(t)}</span>
+      <span class="sev ${escapeHtml(ev.severity || 'info')}">${escapeHtml(ev.severity || 'info')}</span>
+      <span class="body"><b>${escapeHtml(ev.title || ev.type)}</b>${where}${test}
+        <span class="msg">${escapeHtml(ev.message || '')}</span></span>
+    </div>`;
+  }).join('');
 }
 
 // ------------------------------------------------------------------ fırınlar
@@ -368,6 +564,7 @@ function buildFurnaceCards(data) {
       <div id="br-${slug(name)}" class="meta" style="margin-top:6px;">
         <b>Brülör:</b> <span id="burner-${slug(name)}">KAPALI</span>
       </div>
+      <div class="fault-tags" id="ft-${slug(name)}"></div>
       <canvas id="sc-${slug(name)}" class="spark"></canvas>
       <div id="al-${slug(name)}" class="alarm-box">🚨 ALARM: <span id="alarmMsg-${slug(name)}"></span></div>
     `;
@@ -397,6 +594,14 @@ function updateFurnaces(data) {
     stEl.textContent = s.status;
 
     document.getElementById('burner-' + f.id).textContent = s.burner_on ? 'AÇIK 🔥' : 'KAPALI';
+
+    const tags = [];
+    if (s.sensor_ok === false) tags.push('<span class="fault-tag">SENSÖR BAD</span>');
+    if (s.door_open) tags.push('<span class="fault-tag">KAPI AÇIK</span>');
+    if (s.burner_fault) tags.push('<span class="fault-tag">BRÜLÖR ARIZA</span>');
+    if (s.casting) tags.push('<span class="fault-tag bad">DÖKÜM</span>');
+    const ft = document.getElementById('ft-' + f.id);
+    if (ft) ft.innerHTML = tags.join('');
 
     const alarmEl = document.getElementById('al-' + f.id);
     const alarmMsg = document.getElementById('alarmMsg-' + f.id);
@@ -494,7 +699,8 @@ function renderOrders() {
 }
 
 async function startOrder(orderId) {
-  const furnace = inpFurnace.value;
+  const order = orders.find(o => o.id === orderId);
+  const furnace = (order && order.furnace) || inpFurnace.value;
   if (!furnace) { alert('Lütfen bir fırın seçin.'); return; }
   try {
     const res = await fetch('/api/orders/' + encodeURIComponent(orderId) + '/start', {
@@ -548,25 +754,6 @@ btnCreateOrder.addEventListener('click', async () => {
     btnCreateOrder.disabled = false;
   }
 });
-
-// ------------------------------------------------------------------ alarmlar
-
-function renderAlarms(furnacesData, ts) {
-  let active = [];
-  for (const [name, s] of Object.entries(furnacesData)) {
-    if (s.alarm) active.push({ time: ts, furnace: name, message: s.alarm });
-  }
-  if (active.length) {
-    alarmHistory = active.slice(-10).concat(alarmHistory).slice(0, 30);
-  }
-  if (alarmHistory.length === 0) {
-    alarmsBox.innerHTML = '<div class="muted">Şu anda aktif alarm yok.</div>';
-    return;
-  }
-  alarmsBox.innerHTML = alarmHistory.map(a =>
-    `<div class="alarm-item"><span class="time">${fmtDate(a.time)}</span><b>${escapeHtml(a.furnace)}:</b> ${escapeHtml(a.message)}</div>`
-  ).join('');
-}
 
 function escapeHtml(t) {
   return String(t == null ? '' : t)

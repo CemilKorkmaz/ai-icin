@@ -24,11 +24,12 @@ import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from simulator.plant import Plant
 from simulator.opcua_server import run_opcua_server
 from simulator.furnace import FurnaceParams
+from simulator.scenarios import BUSINESS_EVENT_DEFS, SCENARIO_DEFS
 from erp_backend.database import Database
 
 # ------------------------------------------------------------------ ayarlar
@@ -172,6 +173,7 @@ async def simulation_loop() -> None:
             "ts": time.time(),
             "furnaces": states,
             "orders": orders,
+            "latestEventId": plant.latest_event_id(),
         })
 
 
@@ -186,6 +188,32 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="ERP Fabrika Simülasyonu", lifespan=lifespan)
 
+# Test ortamı sürümü; köprü ve dokümanlar bunu okuyabilir.
+SIM_VERSION = "1.7.0"
+
+
+@app.middleware("http")
+async def security_headers(request, call_next):
+    """Simülasyon API'sine tarayıcı güvenlik başlıkları ekler.
+
+    Yerel prototipte TLS yok; yine de MIME sniffing ve referer sızıntısı
+    engellenir. Kimlik doğrulama gerektiren üretim dağıtımı bu katmanın
+    dışında bir ters vekil (reverse proxy) ile yapılmalıdır.
+    """
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "no-referrer")
+    response.headers.setdefault("Permissions-Policy", "geolocation=(), camera=(), microphone=()")
+    return response
+
+
+@app.get("/api/health")
+async def health():
+    return {
+        "ok": True, "version": SIM_VERSION, "speed": SIM_SPEED,
+        "furnaces": len(plant.furnaces), "latestEventId": plant.latest_event_id(),
+    }
+
 # Arayüz klasörü: normal çalışmada repo kökündeki "frontend",
 # paketlenmiş (exe) çalışmada _MEIPASS içindeki kopya.
 FRONTEND_DIR = os.environ.get("ERP_FRONTEND_DIR", "frontend")
@@ -196,10 +224,10 @@ if os.path.isdir(FRONTEND_DIR):
 
 
 class OrderIn(BaseModel):
-    product: str
-    furnace: str
-    target_temp: float
-    duration_min: float
+    product: str = Field(min_length=1, max_length=120)
+    furnace: str = Field(min_length=1, max_length=120)
+    target_temp: float = Field(gt=0, le=1200)
+    duration_min: float = Field(gt=0, le=1440)
 
 
 @app.get("/")
@@ -227,27 +255,37 @@ async def list_orders():
 
 @app.post("/api/orders")
 async def create_order(data: OrderIn):
-    order_id = plant.create_order(
-        product=data.product,
-        furnace=data.furnace,
-        target_temp=data.target_temp,
-        duration_min=data.duration_min,
-    )
+    try:
+        order_id = plant.create_order(
+            product=data.product,
+            furnace=data.furnace,
+            target_temp=data.target_temp,
+            duration_min=data.duration_min,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     order = plant.get_order(order_id)
-    DB.add_order(
-        order_id=order_id,
-        product=order["product"],
-        furnace=order["furnace"],
-        target_temp=order["target_temp"],
-        duration_min=order["duration_min"],
-        state=order["state"],
-        created_at=order["created_at"],
-    )
+    # DB yazımı başarısız olsa bile canlı simülasyon emri çalışmaya devam eder;
+    # kalıcılık hatası yalnızca günlüğe yazılır (canlı akışı durdurmaz).
+    try:
+        DB.add_order(
+            order_id=order_id,
+            product=order["product"],
+            furnace=order["furnace"],
+            target_temp=order["target_temp"],
+            duration_min=order["duration_min"],
+            state=order["state"],
+            created_at=order["created_at"],
+        )
+    except Exception as exc:  # pragma: no cover - savunma amaçlı
+        print("Emir veritabanına yazılamadı (canlı akış sürüyor):", exc)
     return {"id": order_id, "state": order["state"]}
 
 
 @app.post("/api/orders/{order_id}/start")
 async def start_order(order_id: str, payload: dict):
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=400, detail="Gövde bir JSON nesnesi olmalı")
     furnace = payload.get("furnace")
     if not furnace:
         raise HTTPException(status_code=400, detail="furnace alanı zorunlu")
@@ -279,7 +317,77 @@ async def set_speed(data: SpeedIn):
 
 @app.get("/api/readings/{furnace}")
 async def get_readings(furnace: str, limit: int = 200):
-    return DB.get_readings(furnace, limit)
+    return DB.get_readings(furnace, max(1, min(limit, 500)))
+
+
+# ---------------------------------------------------------------- ERP test olayları
+# Bu uçlar ERP test ortamı içindir. Fırın senaryoları gerçek simülasyon
+# durumunu değiştirir; iş akışı testleri yalnızca bildirim olayı üretir.
+
+class ScenarioIn(BaseModel):
+    scenario: str
+    furnace: str | None = None
+
+
+class BusinessEventIn(BaseModel):
+    scenario: str
+
+
+@app.get("/api/scenarios")
+async def scenario_catalog():
+    return {
+        "ok": True,
+        "scenarios": SCENARIO_DEFS,
+        "business": BUSINESS_EVENT_DEFS,
+        "furnaces": list(plant.furnaces.keys()),
+    }
+
+
+@app.post("/api/scenarios")
+async def apply_scenario(data: ScenarioIn):
+    scenario = (data.scenario or "").strip()
+    if not scenario:
+        raise HTTPException(status_code=400, detail="scenario zorunlu")
+    # İş akışı testleri fırın gerektirmez.
+    if scenario in {item["id"] for item in BUSINESS_EVENT_DEFS}:
+        try:
+            result = plant.apply_business_event(scenario)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return {"ok": True, **result, "latestEventId": plant.latest_event_id()}
+    furnace = (data.furnace or "").strip()
+    if not furnace:
+        raise HTTPException(status_code=400, detail="furnace zorunlu")
+    try:
+        result = plant.apply_scenario(furnace, scenario)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    # Sıfırlama senaryosu çalışan emri iptal eder; kalıcı kaydı da eşitle.
+    for order_id in result.get("cancelledOrders", []):
+        try:
+            DB.update_order(order_id, state="CANCELLED", finished_at=time.time())
+        except Exception as exc:  # pragma: no cover - savunma amaçlı
+            print("İptal edilen emir veritabanına yazılamadı:", exc)
+    return {"ok": True, **result, "latestEventId": plant.latest_event_id()}
+
+
+@app.post("/api/scenarios/business")
+async def apply_business_event(data: BusinessEventIn):
+    try:
+        result = plant.apply_business_event((data.scenario or "").strip())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"ok": True, **result, "latestEventId": plant.latest_event_id()}
+
+
+@app.get("/api/events")
+async def list_events(after: int = 0, limit: int = 100):
+    return {
+        "ok": True,
+        "events": plant.events_since(after, limit),
+        "latestId": plant.latest_event_id(),
+        "unsupported": False,
+    }
 
 
 @app.websocket("/api/ws")

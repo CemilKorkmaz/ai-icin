@@ -6,6 +6,9 @@ Simülasyonun belgelenen uçları:
   POST /api/orders                   → emir oluştur
   POST /api/orders/{id}/start        → emri başlat
   GET  /api/readings/{ad}?limit=200  → sıcaklık geçmişi
+  GET  /api/scenarios                → ERP test senaryoları
+  POST /api/scenarios                → senaryo uygula / iş akışı testi
+  GET  /api/events?after=&limit=    → ERP'ye giden olay günlüğü
 
 Köprü yalnızca bu uçları kullanır; simülasyonun veritabanına dokunmaz.
 WebSocket (`/api/ws`) bilinçli olarak kullanılmaz: kullanıcı rehberindeki
@@ -97,6 +100,13 @@ def normalize_furnace(name: str, raw: dict) -> dict:
         'statusLabel': STATUS_LABELS.get(status, status),
         'alarm': alarm if isinstance(alarm, str) else (None if not alarm else str(alarm)),
         'alarmActive': status == 'ALARM' or bool(alarm),
+        'sensorOk': raw.get('sensor_ok') if isinstance(raw.get('sensor_ok'), bool) else None,
+        'doorOpen': raw.get('door_open') if isinstance(raw.get('door_open'), bool) else None,
+        'burnerFault': raw.get('burner_fault') if isinstance(raw.get('burner_fault'), bool) else None,
+        'casting': raw.get('casting') if isinstance(raw.get('casting'), bool) else None,
+        'quality': raw.get('quality') or 'SIMULATED',
+        'faultCode': raw.get('fault_code'),
+        'signals': raw.get('signals') if isinstance(raw.get('signals'), dict) else {},
         'burner': burner if isinstance(burner, bool) else None,
         'gasM3': _num(_pick(raw, 'gaz_tuketimi', 'gas', 'gas_consumption')),
         'energyKwh': _num(_pick(raw, 'enerji_toplam', 'energy', 'energy_total')),
@@ -119,6 +129,23 @@ def normalize_order(raw: dict) -> dict:
         'createdAt': _pick(raw, 'created_at', 'olusturma', 'created'),
         'remainingMin': _num(_pick(raw, 'remaining_min', 'kalan_dakika', 'remaining')),
         'raw': raw
+    }
+
+
+def normalize_event(raw: dict) -> dict:
+    raw = raw if isinstance(raw, dict) else {}
+    event_id = _num(_pick(raw, 'id', 'eventId'))
+    return {
+        'id': int(event_id) if event_id is not None else None,
+        'at': _pick(raw, 'at', 'time', 'timestamp') or '',
+        'type': raw.get('type') or 'event',
+        'severity': str(raw.get('severity') or 'info').lower(),
+        'module': raw.get('module') or 'plc',
+        'title': raw.get('title') or raw.get('type') or 'Olay',
+        'message': raw.get('message') or '',
+        'code': raw.get('code') or '',
+        'furnace': raw.get('furnace'),
+        'data': raw.get('data') if isinstance(raw.get('data'), dict) else {},
     }
 
 
@@ -189,20 +216,24 @@ class SimClient:
         return str(data)[:200]
 
     # ------------------------------------------------------------------ Okuma
-    def health(self) -> dict:
+    def health(self, furnaces: list[dict] | None = None) -> dict:
+        """Sağlık özeti döndürür.
+
+        `furnaces` verilirse ikinci bir `/api/furnaces` çağrısı yapılmaz;
+        `/api/sim/live` aynı turda hem sağlık hem fırın listesi üretir.
+        """
         started = time.time()
-        try:
-            furnaces = self.furnaces()
-        except (SimUnavailable, SimResponseError) as exc:
-            return {'ok': False, 'baseUrl': self.base_url,
-                    'latencyMs': int((time.time() - started) * 1000),
-                    'checkedAt': time.strftime('%Y-%m-%dT%H:%M:%S%z'),
-                    'furnaceCount': 0, 'error': str(exc),
-                    'mode': 'REAL'}
-        return {'ok': True, 'baseUrl': self.base_url,
+        error = ''
+        if furnaces is None:
+            try:
+                furnaces = self.furnaces()
+            except (SimUnavailable, SimResponseError) as exc:
+                error = str(exc)
+                furnaces = []
+        return {'ok': not error, 'baseUrl': self.base_url,
                 'latencyMs': int((time.time() - started) * 1000),
                 'checkedAt': time.strftime('%Y-%m-%dT%H:%M:%S%z'),
-                'furnaceCount': len(furnaces), 'error': '', 'mode': 'REAL'}
+                'furnaceCount': len(furnaces), 'error': error, 'mode': 'REAL'}
 
     def furnaces(self) -> list[dict]:
         data = self._request('/api/furnaces')
@@ -229,6 +260,49 @@ class SimClient:
         if isinstance(data, dict):
             data = data.get('orders') if isinstance(data.get('orders'), list) else []
         return [normalize_order(o) for o in data if isinstance(o, dict)] if isinstance(data, list) else []
+
+    def scenarios(self) -> dict:
+        data = self._request('/api/scenarios')
+        if not isinstance(data, dict):
+            return {'scenarios': [], 'business': [], 'furnaces': []}
+        return {
+            'scenarios': data.get('scenarios') if isinstance(data.get('scenarios'), list) else [],
+            'business': data.get('business') if isinstance(data.get('business'), list) else [],
+            'furnaces': data.get('furnaces') if isinstance(data.get('furnaces'), list) else [],
+        }
+
+    def events(self, after: int = 0, limit: int = 100) -> dict:
+        after = max(0, int(after or 0))
+        limit = max(1, min(200, int(limit or 100)))
+        data = self._request(f'/api/events?after={after}&limit={limit}')
+        if not isinstance(data, dict):
+            return {'events': [], 'latestId': after, 'unsupported': True}
+        rows = [normalize_event(e) for e in (data.get('events') or []) if isinstance(e, dict)]
+        try:
+            latest = int(data.get('latestId') or (rows[-1]['id'] if rows else after) or after)
+        except (TypeError, ValueError):
+            latest = after
+        return {'events': rows, 'latestId': latest, 'unsupported': False}
+
+    def apply_scenario(self, scenario: str, furnace: str | None = None) -> dict:
+        body = {'scenario': scenario}
+        if furnace:
+            body['furnace'] = furnace
+        data = self._request('/api/scenarios', 'POST', body)
+        if not isinstance(data, dict):
+            return {}
+        result = dict(data)
+        if isinstance(result.get('furnace'), dict):
+            raw = result['furnace']
+            name = raw.get('name') or furnace or ''
+            result['furnace'] = normalize_furnace(str(name), raw)
+        if isinstance(result.get('event'), dict):
+            result['event'] = normalize_event(result['event'])
+        return result
+
+    def business_event(self, scenario: str) -> dict:
+        data = self._request('/api/scenarios', 'POST', {'scenario': scenario})
+        return data if isinstance(data, dict) else {}
 
     def readings(self, furnace: str, limit: int = 40) -> list[dict]:
         quoted = urllib.parse.quote(furnace, safe='')
@@ -258,12 +332,17 @@ class SimClient:
 
     # ------------------------------------------------------------------ Özet
     def live(self) -> dict:
-        health = self.health()
-        if not health['ok']:
+        started = time.time()
+        try:
+            furnaces = self.furnaces()
+        except (SimUnavailable, SimResponseError):
+            health = self.health()
             return {'ok': False, 'health': health, 'furnaces': [], 'orders': [],
                     'alarms': [], 'checkedAt': health['checkedAt'],
                     'error': health['error']}
-        furnaces = self.furnaces()
+        health = self.health(furnaces)
+        # Sağlık yanıtındaki gecikme, fırın okumasıyla birlikte ölçülür.
+        health['latencyMs'] = int((time.time() - started) * 1000)
         try:
             orders = self.orders()
         except (SimUnavailable, SimResponseError) as exc:
@@ -277,5 +356,12 @@ class SimClient:
         health['activeOrders'] = len(active)
         health['furnaceCount'] = len(furnaces)
         health['at'] = time.strftime('%Y-%m-%dT%H:%M:%S%z')
+        try:
+            event_data = self.events(0, 50)
+        except (SimUnavailable, SimResponseError) as exc:
+            event_data = {'events': [], 'latestId': 0, 'unsupported': True, 'error': str(exc)}
         return {'ok': True, 'health': health, 'furnaces': furnaces, 'orders': orders,
-                'alarms': alarms, 'checkedAt': health['at'], 'error': ''}
+                'alarms': alarms, 'events': event_data['events'],
+                'latestEventId': event_data['latestId'],
+                'eventsUnsupported': event_data.get('unsupported', False),
+                'checkedAt': health['at'], 'error': ''}

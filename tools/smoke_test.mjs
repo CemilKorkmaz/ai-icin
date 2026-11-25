@@ -267,14 +267,14 @@ const sampleLive = {
   furnaces: [
     { name: 'Aluminyum Eritme Fırını', temperatureC: 745.2, targetC: 750, maxC: 850, status: 'CALISIYOR', alarmActive: false },
     { name: 'Homojenizasyon Fırını', temperatureC: 540, targetC: 550, maxC: 600, status: 'ISINIYOR', alarmActive: false },
-    { name: 'Yaşlandırma Fırını', temperatureC: 181, targetC: 175, maxC: 200, status: 'ALARM', alarmActive: true, alarm: 'Sıcaklık sınırı' }
+    { name: 'Biyet Isıtma Fırını', temperatureC: 181, targetC: 175, maxC: 200, status: 'ALARM', alarmActive: true, alarm: 'Sıcaklık sınırı', sensorOk: false, quality: 'BAD', signals: { door: 'open', casting: 'pouring', alarm: 'fault', running: 'stopped' } }
   ],
   orders: [{ id: 'WO-20261102-0001', product: '6063', furnace: 'Aluminyum Eritme Fırını', targetC: 750, durationMin: 120, state: 'RUNNING', remainingMin: 33 }],
   mapping: {
     pairs: [
       { furnace: 'Aluminyum Eritme Fırını', machineId: 'MCH-01', machineName: 'A Fırını', machineType: 'FURNACE', source: 'auto' },
       { furnace: 'Homojenizasyon Fırını', machineId: 'MCH-10', machineName: 'Homojen 1', machineType: 'HOMO_FURNACE', source: 'auto' },
-      { furnace: 'Yaşlandırma Fırını', machineId: 'MCH-02', machineName: 'B Fırını', machineType: 'FURNACE', source: 'auto' }
+      { furnace: 'Biyet Isıtma Fırını', machineId: 'MCH-02', machineName: 'B Fırını', machineType: 'FURNACE', source: 'auto' }
     ], matched: 3, furnaces: 3
   },
   edge: { batches: 12, readings: 340 }, health: {}
@@ -294,7 +294,9 @@ check(!liveDash.includes('Son 7 Gün Üretim'), 'Canlı panelde demo grafiği ka
 const liveMachines = VIEWS.machines.render();
 check(liveMachines.includes('MCH-01') && liveMachines.includes('CANLI'), 'Makine Parkı canlı değil');
 const livePlc = VIEWS.plc.render();
-check(livePlc.includes('Bilinmiyor') && livePlc.includes('Arıza Var'), 'PLC ekranı dört sinyali canlı göstermiyor');
+check(livePlc.includes('Bilinmiyor') && livePlc.includes('Sensör BAD'), 'PLC ekranı dört sinyali canlı göstermiyor');
+check(livePlc.includes('Açık') && livePlc.includes('Döküm Yapılıyor'), 'PLC kapı/döküm sinyallerini göstermiyor');
+check(livePlc.includes('Sensör BAD') && livePlc.includes('BAD'), 'PLC sensör kalitesini göstermiyor');
 const liveProd = VIEWS.production.render();
 check(liveProd.includes('WO-20261102-0001') && !liveProd.includes('Yeni Döküm Başlat'), 'Üretim akışı canlı/salt okunur değil');
 // Canlı mod açıkken köprü yoksa dört ekran da çökmemeli, açıklayıcı boş durum göstermeli.
@@ -310,7 +312,26 @@ const { readFileSync } = await import('node:fs');
 const swSource = readFileSync(new URL('../app/sw.js', import.meta.url), 'utf8');
 check(swSource.includes("url.pathname.startsWith('/api/')"), 'Service worker /api yanıtlarını önbelleğe alıyor');
 check(swSource.includes('./js/live.js'), 'Service worker live.js dosyasını önbelleğe almıyor');
+check(swSource.includes('./js/sim_feed.js'), 'Service worker sim_feed.js dosyasını önbelleğe almıyor');
 console.log('✓ canlı mod: 3 fırın · 1 alarm · emirler Panel/Üretim/Makine/PLC ekranlarında · demo moduna dönüş');
+
+// 16) Simülasyon → ERP bildirim köprüsü (salt okunur)
+const feed = await import('../app/js/sim_feed.js');
+const beforeNotif = D().notifications.length;
+const okIngest = feed.ingestSimEventForTest({
+  id: 9001, severity: 'critical', module: 'plc', title: 'Sensör arızası',
+  message: 'Biyet Isıtma Fırını: sensör BAD', furnace: 'Biyet Isıtma Fırını',
+  data: { scenario: 'sensor_failure', quality: 'BAD' }
+});
+const lastNotif = D().notifications[0];
+check(okIngest === true, 'Simülasyon olayı bildirime dönüşmedi');
+check(D().notifications.length === beforeNotif + 1, 'Bildirim sayısı artmadı');
+check(lastNotif.simEventId === 9001 && lastNotif.type === 'danger', 'Bildirim simülasyon kimliği/türü yanlış');
+check(lastNotif.source.includes('Biyet Isıtma Fırını') && lastNotif.body.includes('BAD'), 'Bildirim kaynağı/gövdesi eksik');
+check(feed.ingestSimEventForTest({ id: 9001, severity: 'critical', title: 'Tekrar' }) === false, 'Aynı olay iki kez bildirime düştü');
+const notifHtml = VIEWS.notifications.render();
+check(notifHtml.includes('Sensör arızası') && notifHtml.includes('Simülasyon'), 'Bildirim merkezi simülasyon olayını göstermiyor');
+console.log('✓ simülasyon olayı: kritik → bildirim merkezi · tekilleştirme · kaynak etiketi');
 
 console.log(`\nSonuç: ${failures ? failures + ' HATA' : 'TÜM TESTLER GEÇTİ'}`);
 process.exit(failures ? 1 : 0);
