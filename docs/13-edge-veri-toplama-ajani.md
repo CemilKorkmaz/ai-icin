@@ -168,7 +168,7 @@ Ajan yalnızca Python standart kütüphanesini kullanır: `sqlite3`, `http.serve
 - ERP istekleri paylaşılan gizli anahtarla HMAC-SHA256 imzalıdır; token opsiyoneldir.
 - Uzaktan erişim doğrudan IP ile değil VPN + MFA + RBAC ile yapılır (`docs/04` Bölüm 7). Geliştirici hesabı üretim verisini salt okunur görür.
 - Ajan ERP'nin işletme tablolarına veritabanı bağlantısı kurmaz; yalnızca tek bir HTTP uç noktasına yazar.
-- Gizli anahtar arayüzde maskeli gelir; dokunulmazsa korunur.
+- Gizli anahtar arayüzde maskeli gelir; dokunulmazsa korunur. Varsayılan/kısa anahtarda yerel arayüz ve `/api/status` `DEFAULT_EDGE_SECRET` uyarısı gösterir.
 - `quality: SIMULATED` verisi gerçek ölçüm gibi raporlanmaz.
 - Yerel arayüz yanıtları `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` ve izin politikası başlıkları taşır; POST gövdeleri 1 MiB ile sınırlıdır (Sürüm 1.7).
 - Kuyruk ve olay kayıtları silinmez; denetim izi korunur.

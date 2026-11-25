@@ -42,7 +42,7 @@ Denetim, `github.com/affaan-m/ECC` deposunun çalışma yönteminden **ilham al�
 
 | No | Şiddet | Bulgu | Düzeltme | Kanıt |
 | --- | --- | --- | --- | --- |
-| K-01 | Yüksek | Varsayılan HMAC anahtarı (`degistirin-bu-gizli-anahtari`) fark edilmeden saha kurulumuna taşınabilir. | Anahtar kaldırılmadı (demo ve mevcut kurulumlarla uyumluluk); köprü `/api/health` ve `/api/bridge/info` içinde `DEFAULT_EDGE_SECRET` uyarısı yayınlıyor. Uzak simülasyon adresi için `REMOTE_SIM_NO_AUTH` uyarısı eklendi. | `sim_bridge_smoke_test.py::test_11b` |
+| K-01 | Yüksek | Varsayılan HMAC anahtarı (`degistirin-bu-gizli-anahtari`) fark edilmeden saha kurulumuna taşınabilir. | Anahtar kaldırılmadı (demo ve mevcut kurulumlarla uyumluluk); köprü `/api/health` ve `/api/bridge/info`, edge ise `/api/status` ve yerel arayüz içinde `DEFAULT_EDGE_SECRET` uyarısı yayınlıyor. Uzak simülasyon adresi için köprüde `REMOTE_SIM_NO_AUTH` uyarısı eklendi. | `sim_bridge_smoke_test.py::test_11b` |
 | K-02 | Yüksek | Simülasyon API'si geçersiz emri kabul ediyordu: olmayan fırın, 0/negatif veya 1300 °C hedef, 0 veya 2000 dk süre. | `Plant.create_order` ve Pydantic `OrderIn` iki katmanda doğruluyor; API 400 döndürüyor. | `simulation_smoke_test.py::test_gecersiz_emir_reddedilir`, `test_08d` |
 | K-03 | Yüksek | `reset` senaryosu çalışan emri bellekte `CANCELLED` yapıyor, SQLite'ta `RUNNING` bırakıyordu. | `apply_scenario` iptal edilen kimlikleri döndürüyor; API kalıcı kaydı da `CANCELLED` yapıyor. | `simulation_smoke_test.py::test_sifirlama_calisan_emri_iptal_eder` |
 | K-04 | Orta | `Database.update_order` alan adlarını doğrudan SQL'e ekliyordu; ileride kullanıcı girdisi geçerse enjeksiyon riski. | Sütun beyaz listesi (`ORDER_COLUMNS`); bilinmeyen alan `ValueError`. | `test_emir_alanlari_beyaz_liste` |
@@ -80,7 +80,7 @@ Denetim, `github.com/affaan-m/ECC` deposunun çalışma yönteminden **ilham al�
 | Girdi doğrulama | Simülasyon API'si | Pydantic + `Plant`; 400 ve Türkçe gerekçe. |
 | SQL sütun beyaz listesi | `Database.update_order` | Dinamik SQL'e kullanıcı alanı giremez. |
 | Tarayıcı sertleştirme | Tüm HTTP yanıtları | `nosniff`, `no-referrer`, izin politikası. |
-| Yapılandırma uyarıları | `/api/health`, `/api/bridge/info` | Varsayılan anahtar ve uzak simülasyon görünür. |
+| Yapılandırma uyarıları | `/api/health`, `/api/bridge/info`, edge `/api/status` | Varsayılan anahtar ve uzak simülasyon görünür. |
 
 ### 4.2 Kalan riskler (kabul edilen sınırlar)
 

@@ -42,6 +42,19 @@ class EdgeContext:
         self.transport = transport
         self.version = version
 
+    def security_warnings(self) -> list[dict]:
+        """Saha kurulumunda kapatılması gereken yapılandırma açıkları."""
+        warnings: list[dict] = []
+        erp = self.cfg.data.get('erp', {}) if isinstance(self.cfg.data.get('erp'), dict) else {}
+        secret = str(erp.get('secret') or '')
+        if not secret or secret == 'degistirin-bu-gizli-anahtari' or len(secret) < 16:
+            warnings.append({
+                'code': 'DEFAULT_EDGE_SECRET',
+                'severity': 'high',
+                'message': 'HMAC gizli anahtarı varsayılan/kısa. ERP köprüsüyle aynı, en az 16 karakterlik rastgele anahtar kullanın.',
+            })
+        return warnings
+
     def status(self) -> dict:
         perf = self.db.counts()
         test = None
@@ -55,7 +68,8 @@ class EdgeContext:
             'erp': {'url': self.cfg.data['erp']['url'], 'enabled': self.cfg.data['erp'].get('enabled', True),
                     'adapter': self.cfg.data.get('adapter')},
             'adapters': contract_rows(),
-            'test': test
+            'test': test,
+            'securityWarnings': self.security_warnings(),
         }
 
 

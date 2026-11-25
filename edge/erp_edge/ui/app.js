@@ -60,6 +60,7 @@ function renderStatus(s) {
   if (c.fallback) msgs.push(c.fallback);
   if (c.lastError) msgs.push('Son hata: ' + c.lastError);
   if (q.dead > 0) msgs.push(`${q.dead} batch kalıcı olarak gönderilemedi; kayıtlar silinmedi, kuyrukta incelenmeyi bekliyor.`);
+  (s.securityWarnings || []).forEach((w) => msgs.push(w.message));
   banner.innerHTML = msgs.map(esc).join(' · ');
   banner.classList.toggle('show', msgs.length > 0);
 }
