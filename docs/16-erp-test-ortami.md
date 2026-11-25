@@ -210,15 +210,18 @@ python3 server/sim_bridge/run.py --demo --demo-speed 10
 
 Demo kopyada fırın adları `Aluminyum Eritme Fırını`, `Homojenizasyon Fırını`, `Yaşlandırma Fırını`'dır; aynı `/api/scenarios`, `/api/events` uçlarını **ve simülasyon ekranını** (`:8000/`) sunar. Senaryolar gerçek simülasyondaki gibi çalışır; ERP'de aynı bildirimler görünür. Fark: demo kopyanın ısı modeli ve SQLite'ı yoktur, veriler yalnızca bellekte tutulur.
 
+**Tek tıkla dört ekran:** depo kökündeki `hepsi.command` (macOS) veya `Hepsi.bat` (Windows) dosyasına çift tıklayın. Başlatıcı 8000'de simülasyon varsa ona bağlanır, yoksa demo kopyayı açar; köprüyü 8080, edge arayüzünü 8787 üzerinde başlatır ve ERP Panel + ERP Simülasyon Bağlantısı + simülasyon ekranı + edge arayüzünü ayrı pencere/sekmede açar. Terminal kapatılınca başlattığı süreçler kapanır. Seçenekler: `python3 tools/hepsi.py --no-browser --no-edge`.
+
 ---
 
 ## 11. Otomatik doğrulama
 
 ```bash
-python3 tools/check_all.py                # 5 adım: veri + simülasyon + köprü + edge + arayüz
+python3 tools/check_all.py                # 6 adım: veri + simülasyon + köprü + edge + başlatıcı + arayüz
 python3 tools/simulation_smoke_test.py    # 11 test: fizik, doğrulama, senaryo, iptal, SQLite
 python3 tools/sim_bridge_smoke_test.py    # 20 test: senaryo, olay, eşleme, proxy, HMAC, başlık
 python3 tools/edge_smoke_test.py          # 13 test: edge ajanı ve dört sinyal
+python3 tools/hepsi_smoke_test.py         # 4 test: tek tık başlatıcı
 node tools/smoke_test.mjs                 # 35 ekran + simülasyon bildirimi tekilleştirme
 python3 server/erp/scripts/validate_data.py
 ```

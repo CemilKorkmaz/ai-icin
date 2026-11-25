@@ -202,7 +202,7 @@ Yeni bir fabrikaya gidildiğinde yapılacak iş **exe değiştirmek değil**, o 
 | `python3 edge/main.py --once` | Tek döngü, SQLite `readings` + `outbox` yazımı |
 | `python3 edge/main.py --bind 0.0.0.0 --port 8787 --no-browser` | Canlı arayüz; HTML/CSS/JS ve tüm JSON uçları 200 |
 | `python3 -m py_compile edge/main.py edge/erp_edge/*.py` | Sözdizimi hatası yok |
-| `python3 tools/check_all.py` | 5 adımlı kalite kapısı: veri + simülasyon + köprü + edge + arayüz → **TÜM KALİTE KAPISI GEÇTİ** |
+| `python3 tools/check_all.py` | 6 adımlı kalite kapısı: veri + simülasyon + köprü + edge + arayüz → **TÜM KALİTE KAPISI GEÇTİ** |
 | `python3 tools/build_docx.py` | 18 doküman tek geçerli OOXML Word dosyasında birleşti |
 
 Örnek profil 13 aktif makine (biri devre dışı olduğu için taranmaz), 52 sinyal tag'i ve üç telemetri şablonu üretir; tek döngüde 62 okuma yapılır. ERP kapalıyken kuyruk kayıtları `failed` olarak kalır ve hiçbiri silinmez.

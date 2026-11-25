@@ -22,6 +22,7 @@ CHECKS = [
     ('Simülasyon çekirdeği', [sys.executable, 'tools/simulation_smoke_test.py']),
     ('Simülasyon köprüsü', [sys.executable, 'tools/sim_bridge_smoke_test.py']),
     ('Edge ajanı', [sys.executable, 'tools/edge_smoke_test.py']),
+    ('Tek tık başlatıcı', [sys.executable, 'tools/hepsi_smoke_test.py']),
     ('ERP arayüzü (Node)', ['node', 'tools/smoke_test.mjs']),
 ]
 

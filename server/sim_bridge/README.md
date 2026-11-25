@@ -80,7 +80,7 @@ Kayıt defteri `data/ingest.db` (SQLite, WAL) dosyasındadır ve `.gitignore` ka
 ## Testler
 
 ```bash
-python3 tools/check_all.py               # 5 adımlı kalite kapısı
+python3 tools/check_all.py               # 6 adımlı kalite kapısı
 python3 tools/simulation_smoke_test.py   # 11 test
 python3 tools/sim_bridge_smoke_test.py   # 20 test
 node tools/smoke_test.mjs                # 35 ekran
