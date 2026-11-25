@@ -466,7 +466,9 @@ Simülasyon kapalıysa `/api/sim/live` son başarılı görüntüyü `stale` eti
 
 | Platform | Dosya | Sonuç |
 | --- | --- | --- |
-| Windows | `Baslat.bat` | Köprü başlar, tarayıcı canlı `#/dashboard` ekranında açılır |
+| Windows | `Hepsi.bat` | ERP + simülasyon + edge başlar; 4 ekran ayrı pencere/sekmede açılır |
+| macOS | `hepsi.command` | Aynı davranış; 8000 boşsa demo simülasyon kendiliğinden başlar |
+| Windows | `Baslat.bat` | Yalnızca köprü başlar, tarayıcı canlı `#/dashboard` ekranında açılır |
 | macOS | `Baslat.command` | Aynı davranış; Terminal penceresi açık kalır |
 | Windows (tek dosya) | `build_exe.bat` → `ERP-Sim-Bridge.exe` | Python gerekmez; ayar exe yanında |
 | macOS (tek dosya) | `build_macos.sh` → `ERP-Sim-Bridge.app` | Python gerekmez; ayar `~/Library/Application Support` altında |
@@ -593,6 +595,8 @@ Raporlar günlük, haftalık ve aylık üretilir; SMS ve e-posta gönderimi `out
 | Simülasyon olayları | `http://localhost:8080/api/sim/events` |
 | Kullanıcı simülasyonu | `http://localhost:8000` |
 | Edge ajanı paneli | `http://127.0.0.1:8787` |
+| Windows tek tık | `Hepsi.bat` |
+| macOS tek tık | `hepsi.command` |
 | Windows başlatıcı | `Baslat.bat` |
 | macOS başlatıcı | `Baslat.command` |
 | Windows tek dosya | `dist\ERP-Sim-Bridge.exe` |
@@ -607,10 +611,11 @@ Raporlar günlük, haftalık ve aylık üretilir; SMS ve e-posta gönderimi `out
 
 ```bash
 node tools/smoke_test.mjs                  # 35 ekran + hesaplar + mizan + modülerlik
-python3 tools/check_all.py                 # 5 adımlı kalite kapısı
+python3 tools/check_all.py                 # 6 adımlı kalite kapısı
 python3 tools/simulation_smoke_test.py     # 11 test
 python3 tools/edge_smoke_test.py           # 13 test
 python3 tools/sim_bridge_smoke_test.py     # 20 test
+python3 tools/hepsi_smoke_test.py          # 4 test
 python3 server/erp/scripts/validate_data.py
 node tools/export_seed.mjs                 # 59 JSON + manifest
 python3 tools/build_docx.py                # bütün dokümanları Word'e derle

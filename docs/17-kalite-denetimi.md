@@ -49,7 +49,7 @@ Denetim, `github.com/affaan-m/ECC` deposunun çalışma yönteminden **ilham al�
 | K-05 | Orta | `/api/readings/{furnace}?limit=` sınırsızdı; çok büyük istek belleği zorlayabilirdi. | API 1–500, SQLite katmanı 1–1000 aralığına kırpıyor. | `test_okuma_limiti_sinirlanir` |
 | K-06 | Orta | Köprü, simülasyon, demo ve edge yanıtlarında MIME sniffing / referer sızıntısı başlıkları yoktu. | `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy` dört sunucuya eklendi. | `test_11b`, demo/köprü başlık testleri |
 | K-07 | Orta | Negatif `Content-Length` gövde okumasında `read(-1)` ile tüm akış okunabilirdi; demo gövdesi sınırsızdı. | Negatif/sıfır uzunluk boş gövde; demo 1 MiB, köprü `edge.maxBodyBytes` (5 MiB) sınırı. | `sim_bridge_smoke_test.py`, `edge_smoke_test.py` |
-| K-08 | Orta | CI yoktu; testler yalnızca elle ve dağınık komutlarla çalışıyordu. | `.github/workflows/ci.yml` + `tools/check_all.py` (5 adım, ilk hatada başarısız). | CI çalıştırması |
+| K-08 | Orta | CI yoktu; testler yalnızca elle ve dağınık komutlarla çalışıyordu. | `.github/workflows/ci.yml` + `tools/check_all.py` (6 adım, ilk hatada başarısız). | CI çalıştırması |
 | K-09 | Düşük | Her canlı yenilemede `/api/furnaces` iki kez okunuyordu (sağlık + liste). | `SimClient.health(furnaces)` ile tek okuma; normal turda istek sayısı 3 → 2. | Köprü canlı testi |
 | K-10 | Düşük | `config.json` sürümü 1.4.0'da, kod 1.6.0'da kalmıştı. | Tüm sürüm damgaları 1.7.0; README ve doküman sayısı 18. | `test_11` ailesi, DOCX |
 | K-11 | Düşük | Geniş `except Exception` blokları hataları yutabilir. | Sınır katmanlarında (ağ, DB, WebSocket) bilinçli yedekleme olarak korundu; kritik yollarda dar `ValueError`/`HTTPException` kullanıldı ve günlük mesajları Türkçeleştirildi. | Kod incelemesi; kalan riskler Bölüm 5 |
@@ -114,13 +114,15 @@ python3 tools/check_all.py
 | 2 | Simülasyon çekirdeği | 11 test: doğrulama, fizik, senaryo, iptal, SQLite | TÜM TESTLER GEÇTİ |
 | 3 | Simülasyon köprüsü | 20 test: proxy, eşleme, HMAC, başlık, yol, doğrulama | TÜM TESTLER GEÇTİ |
 | 4 | Edge ajanı | 13 test: sinyal, kuyruk, imza, adaptör, dry-run | TÜM TESTLER GEÇTİ |
-| 5 | ERP arayüzü | 35 ekran, 11 uç, canlı mod, bildirim tekilleştirme | TÜM TESTLER GEÇTİ |
+| 5 | Tek tık başlatıcı | 4 test: sarmalayıcılar, URL'ler, port/HTTP sağlık, boş port | TÜM TESTLER GEÇTİ |
+| 6 | ERP arayüzü | 35 ekran, 11 uç, canlı mod, bildirim tekilleştirme | TÜM TESTLER GEÇTİ |
 
 Ek doğrulamalar:
 
 - `python3 tools/simulation_smoke_test.py` — 11/11.
 - `python3 tools/sim_bridge_smoke_test.py` — 20/20.
 - `python3 tools/edge_smoke_test.py` — 13/13.
+- `python3 tools/hepsi_smoke_test.py` — 4/4.
 - `node tools/smoke_test.mjs` — 35/35 ekran.
 - `python3 tools/build_docx.py` — 18 doküman, geçerli OOXML.
 
@@ -178,6 +180,6 @@ Bu işler yapılmadan sistem **üretim ERP'si** ilan edilmemelidir. Mevcut haliy
 - [x] Statik yayın gizli dosyaları ve yol gezinmesini engelliyor.
 - [x] Varsayılan anahtar ve uzak simülasyon uyarısı görünür.
 - [x] Köprü, simülasyon ve demo güvenlik başlıkları gönderiyor.
-- [x] 5 adımlı kalite kapısı yerelde yeşil; CI aynı komutu çalıştırıyor.
+- [x] 6 adımlı kalite kapısı yerelde yeşil; CI aynı komutu çalıştırıyor.
 - [x] 18 doküman DOCX'te birleşiyor.
 - [ ] Üretim kimlik doğrulaması, TLS ve sunucu veritabanı (kapsam dışı; Bölüm 8).

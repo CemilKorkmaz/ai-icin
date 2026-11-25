@@ -34,14 +34,29 @@ Bu depo, sohbette tarif edilen **alüminyum biyet dökümhanesi** için uçtan u
 | `edge/` | **Fabrikadaki tek bilgisayar**: `ERP-Edge-Collector.exe` kaynağı, SQLite şeması, adaptörler (`simulation` dahil), yerel web arayüzü, PyInstaller spec ve kurulum betikleri |
 | `server/sim_bridge/` | **Simülasyon köprüsü**: ERP Studio'yu `:8080` üzerinden kullanıcı simülasyonuna (`:8000`) bağlar; senaryo/olay uçlarını proxy'ler, ana Panel, Makine Parkı, PLC ve Üretim ekranlarını canlı besler, imzalı edge ingest sunar |
 | `Simulasyon/erp-simulasyon-denemesi-main/` | Kullanıcının FastAPI + SQLite fırın simülasyonu; **ERP Test Senaryoları** paneli, sensör/kapı/brülör sinyalleri, sunucu taraflı olay günlüğü |
-| `Baslat.bat`, `Baslat.command` | **Windows / macOS çift tık**: köprüyü başlatır, tarayıcıyı doğrudan canlı Panel'de (`#/dashboard`) açar |
-| `tools/` | Word üretici, seed aktarımı, ikon üretici, **tek komut kalite kapısı** (`check_all.py`), arayüz, **simülasyon çekirdeği**, **edge ajanı** ve **simülasyon köprüsü** duman testleri |
+| `hepsi.command`, `Hepsi.bat` | **Tek tık test ortamı**: ERP + simülasyon + edge'i başlatır; 4 ekranı ayrı pencere/sekmede açar |
+| `Baslat.bat`, `Baslat.command` | **Windows / macOS çift tık**: yalnızca köprüyü başlatır, tarayıcıyı canlı Panel'de (`#/dashboard`) açar |
+| `tools/` | Word üretici, seed aktarımı, ikon üretici, **tek tık başlatıcı** (`hepsi.py`), **tek komut kalite kapısı** (`check_all.py`), arayüz, **simülasyon çekirdeği**, **edge ajanı**, **simülasyon köprüsü** ve **başlatıcı** duman testleri |
 
 ---
 
 ## 2. Prototipi çalıştırma
 
-**En kolay yol (Windows veya macOS):** fırın simülasyonunuz `localhost:8000` üzerinde çalışırken depo kökündeki başlatıcıya çift tıklayın; köprü kendiliğinden başlar ve tarayıcı `http://localhost:8080/app/#/dashboard` adresinde, canlı Panel'de açılır. Ayrı komut veya adres yazmak gerekmez. Açılan pencere köprüdür, açık kaldıkça çalışır.
+**Tek tıkla hepsi (önerilen):** depo kökündeki `hepsi.command` (macOS) veya `Hepsi.bat` (Windows) dosyasına çift tıklayın. Başlatıcı:
+
+1. `8000` portunda uyumlu simülasyon varsa ona bağlanır; yoksa **yerleşik demo simülasyonu** başlatır (8000 doluysa ilk boş porta geçer).
+2. Simülasyon köprüsünü `8080` portunda açar.
+3. Edge saha arayüzünü `8787` portunda başlatır.
+4. Tarayıcıda **ERP Studio Panel**, **ERP · Simülasyon Bağlantısı**, **simülasyon ekranı** ve **edge saha arayüzü** olmak üzere dört ekranı açar; ERP yeni pencere, diğerleri yeni sekme olarak denenir.
+
+| Platform | Tek tık | Ne açar? |
+| --- | --- | --- |
+| Windows | `Hepsi.bat` | ERP + simülasyon + edge, 4 sekme |
+| macOS | `hepsi.command` | ERP + simülasyon + edge, 4 sekme |
+
+Terminal penceresi açık kaldıkça test ortamı çalışır; kapatınca başlatıcının açtığı köprü ve edge süreçleri kapanır. Python 3.10+ gerekir; pip kurulumu gerekmez.
+
+**Yalnızca köprü / kendi simülasyonunuz:** fırın simülasyonunuz `localhost:8000` üzerinde çalışırken `Baslat.bat` / `Baslat.command` çift tıklayın; tarayıcı `http://localhost:8080/app/#/dashboard` adresinde açılır.
 
 | Platform | Çift tık | Tek dosya program (isteğe bağlı, bir kez) |
 | --- | --- | --- |
@@ -50,7 +65,7 @@ Bu depo, sohbette tarif edilen **alüminyum biyet dökümhanesi** için uçtan u
 
 Windows'ta ayar ve veri exe'nin yanında; macOS'ta `~/Library/Application Support/ERP-Sim-Bridge` altında oluşur. macOS uygulaması imzasızdır; ilk açılışta sağ tık → Aç gerekebilir.
 
-Bağımlılık kurulumu gerekmez. Depo kökünde:
+Python bağımlılığı yoktur (yalnızca standart kütüphane). Depo kökünde:
 
 ```bash
 python3 server/sim_bridge/run.py --open   # ERP + simülasyon köprüsü, :8080 + tarayıcı
@@ -149,11 +164,12 @@ python3 tools/simulation_smoke_test.py                # simülasyon çekirdeği:
 python3 tools/sim_bridge_smoke_test.py                 # simülasyon köprüsü: 20 test
 python3 edge/main.py --dry-run                         # tek döngü, yazmadan
 python3 edge/main.py --bind 0.0.0.0 --port 8787       # saha arayüzü (önizleme)
-python3 tools/check_all.py                            # tüm kalite kapısı (5 adım)
+python3 tools/hepsi.py --no-browser                    # tek tık başlatıcı (tarayıcı açmadan)
+python3 tools/check_all.py                            # tüm kalite kapısı (6 adım)
 python3 tools/build_docx.py                           # 18 dokümanı tek Word'e derle
 ```
 
-Son doğrulama sonuçları: 35 menü / 35 ekran eşleşiyor, mizan borç = alacak, 1 ve 2 fırınlı profil testleri geçti, 58 koleksiyonda 0 hata ve 1 bilgilendirici uyarı, **simülasyon çekirdeğinin 11**, **edge ajanının 13**, **simülasyon köprüsünün 20** testi, simülasyon olayı → ERP bildirimi tekilleştirme testi ve 11 JSON ucu geçti; 18 doküman geçerli OOXML Word çıktısında birleşti. CI: `.github/workflows/ci.yml`.
+Son doğrulama sonuçları: 35 menü / 35 ekran eşleşiyor, mizan borç = alacak, 1 ve 2 fırınlı profil testleri geçti, 58 koleksiyonda 0 hata ve 1 bilgilendirici uyarı, **simülasyon çekirdeğinin 11**, **edge ajanının 13**, **simülasyon köprüsünün 20**, **başlatıcının 4** testi, simülasyon olayı → ERP bildirimi tekilleştirme testi ve 11 JSON ucu geçti; 18 doküman geçerli OOXML Word çıktısında birleşti. CI: `.github/workflows/ci.yml`.
 
 > **Sınır:** Bu bir plan doğrulama prototipidir. Gerçek API/veritabanı, RBAC/VPN, OPC UA/Modbus sürücüsü, SMTP/SMS sağlayıcısı ve PLC donanımı bağlı değildir. Simülasyon köprüsü de üretim ingest worker'ı değildir: imzalı batch'i doğrular ve kendi kayıt defterine yazar, işletme tablolarını değiştirmez. Canlı kurulumda doğruluk kaynağı işlemsel veritabanı, JSON dosyaları arşiv ve aktarım görünümüdür.
 
