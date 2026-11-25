@@ -194,6 +194,7 @@ ERP bu emirleri **Üretim Akışı** ekranında dört kolonda gösterir: Oluştu
 * Bildirimler ERP'nin tarayıcı demo verisinde tutulur; başka bir tarayıcıya veya sunucuya taşınmaz.
 * Sensör arızası sıcaklığı “gerçek” olarak değiştirmez; okuma geçersiz olduğu için son değer dondurulur. Bu, gerçek PLC'deki `BAD` kalitesinin karşılığıdır.
 * Aşırı sıcaklık senaryosu fırın sıcaklığını güvenlik sınırının üstüne çıkarır; ardından soğuma modeli devreye girer ve alarm kendiliğinden temizlenebilir. Sensör/kapı/brülör arızaları ise **sıfırlanana kadar** alarmda kalır.
+* Sıfırlama, çalışan emri yalnızca bellekte değil SQLite kaydında da `CANCELLED` yapar; böylece emir listesi ile kalıcı özet çelişmez.
 * Simülasyon emirleri ve olayları bellekte tutulur; simülasyon süreci kapanınca kaybolur. Kalıcı kayıt simülasyonun kendi SQLite dosyasındadır, ERP'ye taşınmaz.
 * Bu bir üretim hattı değildir. Gerçek PLC'ye geçiş için `docs/13` ve `docs/14` Bölüm 13'e bakın.
 
@@ -214,13 +215,15 @@ Demo kopyada fırın adları `Aluminyum Eritme Fırını`, `Homojenizasyon Fır�
 ## 11. Otomatik doğrulama
 
 ```bash
-python3 tools/sim_bridge_smoke_test.py    # 18 test: senaryo, olay, eşleme, proxy, HMAC
+python3 tools/check_all.py                # 5 adım: veri + simülasyon + köprü + edge + arayüz
+python3 tools/simulation_smoke_test.py    # 11 test: fizik, doğrulama, senaryo, iptal, SQLite
+python3 tools/sim_bridge_smoke_test.py    # 20 test: senaryo, olay, eşleme, proxy, HMAC, başlık
 python3 tools/edge_smoke_test.py          # 13 test: edge ajanı ve dört sinyal
 node tools/smoke_test.mjs                 # 35 ekran + simülasyon bildirimi tekilleştirme
 python3 server/erp/scripts/validate_data.py
 ```
 
-Köprü testi gerçek FastAPI gerektirmez; demo motoru ve sahte istemcilerle ağ davranışını sınar. `node tools/smoke_test.mjs` simülasyon olayının bildirim merkezine düştüğünü, aynı olayın ikinci kez eklenmediğini ve kaynak etiketini doğrular.
+Köprü testi gerçek FastAPI gerektirmez; demo motoru ve sahte istemcilerle ağ davranışını sınar. Sürüm 1.7 denetiminde eklenen girdi doğrulama, güvenlik başlıkları, varsayılan anahtar uyarısı ve SQLite sütun beyaz listesi testleri de bu paketlerdedir (`docs/17`). `node tools/smoke_test.mjs` simülasyon olayının bildirim merkezine düştüğünü, aynı olayın ikinci kez eklenmediğini ve kaynak etiketini doğrular.
 
 ---
 

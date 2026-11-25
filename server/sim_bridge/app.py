@@ -26,7 +26,7 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-VERSION = '1.6.0'
+VERSION = '1.7.0'
 
 # İki yerleşim desteklenir:
 #  1. Depo içinden çalıştırma: statik dosyalar ve yapılandırma depo kökünde.
@@ -210,6 +210,35 @@ class BridgeState:
             cfg['edge']['token'] = MASK
         return cfg
 
+    def security_warnings(self) -> list[dict]:
+        """Yerel prototipin üretime taşınmadan önce kapatılması gereken açıkları.
+
+        Uyarılar yapılandırmayı engellemez; `/api/bridge/info` ve `/api/health`
+        üzerinden görünür olur. Amaç, varsayılan HMAC anahtarının farkında
+        olunmadan saha kurulumuna taşınmasını önlemektir.
+        """
+        warnings: list[dict] = []
+        edge = self.config.get('edge', {}) if isinstance(self.config.get('edge'), dict) else {}
+        secret = str(edge.get('secret') or '')
+        if not secret or secret == 'degistirin-bu-gizli-anahtari' or len(secret) < 16:
+            warnings.append({
+                'code': 'DEFAULT_EDGE_SECRET',
+                'severity': 'high',
+                'message': 'edge.secret varsayılan/kısa. Edge ajanıyla aynı, en az 16 karakterlik rastgele anahtar kullanın.',
+            })
+        base = str(self.config.get('simBaseUrl') or '')
+        try:
+            host = (urllib.parse.urlsplit(base).hostname or '').lower()
+        except ValueError:
+            host = ''
+        if base and host not in ('127.0.0.1', 'localhost', '::1'):
+            warnings.append({
+                'code': 'REMOTE_SIM_NO_AUTH',
+                'severity': 'medium',
+                'message': 'Simülasyon uzak adreste ve kimlik doğrulama yok. Yalnızca güvenilir ağda kullanın.',
+            })
+        return warnings
+
     # ------------------------------------------------------------------ canlı
     def edge_summary(self) -> dict:
         edge = self.store.summary()
@@ -259,6 +288,12 @@ class BridgeHandler(BaseHTTPRequestHandler):
     def state(self) -> BridgeState:
         return self.server.state  # type: ignore[attr-defined]
 
+    def _common_headers(self):
+        """MIME sniffing ve referer sızıntısını engelleyen başlıklar."""
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('Referrer-Policy', 'no-referrer')
+        self.send_header('Permissions-Policy', 'geolocation=(), camera=(), microphone=()')
+
     def _json(self, payload, status: int = 200):
         raw = json.dumps(payload, ensure_ascii=False).encode('utf-8')
         self.send_response(status)
@@ -267,6 +302,7 @@ class BridgeHandler(BaseHTTPRequestHandler):
         self.send_header('Cache-Control', 'no-store')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('X-Bridge-Version', VERSION)
+        self._common_headers()
         self.end_headers()
         if self.command != 'HEAD':
             self.wfile.write(raw)
@@ -279,10 +315,12 @@ class BridgeHandler(BaseHTTPRequestHandler):
             length = int(self.headers.get('Content-Length') or 0)
         except ValueError:
             length = 0
+        if length <= 0:
+            return b''
         limit = int(self.state.config.get('edge', {}).get('maxBodyBytes') or 5 * 1024 * 1024)
         if length > limit:
             raise OverflowError(f'Gövde çok büyük (en fazla {limit} bayt)')
-        return self.rfile.read(length) if length else b''
+        return self.rfile.read(length)
 
     def _file(self, target: Path):
         if not target.exists() or not target.is_file():
@@ -302,6 +340,7 @@ class BridgeHandler(BaseHTTPRequestHandler):
         self.send_header('Content-Length', str(len(raw)))
         self.send_header('Cache-Control', 'no-cache')
         self.send_header('Service-Worker-Allowed', '/app/')
+        self._common_headers()
         self.end_headers()
         if self.command != 'HEAD':
             self.wfile.write(raw)
@@ -311,6 +350,7 @@ class BridgeHandler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header('Content-Type', 'text/plain; charset=utf-8')
         self.send_header('Content-Length', str(len(raw)))
+        self._common_headers()
         self.end_headers()
         if self.command != 'HEAD':
             self.wfile.write(raw)
@@ -352,13 +392,16 @@ class BridgeHandler(BaseHTTPRequestHandler):
         state = self.state
         try:
             if path == '/api/health':
-                self._json({'ok': True, 'version': VERSION, 'uptimeSec': int(time.time() - state.started_at)})
+                self._json({'ok': True, 'version': VERSION,
+                            'uptimeSec': int(time.time() - state.started_at),
+                            'securityWarnings': state.security_warnings()})
             elif path == '/api/bridge/info':
                 self._json({
                     'ok': True, 'version': VERSION, 'root': str(state.asset_root),
                     'baseDir': str(state.base_dir), 'runtimeLayout': state.runtime_layout,
                     'demo': state.demo, 'uptimeSec': int(time.time() - state.started_at),
                     'config': state.public_config(),
+                    'securityWarnings': state.security_warnings(),
                     'profile': {k: v for k, v in state.profile().items() if k != 'machines'},
                     'machineCount': len(state.profile().get('machines', []))
                 })

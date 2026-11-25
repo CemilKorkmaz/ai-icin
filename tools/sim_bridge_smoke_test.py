@@ -127,7 +127,11 @@ class BridgeTests(unittest.TestCase):
         self.assertIn(code, (403, 404), 'Gizli dosya sunuldu')
         code, _headers, raw = self.get('/server/sim_bridge/config.json')
         self.assertEqual(code, 404, 'Gizli yapılandırma dosyası sunuldu')
-        print('  ✓ köprü bilgisi · statik ERP · sim.js · 404 JSON · yol güvenliği')
+        # Demo simülasyonun kendi yanıtları da tarayıcı sertleştirme başlıkları taşır.
+        with urllib.request.urlopen(self.sim.url + '/api/health', timeout=5) as res:
+            self.assertEqual(res.headers.get('X-Content-Type-Options'), 'nosniff')
+            self.assertEqual(res.headers.get('Referrer-Policy'), 'no-referrer')
+        print('  ✓ köprü bilgisi · statik ERP · sim.js · 404 JSON · yol güvenliği · demo başlıkları')
 
     # ------------------------------------------------------------------ 2
     def test_02_live_snapshot_and_normalization(self):
@@ -339,6 +343,33 @@ class BridgeTests(unittest.TestCase):
         print('  ✓ SQL kayıt defteri: batch · okuma · olay · sayım · son kayıt')
 
     # ------------------------------------------------------------------ 11
+    def test_11b_security_headers_and_warnings(self):
+        status, headers, _raw = self.get('/api/health')
+        self.assertEqual(status, 200)
+        self.assertEqual(headers.get('X-Content-Type-Options'), 'nosniff')
+        self.assertEqual(headers.get('Referrer-Policy'), 'no-referrer')
+        status, info = self.get_json('/api/bridge/info')
+        self.assertEqual(status, 200)
+        codes = {w['code'] for w in info['securityWarnings']}
+        self.assertIn('DEFAULT_EDGE_SECRET', codes)
+        status, health = self.get_json('/api/health')
+        self.assertEqual(status, 200)
+        self.assertIn('securityWarnings', health)
+
+    def test_08d_order_validation_reaches_sim(self):
+        status, data = self.post('/api/sim/orders', {
+            'product': 'Test', 'furnace': 'Aluminyum Eritme Fırını',
+            'target_temp': 1300, 'duration_min': 10,
+        })
+        self.assertEqual(status, 400)
+        self.assertIn('Hedef sıcaklık', data['error'])
+        status, data = self.post('/api/sim/orders', {
+            'product': 'Test', 'furnace': 'Olmayan Fırın',
+            'target_temp': 700, 'duration_min': 10,
+        })
+        self.assertEqual(status, 400)
+        self.assertIn('Fırın bulunamadı', data['error'])
+
     def test_11_config_validation(self):
         status, data = self.post('/api/bridge/config', {'simBaseUrl': 'ftp://127.0.0.1:8000'})
         self.assertEqual(status, 400)

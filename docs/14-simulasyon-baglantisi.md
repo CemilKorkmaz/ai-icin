@@ -156,7 +156,7 @@ Ajan `8787`'de açılır. **Bağlantıyı Test Et** düğmesi hem simülasyonu h
 | `ingestDb` | `server/sim_bridge/data/ingest.db`; exe/.app'te `data/ingest.db` | Batch, okuma ve olay kayıt defteri |
 | `autoMap` | `true` | Ada göre otomatik eşleme |
 | `furnaceMap` | `{}` | Açık eşleme: `{ "Fırın adı": "MCH-01" }` |
-| `edge.secret` | `degistirin-bu-gizli-anahtari` | Edge ajanıyla **aynı** HMAC anahtarı |
+| `edge.secret` | `degistirin-bu-gizli-anahtari` | Edge ajanıyla **aynı** HMAC anahtarı. Varsayılan değer **yalnızca demo içindir**; saha kurulumunda en az 16 karakterlik rastgele değerle değiştirin. Köprü, değiştirilmediyse `/api/health` ve `/api/bridge/info` içinde `DEFAULT_EDGE_SECRET` uyarısı yayınlar. |
 | `edge.token` | boş | Doluysa `Authorization: Bearer …` zorunlu olur |
 | `edge.maxBodyBytes` | 5 MB | Batch gövde sınırı |
 
@@ -168,8 +168,8 @@ Ajan `8787`'de açılır. **Bağlantıyı Test Et** düğmesi hem simülasyonu h
 
 | Metot | Yol | Açıklama |
 | --- | --- | --- |
-| GET | `/api/health` | Köprü canlı mı, sürüm ve çalışma süresi |
-| GET | `/api/bridge/info` | Kök, profil, demo modu, maskeli yapılandırma |
+| GET | `/api/health` | Köprü canlı mı, sürüm, çalışma süresi ve `securityWarnings` |
+| GET | `/api/bridge/info` | Kök, profil, demo modu, maskeli yapılandırma ve güvenlik uyarıları |
 | GET | `/api/sim/health` | Simülasyon bağlantısı, gecikme, fırın sayısı |
 | GET | `/api/sim/live` | Arayüzün tek çağrısı: fırınlar, emirler, alarmlar, eşleme, edge özeti |
 | GET | `/api/sim/furnaces` | Ham ama normalize edilmiş fırın listesi |
@@ -188,7 +188,9 @@ Ajan `8787`'de açılır. **Bağlantıyı Test Et** düğmesi hem simülasyonu h
 | GET | `/api/edge/latest?limit=` | Son okumalar ve olaylar |
 | POST | `/api/edge/ingest` | Edge ajanının **tek yazma ucu**; HMAC zorunlu |
 
-Hata biçimi her uçta aynıdır: `{ "ok": false, "error": "Türkçe açıklama" }`. Simülasyon kapalıyken emir uçları `503`, simülasyonun kendi 4xx yanıtları `400` olarak döner; arayüz hatayı toast ve satır içi mesajla gösterir.
+Hata biçimi her uçta aynıdır: `{ "ok": false, "error": "Türkçe açıklama" }`. Simülasyon kapalıyken emir uçları `503`, simülasyonun kendi 4xx yanıtları `400` olarak döner; arayüz hatayı toast ve satır içi mesajla gösterir. Sürüm 1.7'den itibaren emir hedefi 0–1200 °C, süresi 0–1440 dk ve fırın adı zorunludur; geçersiz istek simülasyonda reddedilir, köprü bunu 400 + Türkçe gerekçe olarak iletir.
+
+Tüm HTTP yanıtları `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` ve `Permissions-Policy` başlıklarını taşır. Bunlar MIME sniffing ve referer sızıntısını engeller; kimlik doğrulamanın yerini **tutmaz** (bkz. docs/17 Bölüm 4).
 
 ---
 
@@ -289,7 +291,8 @@ Sırayla:
 Bu depodaki otomatik doğrulama:
 
 ```bash
-python3 tools/sim_bridge_smoke_test.py    # 18 test
+python3 tools/sim_bridge_smoke_test.py    # 20 test
+python3 tools/simulation_smoke_test.py    # 11 test
 python3 tools/edge_smoke_test.py          # 13 test
 node tools/smoke_test.mjs                 # 35 ekran + simülasyon bildirimi
 ```

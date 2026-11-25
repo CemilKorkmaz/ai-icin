@@ -4,7 +4,7 @@
 
 **Kime hitap eder:** Sistemi kullanacak fabrika yöneticisi, üretim şefi, depo ve sevkiyat sorumlusu; ayrıca sistemi kuracak ve geliştirecek teknik ekip.
 
-**Kapsam:** Sürüm 1.6.0 itibarıyla **35 ERP ekranı**, **59 veri varlığı**, **1 saha veri toplama arayüzü** ve **1 simülasyon köprüsü**. Şekil, kutu diyagramı ve ok şeması kullanılmaz; anlatım prose ve tablolarla yürür.
+**Kapsam:** Sürüm 1.7.0 itibarıyla **35 ERP ekranı**, **59 veri varlığı**, **1 saha veri toplama arayüzü** ve **1 simülasyon köprüsü**. Şekil, kutu diyagramı ve ok şeması kullanılmaz; anlatım prose ve tablolarla yürür.
 
 ---
 
@@ -59,7 +59,7 @@ Sistem dört katmandan oluşur. Her katmanın görevi ayrıdır ve hiçbiri diğ
 
 ## 4. Veri modeli: neleri takip ediyoruz?
 
-Sürüm 1.6.0 itibarıyla **59 varlık** vardır; `manifest.json` hariç sunucuda 59 JSON dosyası bulunur. Şema sürümü `4`'tür. Her kayıt bir `id` taşır; çoğu kayıt `createdAt`, `updatedAt`, `plantId` ve kaynak belge kimliği ile izlenir. Makine kimlikleri sabit kodlanmaz; fabrika profilinden gelir.
+Sürüm 1.7.0 itibarıyla **59 varlık** vardır; `manifest.json` hariç sunucuda 59 JSON dosyası bulunur. Şema sürümü `4`'tür. Her kayıt bir `id` taşır; çoğu kayıt `createdAt`, `updatedAt`, `plantId` ve kaynak belge kimliği ile izlenir. Makine kimlikleri sabit kodlanmaz; fabrika profilinden gelir.
 
 | Alan | Varlıklar | Ne tutulur |
 | --- | --- | --- |
@@ -160,6 +160,10 @@ Simülasyon artık **arıza enjekte edilebilen bir test ortamıdır**. Simülasy
 | Simülasyon Bağlantısı | Son simülasyon olayları tablosu |
 
 İş akışı testleri (kritik stok, kalite reddi, bakım, sevkiyat, cari, kredi, üretim) yalnızca bildirim üretir; `createsRecord: false` ve `TEST` etiketi taşır. Stok, cari, muhasebe veya üretim kaydı oluşmaz. Ayrıntılı oynatma kitabı `docs/16`'dadır.
+
+### 5.3 Sürüm 1.7 kalite sertleştirmesi
+
+Sürüm 1.7'de sistem baştan aşağı yeniden denetlendi. Simülasyon emirleri iki katmanda doğrulanıyor; sıfırlama çalışan emri SQLite'ta da iptal ediyor; SQLite güncellemeleri sütun beyaz listesi kullanıyor; okuma ve gövde istekleri sınırlandı; köprü, simülasyon ve demo tarayıcı güvenlik başlıkları gönderiyor; varsayılan HMAC anahtarı ve uzak simülasyon adresi `/api/health` üzerinden uyarı olarak görünüyor. Beş adımlı kalite kapısı (`tools/check_all.py`) ve GitHub Actions aynı testleri çalıştırıyor. Bulguların tamamı, kalan riskler ve kabul listesi `docs/17`'dedir.
 
 ---
 
@@ -603,8 +607,10 @@ Raporlar günlük, haftalık ve aylık üretilir; SMS ve e-posta gönderimi `out
 
 ```bash
 node tools/smoke_test.mjs                  # 35 ekran + hesaplar + mizan + modülerlik
+python3 tools/check_all.py                 # 5 adımlı kalite kapısı
+python3 tools/simulation_smoke_test.py     # 11 test
 python3 tools/edge_smoke_test.py           # 13 test
-python3 tools/sim_bridge_smoke_test.py     # 18 test
+python3 tools/sim_bridge_smoke_test.py     # 20 test
 python3 server/erp/scripts/validate_data.py
 node tools/export_seed.mjs                 # 59 JSON + manifest
 python3 tools/build_docx.py                # bütün dokümanları Word'e derle

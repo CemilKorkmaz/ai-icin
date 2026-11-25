@@ -49,6 +49,22 @@ class Plant:
 
     def create_order(self, product: str, furnace: str, target_temp: float,
                      duration_min: float) -> str:
+        # Girdi doğrulaması API katmanından bağımsız olarak burada da yapılır;
+        # böylece Plant'i doğrudan kullanan testler/araçlar geçersiz emir üretemez.
+        product = (product or "").strip()
+        if not product or len(product) > 120:
+            raise ValueError("Ürün adı 1-120 karakter olmalı")
+        if furnace not in self.furnaces:
+            raise ValueError(f"Fırın bulunamadı: {furnace}")
+        try:
+            target_temp = float(target_temp)
+            duration_min = float(duration_min)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Hedef sıcaklık ve süre sayısal olmalı") from exc
+        if not (0.0 < target_temp <= 1200.0):
+            raise ValueError("Hedef sıcaklık 0-1200 °C aralığında olmalı")
+        if not (0.0 < duration_min <= 1440.0):
+            raise ValueError("Süre 0-1440 dakika aralığında olmalı")
         today = time.strftime("%Y%m%d")
         self._order_counter += 1
         order_id = f"WO-{today}-{self._order_counter:04d}"
@@ -153,6 +169,7 @@ class Plant:
         definition = SCENARIO_BY_ID[scenario]
         s = furnace.state
         p = furnace.params
+        cancelled_orders: list[str] = []
 
         if scenario == "sensor_failure":
             s.sensor_ok = False
@@ -206,6 +223,7 @@ class Plant:
             s.cycle_time = 0.0
             s.soak_started_at = None
             if furnace.order_id:
+                cancelled_orders.append(furnace.order_id)
                 order = self.orders.get(furnace.order_id)
                 if order and order.get("state") == "RUNNING":
                     order["state"] = "CANCELLED"
@@ -227,7 +245,10 @@ class Plant:
             data={"scenario": scenario, "quality": "BAD" if not s.sensor_ok else "SIMULATED",
                   "state": furnace.to_dict()},
         )
-        return {"furnace": furnace.to_dict(), "event": event}
+        result = {"furnace": furnace.to_dict(), "event": event}
+        if cancelled_orders:
+            result["cancelledOrders"] = cancelled_orders
+        return result
 
     def apply_business_event(self, scenario: str) -> dict:
         """ERP bildirim zinciri testi; işletme tablosu değiştirmez."""

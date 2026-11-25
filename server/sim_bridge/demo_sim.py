@@ -426,12 +426,18 @@ class DemoHandler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         pass
 
+    def _common_headers(self):
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('Referrer-Policy', 'no-referrer')
+        self.send_header('Permissions-Policy', 'geolocation=(), camera=(), microphone=()')
+
     def _html(self, raw: bytes, status: int = 200):
         self.send_response(status)
         self.send_header('Content-Type', 'text/html; charset=utf-8')
         self.send_header('Content-Length', str(len(raw)))
         self.send_header('Cache-Control', 'no-store')
         self.send_header('Access-Control-Allow-Origin', '*')
+        self._common_headers()
         self.end_headers()
         self.wfile.write(raw)
 
@@ -442,17 +448,24 @@ class DemoHandler(BaseHTTPRequestHandler):
         self.send_header('Content-Length', str(len(raw)))
         self.send_header('Cache-Control', 'no-store')
         self.send_header('Access-Control-Allow-Origin', '*')
+        self._common_headers()
         self.end_headers()
         self.wfile.write(raw)
 
     def _body(self) -> dict:
-        length = int(self.headers.get('Content-Length') or 0)
-        if not length:
+        try:
+            length = int(self.headers.get('Content-Length') or 0)
+        except (TypeError, ValueError):
+            return {}
+        if length <= 0:
+            return {}
+        if length > 1024 * 1024:
             return {}
         try:
-            return json.loads(self.rfile.read(length).decode('utf-8'))
+            data = json.loads(self.rfile.read(length).decode('utf-8'))
         except (ValueError, UnicodeDecodeError):
             return {}
+        return data if isinstance(data, dict) else {}
 
     @property
     def engine(self) -> FurnaceEngine:

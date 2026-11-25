@@ -14,6 +14,13 @@ from typing import Optional
 
 
 class Database:
+    # update_order yalnızca bu sütunları yazabilir. Alan adları dinamik olarak
+    # SQL'e eklendiği için beyaz liste, hatalı/istenmeyen sütun yazımını engeller.
+    ORDER_COLUMNS = frozenset({
+        "product", "furnace", "target_temp", "duration_min", "state",
+        "created_at", "started_at", "finished_at", "energy_total_m3", "cycle_time_s",
+    })
+
     def __init__(self, path: str = "erp_sim.db"):
         self.path = path
         self.lock = threading.Lock()
@@ -81,6 +88,7 @@ class Database:
             self.conn.commit()
 
     def get_readings(self, furnace: str, limit: int = 200) -> list[dict]:
+        limit = max(1, min(int(limit), 1000))
         with self.lock:
             rows = self.conn.execute(
                 """
@@ -136,6 +144,9 @@ class Database:
     def update_order(self, order_id: str, **fields) -> None:
         if not fields:
             return
+        unknown = set(fields) - self.ORDER_COLUMNS
+        if unknown:
+            raise ValueError(f"Geçersiz emir alanı: {', '.join(sorted(unknown))}")
         cols = ", ".join(f"{k} = ?" for k in fields)
         with self.lock:
             self.conn.execute(

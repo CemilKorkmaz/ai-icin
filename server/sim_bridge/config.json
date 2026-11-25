@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0",
+  "version": "1.7.0",
   "simBaseUrl": "http://127.0.0.1:8000",
   "simLabel": "Kullanıcı simülasyonu · erp_backend",
   "timeoutSeconds": 3,

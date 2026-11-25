@@ -24,7 +24,7 @@ function shell() {
       <div class="sidebar-scroll">${nav}</div>
       <div class="sidebar-foot">
         <div class="server-chip"><span class="server-dot ${d.settings.online ? '' : 'off'}"></span><div><strong>${esc(d.settings.serverUrl)}</strong><span>${d.settings.online ? 'LAN + WAN bağlı' : 'Kapalı çevrim · LAN'}</span></div></div>
-        <span class="side-version">v1.6 · ERP Test Ortamı</span>
+        <span class="side-version">v1.7 · ERP Test Ortamı</span>
       </div>
     </aside>
     <div class="shell-main">

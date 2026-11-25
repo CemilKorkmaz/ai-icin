@@ -216,20 +216,24 @@ class SimClient:
         return str(data)[:200]
 
     # ------------------------------------------------------------------ Okuma
-    def health(self) -> dict:
+    def health(self, furnaces: list[dict] | None = None) -> dict:
+        """Sağlık özeti döndürür.
+
+        `furnaces` verilirse ikinci bir `/api/furnaces` çağrısı yapılmaz;
+        `/api/sim/live` aynı turda hem sağlık hem fırın listesi üretir.
+        """
         started = time.time()
-        try:
-            furnaces = self.furnaces()
-        except (SimUnavailable, SimResponseError) as exc:
-            return {'ok': False, 'baseUrl': self.base_url,
-                    'latencyMs': int((time.time() - started) * 1000),
-                    'checkedAt': time.strftime('%Y-%m-%dT%H:%M:%S%z'),
-                    'furnaceCount': 0, 'error': str(exc),
-                    'mode': 'REAL'}
-        return {'ok': True, 'baseUrl': self.base_url,
+        error = ''
+        if furnaces is None:
+            try:
+                furnaces = self.furnaces()
+            except (SimUnavailable, SimResponseError) as exc:
+                error = str(exc)
+                furnaces = []
+        return {'ok': not error, 'baseUrl': self.base_url,
                 'latencyMs': int((time.time() - started) * 1000),
                 'checkedAt': time.strftime('%Y-%m-%dT%H:%M:%S%z'),
-                'furnaceCount': len(furnaces), 'error': '', 'mode': 'REAL'}
+                'furnaceCount': len(furnaces), 'error': error, 'mode': 'REAL'}
 
     def furnaces(self) -> list[dict]:
         data = self._request('/api/furnaces')
@@ -328,12 +332,17 @@ class SimClient:
 
     # ------------------------------------------------------------------ Özet
     def live(self) -> dict:
-        health = self.health()
-        if not health['ok']:
+        started = time.time()
+        try:
+            furnaces = self.furnaces()
+        except (SimUnavailable, SimResponseError):
+            health = self.health()
             return {'ok': False, 'health': health, 'furnaces': [], 'orders': [],
                     'alarms': [], 'checkedAt': health['checkedAt'],
                     'error': health['error']}
-        furnaces = self.furnaces()
+        health = self.health(furnaces)
+        # Sağlık yanıtındaki gecikme, fırın okumasıyla birlikte ölçülür.
+        health['latencyMs'] = int((time.time() - started) * 1000)
         try:
             orders = self.orders()
         except (SimUnavailable, SimResponseError) as exc:
